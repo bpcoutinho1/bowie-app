@@ -34,3 +34,7 @@ Add the next feature as another folder under `lib/features` when there is a real
 ```bash
 flutter test
 ```
+
+## Docs
+
+How the app works, in Portuguese: [`docs/`](docs/README.md).
