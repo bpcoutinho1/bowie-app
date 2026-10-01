@@ -1,0 +1,147 @@
+/* Bowie — design tokens (gerado de tokens.json; edite lá) */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;800&display=swap');
+
+:root {
+  --brand-night: #1D2B45;
+  --brand-bowie-blue: #6FA8DC;
+  --brand-chestnut: #9A6440;
+  --brand-merle: #8C97A6;
+  --brand-smile: #EE8E98;
+  --brand-mist: #F4F6F8;
+  --brand-white: #FFFFFF;
+  --brand-bowie-blue-strong: #2F6FA8;
+  --brand-chestnut-strong: #7A4C2E;
+  --neutral-900: #0F1626;
+  --neutral-800: #1D2B45;
+  --neutral-700: #2E3A52;
+  --neutral-600: #4A5670;
+  --neutral-500: #5A6782;
+  --neutral-400: #8C97A6;
+  --neutral-300: #C3CBD6;
+  --neutral-200: #DDE2E8;
+  --neutral-100: #EDF0F4;
+  --neutral-50: #F4F6F8;
+  --neutral-0: #FFFFFF;
+  --color-background: #F4F6F8;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #EDF0F4;
+  --color-border: #DDE2E8;
+  --color-text: #1D2B45;
+  --color-text-muted: #4A5670;
+  --color-text-subtle: #5A6782;
+  --color-text-on-primary: #FFFFFF;
+  --color-primary: #1D2B45;
+  --color-primary-pressed: #2E3A52;
+  --color-accent: #6FA8DC;
+  --color-text-on-accent: #1D2B45;
+  --color-link: #2F6FA8;
+  --color-focus-ring: #6FA8DC;
+  --color-success: #276B4E;
+  --color-success-soft: #E8F4EE;
+  --color-warning: #A15C00;
+  --color-warning-soft: #FDF1E2;
+  --color-danger: #B3364A;
+  --color-danger-soft: #FBE9EC;
+  --color-info: #2F6FA8;
+  --color-info-soft: #EAF3FB;
+  --category-vaccines: #2F6FA8;
+  --category-shopping: #7A4C2E;
+  --category-incidents: #B3364A;
+  --font-brand: 'Figtree', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+  --shadow-card: 0 1px 2px rgba(29,43,69,0.06), 0 4px 12px rgba(29,43,69,0.06);
+  --shadow-sheet: 0 -2px 6px rgba(29,43,69,0.06), 0 -12px 32px rgba(29,43,69,0.10);
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-easing: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-background: #0F1626;
+    --color-surface: #182235;
+    --color-surface-muted: #22304A;
+    --color-border: #2E3A52;
+    --color-text: #E8EDF3;
+    --color-text-muted: #AEB8C6;
+    --color-text-subtle: #9AA6B8;
+    --color-text-on-primary: #0F1626;
+    --color-primary: #6FA8DC;
+    --color-primary-pressed: #8CC0EC;
+    --color-accent: #6FA8DC;
+    --color-text-on-accent: #0F1626;
+    --color-link: #8CC0EC;
+    --color-focus-ring: #8CC0EC;
+    --color-success: #5FBF92;
+    --color-success-soft: #16352A;
+    --color-warning: #E3A44A;
+    --color-warning-soft: #3A2A12;
+    --color-danger: #F07C8C;
+    --color-danger-soft: #3E1C24;
+    --color-info: #8CC0EC;
+    --color-info-soft: #16304A;
+    --category-vaccines: #8CC0EC;
+    --category-shopping: #C4895F;
+    --category-incidents: #F07C8C;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-background: #0F1626;
+  --color-surface: #182235;
+  --color-surface-muted: #22304A;
+  --color-border: #2E3A52;
+  --color-text: #E8EDF3;
+  --color-text-muted: #AEB8C6;
+  --color-text-subtle: #9AA6B8;
+  --color-text-on-primary: #0F1626;
+  --color-primary: #6FA8DC;
+  --color-primary-pressed: #8CC0EC;
+  --color-accent: #6FA8DC;
+  --color-text-on-accent: #0F1626;
+  --color-link: #8CC0EC;
+  --color-focus-ring: #8CC0EC;
+  --color-success: #5FBF92;
+  --color-success-soft: #16352A;
+  --color-warning: #E3A44A;
+  --color-warning-soft: #3A2A12;
+  --color-danger: #F07C8C;
+  --color-danger-soft: #3E1C24;
+  --color-info: #8CC0EC;
+  --color-info-soft: #16304A;
+  --category-vaccines: #8CC0EC;
+  --category-shopping: #C4895F;
+  --category-incidents: #F07C8C;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-brand);
+}
+
+.text-display { font-size: 34px; line-height: 40px; font-weight: 800; letter-spacing: -0.02em; }
+.text-title1 { font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.015em; }
+.text-title2 { font-size: 22px; line-height: 28px; font-weight: 800; letter-spacing: -0.01em; }
+.text-title3 { font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: 0em; }
+.text-body { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0em; }
+.text-body-strong { font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: 0em; }
+.text-callout { font-size: 15px; line-height: 22px; font-weight: 400; letter-spacing: 0em; }
+.text-caption { font-size: 13px; line-height: 18px; font-weight: 400; letter-spacing: 0em; }
+.text-overline { font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }

@@ -4,14 +4,22 @@ Esta pasta guarda a documentação do projeto. O `README.md` da raiz continua se
 
 ## Estrutura
 
-| Pasta | Conteúdo |
-| --- | --- |
-| [`funcionamento/`](funcionamento/) | Como o app se comporta hoje: telas, autenticação, dados, sincronização e backend. |
+| Pasta | Conteúdo | Quem decide |
+| --- | --- | --- |
+| [`produto/`](produto/) | O que o app **deve** fazer: visão, regras de negócio, prioridade do MVP e questões em aberto. | Fundador do produto. |
+| [`funcionamento/`](funcionamento/) | O que o app faz **hoje**: telas, autenticação, dados, sincronização e backend. | O código. |
+| [`design/`](design/) | Regras de uso da marca. Os arquivos (tokens, logo, ícones) ficam em [`/design`](../design/). | Fundador do produto. |
+
+A diferença entre `produto/` e `funcionamento/` mostra o que ainda falta construir.
 
 Seções que podem entrar depois, quando houver material para elas:
 
 - `decisoes/`: registros de decisão (ADRs), um arquivo por decisão, no formato `AAAA-MM-DD-titulo.md`.
 - `guias/`: passo a passo para tarefas de desenvolvimento (adicionar uma feature, criar uma migração, publicar uma build).
+
+## Produto
+
+Comece pelo [índice do produto](produto/README.md), que traz a prioridade do MVP.
 
 ## Funcionamento do app
 
@@ -25,6 +33,6 @@ Seções que podem entrar depois, quando houver material para elas:
 
 - Escreva em português. Nomes de código (classes, arquivos, tabelas, rotas) ficam como estão no código.
 - Ao citar código, use o caminho a partir da raiz do repositório, por exemplo `lib/app/router.dart`.
-- Descreva o comportamento atual. Planos e ideias vão em uma seção "Limitações e próximos passos" ou em `decisoes/`.
+- Em `funcionamento/`, descreva só o comportamento atual. O que ainda vai ser feito fica em `produto/`.
 - Quando uma mudança no código alterar algo descrito aqui, atualize o documento no mesmo commit.
 - Diagramas usam [Mermaid](https://mermaid.js.org/), que o GitHub renderiza direto no Markdown.

@@ -27,7 +27,7 @@ The session is stored in the iOS Keychain. Pet and tutor rows live in SQLite on 
 
 `lib/app` wires the theme, router, and providers. `lib/features/auth` is Supabase sign-in plus the device unlock. `lib/features/pets` is the pet, the tutor list, the local database, and sync. `lib/core` is config, errors, the Keychain session store, and connectivity.
 
-Add the next feature as another folder under `lib/features` when there is a real second entity. Do not grow a routine model until the product needs one.
+Add each new area as another folder under `lib/features`. What to build, and in what order, is in `docs/produto/` (Portuguese).
 
 ## Tests
 
