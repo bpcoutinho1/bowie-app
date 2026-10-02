@@ -11,8 +11,9 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 3. [Pets](pets.md): cadastro do pet e lista de raças sugeridas.
 4. [Saúde](saude.md): vacinas, vermífugos, medicamentos e incidentes.
 5. [Lista de compras](compras.md): a lista compartilhada, no estilo do app Bring.
-6. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
-7. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
+6. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
+7. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
+8. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
 
 ## Prioridade do MVP
 
@@ -25,6 +26,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | 3 | Vacinas e vermífugos | Não iniciado. |
 | 4 | Medicamentos | Não iniciado. |
 | 5 | Histórico de incidentes | Não iniciado. |
+| 5a | Central de notificações | Não iniciado. Necessária para os convites de quem já tem conta. |
 | 6 | Lista de compras | Não iniciado. A ordem ainda precisa ser confirmada (veja [questões em aberto](questoes-em-aberto.md)). |
 
 Atualize a coluna "Situação no código" sempre que uma área avançar.
