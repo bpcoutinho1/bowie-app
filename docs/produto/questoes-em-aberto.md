@@ -2,9 +2,6 @@
 
 Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a resposta para o documento da área e apague a linha daqui.
 
-## Contas e tutores
-
-
 ## Pets
 
 - [ ] O lembrete mensal de peso vira push ou fica só na central? Proposta: só na central, como os demais avisos.
