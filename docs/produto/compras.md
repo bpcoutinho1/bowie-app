@@ -25,7 +25,15 @@ A lista é **por casa**, não por pet: uma única lista reúne as compras de tod
 
 Todas as pessoas da casa veem e editam a mesma lista. Quando alguém marca um item como comprado, ele some da lista dos outros logo em seguida.
 
-Ainda está em aberto como uma casa é formada e quem faz parte dela (veja [questões em aberto](questoes-em-aberto.md)). Essa decisão vale "por enquanto" e pode mudar.
+### Como a casa é formada
+
+- Cada tutor principal tem **uma casa**, que reúne todos os pets de que ele é tutor principal.
+- Fazem parte da casa o tutor principal e os tutores de qualquer pet dela.
+- A casa não é criada à parte: ela existe a partir do primeiro pet cadastrado.
+- Quem entra como tutor de um pet passa a ver e editar a lista da casa desse pet. Quem é removido de todos os pets da casa deixa de vê-la.
+- Se um pet é transferido, ele passa para a casa do novo tutor principal.
+
+Ainda está em aberto o que acontece com quem cuida de pets em duas casas (veja [questões em aberto](questoes-em-aberto.md)). A lista por casa vale "por enquanto" e pode mudar.
 
 ## Afiliados (futuro)
 

@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Nome | Sim | Como a pessoa aparece para os outros tutores. |
 | Email | Sim | Usado no login e nos convites. |
-| Celular | A definir | Recuperação de senha por WhatsApp e, no futuro, SMS comerciais. Veja abaixo. |
+| Celular | Sim | Recuperação de senha por WhatsApp e, no futuro, SMS comerciais. Veja abaixo. |
 
 O login continua por email e senha no Supabase, seguido do desbloqueio do aparelho com Face ID, Touch ID ou código (veja [funcionamento](../funcionamento/autenticacao-e-navegacao.md)).
 

@@ -7,7 +7,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 - [ ] Um tutor pode sair do pet por conta própria?
 - [ ] O convite deve chegar por email ou notificação, ou basta aparecer quando a pessoa entra no app?
 - [ ] O que acontece com quem foi convidado e ainda não tem conta?
-- [ ] O celular é obrigatório no cadastro, ou só para quem quer recuperar a senha por WhatsApp?
 
 ## Pets
 
@@ -23,7 +22,8 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Lista de compras
 
-- [ ] Como uma casa é formada? Por exemplo: cada tutor principal tem uma casa, os pets dele ficam nela e os tutores desses pets fazem parte da casa. E se alguém é tutor de pets em duas casas diferentes?
+- [ ] Quem cuida de pets em duas casas (por exemplo, é tutor principal dos próprios pets e tutor de um pet da mãe) vê o quê? Proposta: uma lista por casa, com um seletor no topo da tela de compras para trocar de casa, abrindo na casa do próprio usuário. Alternativa: juntar tudo numa lista só, indicando a casa de cada item.
+- [ ] Ao transferir um pet, os itens da lista que eram dele vão junto para a nova casa, ou ficam na casa antiga? (Hoje os itens não são ligados a um pet.)
 - [ ] Em que posição da prioridade do MVP a lista entra?
 - [ ] O item tem catálogo com ícones (como o Bring) ou é só texto livre no início?
 
