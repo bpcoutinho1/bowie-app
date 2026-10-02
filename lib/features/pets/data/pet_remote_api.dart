@@ -17,6 +17,9 @@ abstract class PetRemoteApi {
   Future<List<PetTutor>> pullTutors();
 }
 
+/// Shown when the server refuses a change, usually because of a permission rule.
+const _rejected = 'O servidor recusou uma alteração. Tente de novo mais tarde.';
+
 class SupabasePetApi implements PetRemoteApi {
   const SupabasePetApi(this._client);
 
@@ -43,7 +46,7 @@ class SupabasePetApi implements PetRemoteApi {
     try {
       await _guard(() => _client.from(table).insert(row));
     } on PostgrestException catch (error) {
-      if (error.code != '23505') throw AppFailure(error.message);
+      if (error.code != '23505') throw const AppFailure(_rejected);
       await _guard(() {
         return _client.from(table).update(row).eq('id', id).select('id');
       });
@@ -88,15 +91,15 @@ class SupabasePetApi implements PetRemoteApi {
       return await action();
     } on PostgrestException catch (error) {
       if (error.code == '23505') rethrow;
-      throw AppFailure(error.message);
+      throw const AppFailure(_rejected);
     } on SocketException {
       throw const AppFailure(
-        'Could not reach the server. Changes stay on this device.',
+        'Sem conexão com o servidor. As alterações ficam salvas no celular.',
         retryable: true,
       );
     } on TimeoutException {
       throw const AppFailure(
-        'Could not reach the server. Changes stay on this device.',
+        'Sem conexão com o servidor. As alterações ficam salvas no celular.',
         retryable: true,
       );
     } on AppFailure {
@@ -104,11 +107,13 @@ class SupabasePetApi implements PetRemoteApi {
     } catch (error) {
       if (_isOffline(error)) {
         throw const AppFailure(
-          'Could not reach the server. Changes stay on this device.',
+          'Sem conexão com o servidor. As alterações ficam salvas no celular.',
           retryable: true,
         );
       }
-      throw const AppFailure('Something went wrong while syncing.');
+      throw const AppFailure(
+        'Algo deu errado na sincronização. Tente de novo.',
+      );
     }
   }
 

@@ -18,7 +18,7 @@ class AuthRepository {
         password: password,
       );
     } on AuthException catch (error) {
-      throw AppFailure(error.message);
+      throw AppFailure(authMessage(error));
     }
   }
 
@@ -32,7 +32,7 @@ class AuthRepository {
       );
       return response.session == null;
     } on AuthException catch (error) {
-      throw AppFailure(error.message);
+      throw AppFailure(authMessage(error));
     }
   }
 
@@ -43,17 +43,37 @@ class AuthRepository {
   SupabaseClient _require() {
     final client = _client;
     if (client == null) {
-      throw const AppFailure('Supabase is not configured in this build.');
+      throw const AppFailure('Este app ainda não está conectado ao servidor.');
     }
     return client;
   }
 
   void _validate({required String email, required String password}) {
     if (!emailLooksValid(email)) {
-      throw const AppFailure('Enter a valid email.');
+      throw const AppFailure('Digite um email válido.');
     }
     if (password.length < 6) {
-      throw const AppFailure('Use at least 6 characters.');
+      throw const AppFailure('A senha precisa ter pelo menos 6 caracteres.');
     }
   }
+}
+
+/// Supabase sends English messages; show the common ones in Portuguese.
+String authMessage(AuthException error) {
+  if (error is AuthRetryableFetchException) {
+    return 'Não foi possível falar com o servidor. Confira a internet e tente de novo.';
+  }
+  return switch (error.code) {
+    'invalid_credentials' => 'Email ou senha incorretos.',
+    'user_already_exists' ||
+    'email_exists' => 'Já existe uma conta com este email. Tente entrar.',
+    'email_not_confirmed' =>
+      'Confirme o seu email pelo link que enviamos e tente de novo.',
+    'weak_password' => 'Escolha uma senha mais forte.',
+    'email_address_invalid' => 'Digite um email válido.',
+    'over_email_send_rate_limit' || 'over_request_rate_limit' =>
+      'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.',
+    'signup_disabled' => 'Novos cadastros estão desativados no momento.',
+    _ => 'Algo deu errado. Tente de novo.',
+  };
 }
