@@ -4,9 +4,8 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Contas e tutores
 
-- [ ] Um tutor pode sair do pet por conta própria?
-- [ ] O convite deve chegar por email ou notificação, ou basta aparecer quando a pessoa entra no app?
-- [ ] O que acontece com quem foi convidado e ainda não tem conta?
+- [ ] Quem **já tem conta** e recebe um convite: o link do email abre o app direto no convite (se estiver instalado), e o vínculo vira ativo só com o clique, ou a pessoa ainda confirma dentro do app?
+- [ ] O convite pendente expira depois de um tempo?
 
 ## Pets
 
