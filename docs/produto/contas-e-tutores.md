@@ -41,7 +41,7 @@ Regra geral: **todos podem editar tudo** nos registros do pet. O que fica só co
 3. O link leva a uma página com dois botões, um para baixar na App Store (iOS) e outro no Google Play (Android).
 4. **Se a pessoa ainda não tem conta:** o email a convida a se cadastrar como tutora. Enquanto ela não se cadastra, o vínculo continua pendente, e o tutor principal vê "Pendente" ao lado do email dela.
 5. **Ao se cadastrar** com o mesmo email do convite, ela passa a ser tutora do pet, com as permissões acima.
-6. **Se a pessoa já tem conta:** o convite chega na [central de notificações](notificacoes.md) do app, com o botão "Aceitar". O vínculo só fica ativo depois desse toque.
+6. **Se a pessoa já tem conta:** não há email. O convite chega só na [central de notificações](notificacoes.md) do app, com o botão "Aceitar". O vínculo só fica ativo depois desse toque.
 
 O convite pendente expira em **30 dias**. Depois disso, o tutor principal pode reenviá-lo.
 

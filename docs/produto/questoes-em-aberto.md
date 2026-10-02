@@ -4,13 +4,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Contas e tutores
 
-- [ ] Quem já tem conta recebe o convite **também** por email, ou só na central de notificações?
-
-## Notificações
-
-- [ ] Além do lembrete de vacina, quais eventos também viram push no celular? Proposta: só convites e lembretes viram push; o resto fica só na central, para não incomodar.
-- [ ] A pessoa pode escolher quais notificações recebe (por tipo ou por pet)?
-- [ ] Por quanto tempo as notificações ficam guardadas na central? Proposta: 90 dias.
 
 ## Pets
 
