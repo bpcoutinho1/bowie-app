@@ -13,7 +13,7 @@ Cada página é dedicada a **uma vacina** (o título da página: "Vacina V10", "
 | Etiqueta do frasco | Produto, fabricante, partida (lote), fabricação e validade do frasco | Adesivo impresso, às vezes dois sobrepostos (vacina e diluente) |
 | Carimbo do veterinário | Nome, CRMV e assinatura | Carimbo com assinatura por cima |
 
-Algumas carteirinhas também têm páginas de **vermífugo** (data, produto, peso) e de **peso** (data, peso).
+Algumas carteirinhas também têm páginas de **vermífugo** (data, produto, peso) e de **peso** (data, peso). As medições de peso também são importadas, para o histórico de peso do pet (veja [pets](pets.md#peso)).
 
 ## O que extrair de cada dose
 
@@ -63,4 +63,4 @@ A página de vermífugo está em branco: nenhum registro.
 
 ### Peso
 
-Uma medição: 23 kg em 17/05/2026.
+Uma medição, importada para o histórico de peso: 23 kg em 17/05/2026.

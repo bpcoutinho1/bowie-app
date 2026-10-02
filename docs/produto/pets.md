@@ -17,6 +17,8 @@ Guardar a data de nascimento, e não a idade, mantém a idade sempre certa e per
 
 No MVP o cadastro guarda só o peso atual. A evolução do peso (histórico com datas e gráfico) está prevista para depois. Por isso, convém gravar cada alteração de peso com data desde o início, mesmo mostrando só o valor mais recente.
 
+A [leitura da carteirinha](carteirinha-de-vacinacao.md) também importa as medições de peso que estiverem nela. O peso atual é sempre a medição mais recente, venha ela do cadastro ou da carteirinha.
+
 ## Raças sugeridas
 
 Base: [PetCenso 2025 da Petlove](https://www.infomoney.com.br/?p=2941590), com mais de 1,8 milhão de pets cadastrados ([cobertura da Band](https://www.band.com.br/noticias/vira-latas-lideram-ranking-de-pets-mais-populares-do-brasil-veja-top-10-202507071138)). As raças do ranking vêm primeiro, na ordem da pesquisa. Depois vêm outras raças comuns no Brasil, em ordem alfabética, para completar a lista.
