@@ -8,11 +8,11 @@
 | Email | Sim | Usado no login e nos convites. |
 | Celular | Sim | Recuperação de senha por WhatsApp e, no futuro, SMS comerciais. Veja abaixo. |
 
-O login continua por email e senha no Supabase, seguido do desbloqueio do aparelho com Face ID, Touch ID ou código (veja [funcionamento](../funcionamento/autenticacao-e-navegacao.md)).
+O login é **só por email e senha** no MVP, sem "Entrar com Google" ou "Entrar com Apple". Ele é feito no Supabase, seguido do desbloqueio do aparelho com Face ID, Touch ID ou código (veja [funcionamento](../funcionamento/autenticacao-e-navegacao.md)).
 
 ### Para que serve o celular
 
-1. **Recuperação de senha por WhatsApp.** Quem esqueceu a senha pode recebê-la pelo WhatsApp, além do caminho por email. Para isso, o número precisa ser confirmado (por exemplo, com um código) antes de ser usado.
+1. **Recuperação de senha.** No MVP, a recuperação é **por email**. A recuperação por WhatsApp vem depois: integrar o WhatsApp tem custo por mensagem e exige aprovação da Meta. O número só passa a ser confirmado com um código quando o WhatsApp for ativado; até lá, o cadastro não pede confirmação.
 2. **SMS comerciais, no futuro.** Mensagens de marketing só vão para quem aceitou recebê-las, em uma opção separada, desmarcada por padrão e que pode ser desligada a qualquer momento. Aceitar os termos do app não vale como esse consentimento.
 
 Celular e nome são dados pessoais. Seguem as regras de [dados e privacidade](dados-e-privacidade.md).
@@ -56,6 +56,14 @@ O que isso exige do sistema:
 ## Remoção de tutor
 
 O tutor principal pode remover qualquer tutor. A pessoa removida deixa de ver o pet e os registros dele, inclusive nos aparelhos dela na próxima sincronização.
+
+## Exclusão da conta
+
+Quando alguém exclui a própria conta:
+
+- Pets em que a pessoa é **tutora**: ela sai deles, como na saída por conta própria.
+- Pets em que a pessoa é **tutora principal**: o app propõe transferir cada pet para um dos tutores. Ex.: o Bruno exclui a conta, e o app sugere transferir o Bowie para a esposa dele.
+- Se o pet não tem outro tutor, ele é excluído junto com a conta, depois de uma confirmação que mostra o nome do pet.
 
 ## Saída do tutor
 

@@ -7,14 +7,16 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 ## Documentos
 
 1. [Visão](visao.md): por que o app existe, para quem, plataformas e modelo de negócio.
-2. [Contas e tutores](contas-e-tutores.md): cadastro do usuário, tutor principal, convites, remoção e transferência.
-3. [Pets](pets.md): cadastro do pet e lista de raças sugeridas.
-4. [Saúde](saude.md): vacinas, vermífugos, medicamentos e incidentes.
-5. [Lista de compras](compras.md): a lista compartilhada, no estilo do app Bring.
-6. [Leitura da carteirinha](carteirinha-de-vacinacao.md): como o app lê a foto da carteirinha, com o exemplo do Bowie.
-7. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
-8. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
-9. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
+2. [Navegação](navegacao.md): as abas e a tela inicial.
+3. [Lançamento](lancamento.md): contas nas lojas, Supabase, domínio e o que falta para os testes.
+4. [Contas e tutores](contas-e-tutores.md): cadastro do usuário, tutor principal, convites, remoção e transferência.
+5. [Pets](pets.md): cadastro do pet e lista de raças sugeridas.
+6. [Saúde](saude.md): vacinas, vermífugos, medicamentos e incidentes.
+7. [Lista de compras](compras.md): a lista compartilhada, no estilo do app Bring.
+8. [Leitura da carteirinha](carteirinha-de-vacinacao.md): como o app lê a foto da carteirinha, com o exemplo do Bowie.
+9. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
+10. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
+11. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
 
 ## Prioridade do MVP
 

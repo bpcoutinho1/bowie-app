@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Nome | Sim | De 1 a 80 caracteres. |
 | Tipo | Sim | Cão ou gato. |
-| Data de nascimento | Sim | Pode ser aproximada. O app mostra a idade calculada ("5 anos", "8 meses"). |
+| Data de nascimento | Sim | O app mostra a idade calculada ("5 anos", "8 meses"). Quem não sabe a data marca "Não sei a data exata" e informa a idade aproximada ("uns 3 anos"); o app calcula uma data estimada e mostra a idade como aproximada ("cerca de 3 anos"). |
 | Raça | Não | Sugestões conforme o tipo (lista abaixo), com opção de digitar outra. "Sem raça definida (SRD)" é a primeira opção. |
 | Peso atual | Não | Em kg, com uma casa decimal. |
 | Foto | Não | Uma foto de perfil, da câmera ou da galeria. |
@@ -15,7 +15,9 @@ Guardar a data de nascimento, e não a idade, mantém a idade sempre certa e per
 
 ### Peso
 
-No MVP o cadastro guarda só o peso atual. A evolução do peso (histórico com datas e gráfico) está prevista para depois. Por isso, convém gravar cada alteração de peso com data desde o início, mesmo mostrando só o valor mais recente.
+No MVP o cadastro guarda o peso atual. Cada alteração é gravada com data desde o início, para alimentar o **gráfico de evolução do peso**, que vem depois.
+
+Junto com o gráfico vem um lembrete mensal para registrar o peso: "Que tal registrar o peso do Bowie este mês?". 
 
 A [leitura da carteirinha](carteirinha-de-vacinacao.md) também importa as medições de peso que estiverem nela. O peso atual é sempre a medição mais recente, venha ela do cadastro ou da carteirinha.
 
@@ -54,6 +56,17 @@ Do ranking:
 Complemento: Azul Russo, Bengal, British Shorthair, Exótico de Pelo Curto, Himalaio, Sagrado da Birmânia, Sphynx.
 
 A lista deve virar um arquivo de dados no código, fácil de revisar, e não ficar espalhada nas telas.
+
+## Falecimento
+
+Quando um pet falece, o tutor principal pode marcá-lo como **falecido**:
+
+- O pet sai das listas e telas do dia a dia.
+- Todos os lembretes e notificações dele param.
+- O histórico (vacinas, remédios, incidentes, fotos, peso) fica guardado como memória e pode ser consultado pelos tutores.
+- Nenhuma notificação é enviada sobre o falecimento.
+
+Mais adiante, essa tela pode ter uma mensagem de conforto para os tutores. O texto precisa ser escrito com cuidado e aprovado pelo fundador.
 
 ## Exclusão
 

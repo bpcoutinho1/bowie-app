@@ -56,10 +56,13 @@ O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e íc
 | --- | --- | --- |
 | Nome do remédio | Sim | |
 | Dosagem | Sim | Texto livre, ex.: "1 comprimido", "5 gotas". |
-| Períodos e horários | Sim | Manhã, tarde e/ou noite, cada um com um horário. Ex.: manhã às 07h e noite às 19h. |
+| Frequência | Sim | Diária, semanal, mensal ou a cada X dias ou meses. |
+| Períodos e horários | Se diária | Manhã, tarde e/ou noite, cada um com um horário. Ex.: manhã às 07h e noite às 19h. |
 | Início | Sim | Padrão: hoje. |
 | Fim | Não | Data em que o tratamento termina. |
 | Recorrente | Não | Marcado quando o remédio é para sempre, sem data de fim. Ex.: o Omega 3 do Bowie. |
+
+Antipulgas e carrapaticidas também entram como medicamento. Ex.: a coleira antipulgas do Bowie é trocada a cada 8 meses (frequência "a cada 8 meses", recorrente).
 
 Um medicamento tem data de fim **ou** é recorrente. Depois da data de fim, ele sai da lista de medicamentos ativos e fica no histórico do pet.
 
@@ -76,6 +79,7 @@ Um medicamento tem data de fim **ou** é recorrente. Depois da data de fim, ele 
 - A pessoa marca a dose como dada, pelo app ou pela própria notificação.
 - O app registra **quem deu** e quando: "Dada por Bruno às 07h05".
 - A dose aparece como dada para todos os tutores do pet, para ninguém dar o remédio duas vezes.
+- Se ninguém marca a dose depois do lembrete e da repetição, ela fica no histórico como **"não marcada"**, sem novos alertas.
 
 ## Histórico de incidentes
 
@@ -87,3 +91,7 @@ Um medicamento tem data de fim **ou** é recorrente. Depois da data de fim, ele 
 | Fotos | Não | Uma ou mais. Ex.: fotografar as fezes para comparar depois. |
 
 O histórico aparece em ordem cronológica, do mais recente para o mais antigo. Fotos de incidentes podem ser sensíveis: elas só ficam visíveis para os tutores do pet (veja [dados e privacidade](dados-e-privacidade.md)).
+
+## Excluir registros
+
+Qualquer tutor do pet pode excluir qualquer registro de saúde (vacina, vermífugo, medicamento, dose, incidente), mesmo que outra pessoa tenha criado. O app pede confirmação e guarda quem excluiu e quando, para os outros tutores saberem.

@@ -17,7 +17,7 @@ Fluxo:
 
 Não há quantidades nem preços no MVP. O item é só um nome, com uma descrição opcional (ex.: marca, tamanho). Por enquanto, o item também não é ligado a um pet: não existe lista de compras por pet.
 
-Como no Bring, a interface pode mostrar os itens em blocos, com ícone ou imagem, em vez de uma lista de texto. O item deve seguir os tokens de design, com a cor `category.shopping` para ícones e marcadores.
+Como no Bring, a lista tem um **catálogo de itens com ícones** (ração, petisco, areia, antipulgas, brinquedo etc.), mostrados em blocos fáceis de tocar. Também dá para adicionar um item digitado, fora do catálogo. O item deve seguir os tokens de design, com a cor `category.shopping` para ícones e marcadores.
 
 ## Compartilhamento
 
