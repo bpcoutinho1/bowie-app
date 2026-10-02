@@ -18,7 +18,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 
 | # | Área | Situação no código |
 | --- | --- | --- |
-| 0 | Base: Android, tema e marca, textos em português | Não iniciado: o repositório só tem o projeto iOS, e o tema e os textos ainda são os provisórios em inglês. |
+| 0 | Base: Android, tema e marca, textos em português | Parcial: projeto Android criado, com ícone e splash da marca nas duas plataformas. Falta o tema a partir dos tokens, a fonte Figtree e traduzir os textos. |
 | 1 | Cadastro do usuário (nome, email, celular) | Parcial: só email e senha. |
 | 2 | Cadastro do pet (nome, nascimento, tipo, raça, peso, foto) | Parcial: só nome. |
 | 2a | Tutores (convite, remoção, transferência) | Parcial: só convite e aceite. |

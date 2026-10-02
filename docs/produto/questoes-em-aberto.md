@@ -4,11 +4,10 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Contas e tutores
 
-- [ ] Para que serve o celular: só contato, login por SMS, ou notificações?
-- [ ] Um tutor convidado pode convidar outras pessoas, ou só o tutor principal?
 - [ ] Um tutor pode sair do pet por conta própria?
 - [ ] O convite deve chegar por email ou notificação, ou basta aparecer quando a pessoa entra no app?
 - [ ] O que acontece com quem foi convidado e ainda não tem conta?
+- [ ] O celular é obrigatório no cadastro, ou só para quem quer recuperar a senha por WhatsApp?
 
 ## Pets
 
@@ -24,7 +23,7 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Lista de compras
 
-- [ ] Uma lista por pet, ou uma lista por casa reunindo todos os pets?
+- [ ] Como uma casa é formada? Por exemplo: cada tutor principal tem uma casa, os pets dele ficam nela e os tutores desses pets fazem parte da casa. E se alguém é tutor de pets em duas casas diferentes?
 - [ ] Em que posição da prioridade do MVP a lista entra?
 - [ ] O item tem catálogo com ícones (como o Bring) ou é só texto livre no início?
 

@@ -21,9 +21,11 @@ Como no Bring, a interface pode mostrar os itens em blocos, com ícone ou imagem
 
 ## Compartilhamento
 
-Todos os tutores veem e editam a mesma lista. Quando um tutor marca um item como comprado, ele some da lista dos outros na próxima sincronização.
+A lista é **por casa**, não por pet: uma única lista reúne as compras de todos os pets da casa. Ração do Bowie e areia de um gato, por exemplo, ficam na mesma lista.
 
-Em aberto: uma lista por pet, ou uma lista por casa que reúne todos os pets da pessoa (veja [questões em aberto](questoes-em-aberto.md)).
+Todas as pessoas da casa veem e editam a mesma lista. Quando alguém marca um item como comprado, ele some da lista dos outros logo em seguida.
+
+Ainda está em aberto como uma casa é formada e quem faz parte dela (veja [questões em aberto](questoes-em-aberto.md)). Essa decisão vale "por enquanto" e pode mudar.
 
 ## Afiliados (futuro)
 

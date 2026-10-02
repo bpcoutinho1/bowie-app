@@ -6,9 +6,14 @@
 | --- | --- | --- |
 | Nome | Sim | Como a pessoa aparece para os outros tutores. |
 | Email | Sim | Usado no login e nos convites. |
-| Celular | A definir | Uso ainda em aberto (veja [questões em aberto](questoes-em-aberto.md)). |
+| Celular | A definir | Recuperação de senha por WhatsApp e, no futuro, SMS comerciais. Veja abaixo. |
 
 O login continua por email e senha no Supabase, seguido do desbloqueio do aparelho com Face ID, Touch ID ou código (veja [funcionamento](../funcionamento/autenticacao-e-navegacao.md)).
+
+### Para que serve o celular
+
+1. **Recuperação de senha por WhatsApp.** Quem esqueceu a senha pode recebê-la pelo WhatsApp, além do caminho por email. Para isso, o número precisa ser confirmado (por exemplo, com um código) antes de ser usado.
+2. **SMS comerciais, no futuro.** Mensagens de marketing só vão para quem aceitou recebê-las, em uma opção separada, desmarcada por padrão e que pode ser desligada a qualquer momento. Aceitar os termos do app não vale como esse consentimento.
 
 Celular e nome são dados pessoais. Seguem as regras de [dados e privacidade](dados-e-privacidade.md).
 
@@ -21,12 +26,12 @@ Todo pet tem **um tutor principal** e pode ter **vários tutores**.
 | Ver tudo do pet | Sim | Sim |
 | Editar o cadastro do pet | Sim | Sim |
 | Registrar e editar vacinas, vermífugos, medicamentos, incidentes e compras | Sim | Sim |
-| Convidar outro tutor | Sim | A definir |
+| Convidar outro tutor | Sim | **Não** |
 | Remover um tutor | Sim | Não |
 | Transferir o pet para outro tutor | Sim | Não |
 | Excluir o pet | Sim | **Não** |
 
-Regra geral: **todos podem editar tudo**. A única ação proibida para o tutor convidado, além de remover pessoas e transferir o pet, é excluir o cadastro do pet.
+Regra geral: **todos podem editar tudo** nos registros do pet. O que fica só com o tutor principal é gerenciar as pessoas e o pet em si: convidar, remover, transferir e excluir.
 
 ## Convite
 
