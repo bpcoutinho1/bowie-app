@@ -40,7 +40,7 @@ Algumas carteirinhas também têm páginas de **vermífugo** (data, produto, pes
 
 ## Exemplo: carteirinha do Bowie
 
-Resultado esperado da leitura das fotos enviadas em 2 de outubro de 2026. Serve de teste para a função de leitura.
+Resultado esperado da leitura das fotos enviadas em 2 de outubro de 2026, guardadas em [`test/fixtures/carteirinha-bowie/`](../../test/fixtures/carteirinha-bowie/). Serve de teste para a função de leitura.
 
 ### Vacinas
 
