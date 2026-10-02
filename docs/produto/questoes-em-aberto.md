@@ -13,7 +13,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 - [ ] Foto da carteirinha: o app lê a imagem e preenche os campos sozinho, ou só guarda a foto junto do registro?
 - [ ] Vermífugos e vacinas seguem exatamente as mesmas regras de status e lembrete?
-- [ ] Cada tutor pode desligar os lembretes só para si?
 - [ ] Medicamentos: há data de início e fim do tratamento?
 - [ ] Medicamentos: o app lembra cada dose (manhã, tarde, noite)? Registra que a dose foi dada, e por quem?
 

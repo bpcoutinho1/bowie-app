@@ -36,7 +36,7 @@ O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e íc
 ### Lembrete
 
 - Notificação no celular (push) **7 dias antes** do vencimento.
-- Vai para todos os tutores do pet. Se cada tutor poderá desligar os lembretes para si ainda está em aberto.
+- Vai para todos os tutores do pet. Não dá para desligar, como as demais [notificações](notificacoes.md).
 - O lembrete precisa funcionar mesmo que ninguém abra o app nesses dias.
 
 ## Medicamentos
