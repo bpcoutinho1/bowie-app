@@ -2,8 +2,8 @@
 
 O acesso ao app tem duas etapas:
 
-1. **Conta no Supabase**: email e senha, feito uma vez. A sessão fica salva no Keychain.
-2. **Desbloqueio do aparelho**: Face ID, Touch ID ou código, a cada vez que o app é aberto.
+1. **Conta no Supabase**: email e senha, feito uma vez. A sessão fica salva no armazenamento seguro do aparelho.
+2. **Desbloqueio do aparelho**: Face ID, Touch ID, impressão digital, reconhecimento facial ou código do aparelho, a cada vez que o app é aberto.
 
 ## O portão de autenticação (`AuthGate`)
 
@@ -64,16 +64,17 @@ Quando o login dá certo, o stream de autenticação emite o usuário, o `AuthGa
 ## Desbloqueio (`UnlockPage`)
 
 - Ao abrir, a tela já pede o desbloqueio (`DeviceLock.unlock`).
-- Aceita biometria ou código do aparelho (`biometricOnly: false`).
+- Aceita biometria ou código do aparelho (`biometricOnly: false`). No Android, o código pode ser PIN, padrão ou senha.
+- Os textos da tela citam "Face ID, Touch ID" também no Android. Eles serão revistos na tradução para português.
 - Se o usuário cancelar, aparece "Authentication was canceled." e o botão "Unlock" permite tentar de novo.
 - Se o aparelho não tem código configurado, a mensagem pede para configurar um.
 - Também há um botão "Sign out".
 
 O estado "desbloqueado" fica só em memória. Ele volta a `false` quando o app é encerrado e reaberto, ou no sign out. Mandar o app para segundo plano e voltar **não** bloqueia de novo.
 
-## Sessão no Keychain
+## Sessão no armazenamento seguro
 
-`SecureSessionStorage` (`lib/core/supabase/secure_session_storage.dart`) substitui o armazenamento padrão do Supabase. A sessão é gravada no Keychain com a chave `sb-<project-ref>-auth-token`. O Supabase cuida da renovação do token.
+`SecureSessionStorage` (`lib/core/supabase/secure_session_storage.dart`) substitui o armazenamento padrão do Supabase. A sessão é gravada com a chave `sb-<project-ref>-auth-token`: no Keychain do iOS, ou, no Android, em armazenamento cifrado com uma chave do Android Keystore. O Supabase cuida da renovação do token.
 
 ## Sign out
 

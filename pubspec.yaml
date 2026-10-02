@@ -24,6 +24,32 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   sqflite_common_ffi: ^2.4.3
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
+
+# Icon and splash from design/brand/app-icon. Regenerate with:
+#   dart run flutter_launcher_icons
+#   dart run flutter_native_splash:create
+flutter_launcher_icons:
+  image_path: "design/brand/app-icon/icon-1024.png"
+  ios: true
+  remove_alpha_ios: true
+  android: "ic_launcher"
+  min_sdk_android: 24
+  adaptive_icon_background: "#6FA8DC"
+  adaptive_icon_foreground: "design/brand/app-icon/adaptive-foreground-1024.png"
+  # The foreground already keeps the face inside the adaptive safe zone.
+  adaptive_icon_foreground_inset: 0
+
+flutter_native_splash:
+  color: "#F4F6F8"
+  image: "design/brand/app-icon/splash-icon-1024.png"
+  android_12:
+    color: "#F4F6F8"
+    # Android 12+ crops the splash icon to a circle; the adaptive
+    # foreground already keeps the face inside that safe zone.
+    image: "design/brand/app-icon/adaptive-foreground-1024.png"
+  web: false
