@@ -32,9 +32,10 @@ O convite pendente **expira em 30 dias**. Depois disso, o tutor principal pode r
 
 ## Notificação no app e push
 
-Só dois eventos viram push no celular, além de aparecer na central:
+Só três eventos viram push no celular, além de aparecer na central:
 
 - O lembrete de vacina e vermífugo, 7 dias antes do vencimento (veja [saúde](saude.md#lembrete)).
+- O lembrete de dose de medicamento, no horário de cada período (veja [saúde](saude.md#lembrete-de-dose)).
 - O convite recebido por quem já tem conta.
 
 Todo o resto (compras, medicamentos, incidentes, alterações no pet, tutores) fica **só na central**, sem push, para não incomodar.

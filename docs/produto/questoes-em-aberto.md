@@ -11,10 +11,9 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Saúde
 
-- [ ] Foto da carteirinha: o app lê a imagem e preenche os campos sozinho, ou só guarda a foto junto do registro?
-- [ ] Vermífugos e vacinas seguem exatamente as mesmas regras de status e lembrete?
-- [ ] Medicamentos: há data de início e fim do tratamento?
-- [ ] Medicamentos: o app lembra cada dose (manhã, tarde, noite)? Registra que a dose foi dada, e por quem?
+- [ ] Lembrete de dose: vai para todos os tutores do pet, ou só para alguns (ex.: quem estiver em casa)? Quando alguém marca a dose como dada, o lembrete some para os outros?
+- [ ] Se ninguém marca a dose como dada, o app lembra de novo (ex.: 30 minutos depois)?
+- [ ] Leitura da carteirinha: feita no próprio celular (mais privado, mas fraca com letra à mão) ou por um serviço de IA na nuvem (lê melhor, mas a foto sai do aparelho e isso precisa de consentimento na LGPD)? Decidir depois de testar com a carteirinha do Bowie.
 
 ## Lista de compras
 
