@@ -15,7 +15,7 @@ Fluxo:
 2. Quando o item é comprado, a pessoa toca nele. Ele sai de "A comprar" e vai para "Itens frequentes".
 3. Quando o item faz falta de novo, um toque em "Itens frequentes" o devolve para "A comprar".
 
-Não há quantidades nem preços no MVP. O item é só um nome, com uma descrição opcional (ex.: marca, tamanho).
+Não há quantidades nem preços no MVP. O item é só um nome, com uma descrição opcional (ex.: marca, tamanho). Por enquanto, o item também não é ligado a um pet: não existe lista de compras por pet.
 
 Como no Bring, a interface pode mostrar os itens em blocos, com ícone ou imagem, em vez de uma lista de texto. O item deve seguir os tokens de design, com a cor `category.shopping` para ícones e marcadores.
 
@@ -31,7 +31,7 @@ Todas as pessoas da casa veem e editam a mesma lista. Quando alguém marca um it
 - Fazem parte da casa o tutor principal e os tutores de qualquer pet dela.
 - A casa não é criada à parte: ela existe a partir do primeiro pet cadastrado.
 - Quem entra como tutor de um pet passa a ver e editar a lista da casa desse pet. Quem é removido de todos os pets da casa deixa de vê-la.
-- Se um pet é transferido, ele passa para a casa do novo tutor principal.
+- Se um pet é transferido, ele passa para a casa do novo tutor principal. Os itens da lista **ficam na casa antiga**: a lista é da casa, e os itens não são ligados a um pet. Exemplo: se a mãe transfere a Mia para o Bruno, a Mia entra na casa do Bruno, e a areia da Mia continua na lista da casa da mãe.
 
 ### Quem participa de mais de uma casa
 
