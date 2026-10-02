@@ -69,6 +69,7 @@ Um medicamento tem data de fim **ou** é recorrente. Depois da data de fim, ele 
 ### Lembrete de dose
 
 - Notificação no celular (push) **no horário de cada período**. Ex.: "Hora do Omega 3 do Bowie (manhã)." às 07h.
+- Medicamentos não diários (semanal, mensal, a cada X dias ou meses) têm um único lembrete, **um dia antes, às 09h**. Ex.: "Amanhã é dia de trocar a coleira antipulgas do Bowie."
 - Os lembretes valem do início até o fim do tratamento, ou para sempre se for recorrente.
 - O lembrete precisa funcionar mesmo sem internet e sem abrir o app.
 - Vai para **todos os tutores** do pet. Quando alguém marca a dose como dada, o lembrete daquela dose some para os outros.
