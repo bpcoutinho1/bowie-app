@@ -33,7 +33,16 @@ Todas as pessoas da casa veem e editam a mesma lista. Quando alguém marca um it
 - Quem entra como tutor de um pet passa a ver e editar a lista da casa desse pet. Quem é removido de todos os pets da casa deixa de vê-la.
 - Se um pet é transferido, ele passa para a casa do novo tutor principal.
 
-Ainda está em aberto o que acontece com quem cuida de pets em duas casas (veja [questões em aberto](questoes-em-aberto.md)). A lista por casa vale "por enquanto" e pode mudar.
+### Quem participa de mais de uma casa
+
+Exemplo: o Bruno é tutor principal do Bowie (casa do Bruno) e tutor convidado da gata da mãe (casa da mãe).
+
+- Cada casa tem a sua lista, separada. Os itens de uma casa nunca aparecem na outra.
+- A tela de compras abre na **casa própria** da pessoa, aquela em que ela é tutora principal.
+- Um seletor no topo da tela troca de casa. Cada casa aparece com o nome do tutor principal: "Casa do Bruno", "Casa da Ana".
+- Quem não tem casa própria (por exemplo, um passeador que só é tutor convidado) abre na última casa que usou.
+
+A lista por casa vale "por enquanto" e pode mudar.
 
 ## Afiliados (futuro)
 

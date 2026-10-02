@@ -22,7 +22,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Lista de compras
 
-- [ ] Quem cuida de pets em duas casas (por exemplo, é tutor principal dos próprios pets e tutor de um pet da mãe) vê o quê? Proposta: uma lista por casa, com um seletor no topo da tela de compras para trocar de casa, abrindo na casa do próprio usuário. Alternativa: juntar tudo numa lista só, indicando a casa de cada item.
 - [ ] Ao transferir um pet, os itens da lista que eram dele vão junto para a nova casa, ou ficam na casa antiga? (Hoje os itens não são ligados a um pet.)
 - [ ] Em que posição da prioridade do MVP a lista entra?
 - [ ] O item tem catálogo com ícones (como o Bring) ou é só texto livre no início?
