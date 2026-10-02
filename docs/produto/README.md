@@ -11,9 +11,10 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 3. [Pets](pets.md): cadastro do pet e lista de raças sugeridas.
 4. [Saúde](saude.md): vacinas, vermífugos, medicamentos e incidentes.
 5. [Lista de compras](compras.md): a lista compartilhada, no estilo do app Bring.
-6. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
-7. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
-8. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
+6. [Leitura da carteirinha](carteirinha-de-vacinacao.md): como o app lê a foto da carteirinha, com o exemplo do Bowie.
+7. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
+8. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
+9. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
 
 ## Prioridade do MVP
 

@@ -17,8 +17,11 @@ Cada dose registrada tem:
 | Tipo | Sim | Vacina ou vermífugo. |
 | Nome | Sim | Ex.: V10, antirrábica, nome do vermífugo. |
 | Data da aplicação | Sim | |
-| Data de vencimento | Sim | Quando a próxima dose deve ser dada. |
-| Observações | Não | Lote, clínica, veterinário etc. |
+| Data de vencimento | Sim | Quando a próxima dose deve ser dada ("Revacinar em" na carteirinha). |
+| Produto e fabricante | Não | Ex.: Vanguard Plus, Zoetis. |
+| Lote | Não | "Part." na etiqueta do frasco. |
+| Veterinário | Não | Nome e CRMV. |
+| Observações | Não | Clínica e outras anotações. |
 
 Duas formas de registrar:
 
@@ -27,7 +30,7 @@ Duas formas de registrar:
    - Antes de salvar, o app mostra o que leu para a pessoa conferir e corrigir. Nada é gravado sem essa revisão, porque um vencimento lido errado gera um lembrete errado.
    - Campos que o app não conseguiu ler ficam vazios e marcados para a pessoa preencher.
    - A foto fica guardada junto dos registros, como comprovante.
-   - Carteirinhas costumam ser escritas à mão e ter etiquetas coladas das vacinas. A carteirinha do Bowie será a referência para testar a leitura.
+   - Como ler cada parte da carteirinha, as armadilhas e o resultado esperado com a carteirinha do Bowie estão em [leitura da carteirinha](carteirinha-de-vacinacao.md).
 
 ### Status
 
@@ -36,6 +39,8 @@ Duas formas de registrar:
 | Vencimento a mais de 30 dias | Em dia | `success` |
 | Vence em 30 dias ou menos | Vence em breve | `warning` |
 | Vencimento já passou | Vencida | `danger` |
+
+O status é **por vacina**, e vale a dose mais recente. Doses anteriores da mesma vacina ficam no histórico como "substituídas" e não geram lembrete.
 
 O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e ícone. Fale do pet pelo nome: "A vacina V10 do Bowie vence em 12 dias".
 
@@ -63,6 +68,8 @@ Um medicamento tem data de fim **ou** é recorrente. Depois da data de fim, ele 
 - Notificação no celular (push) **no horário de cada período**. Ex.: "Hora do Omega 3 do Bowie (manhã)." às 07h.
 - Os lembretes valem do início até o fim do tratamento, ou para sempre se for recorrente.
 - O lembrete precisa funcionar mesmo sem internet e sem abrir o app.
+- Vai para **todos os tutores** do pet. Quando alguém marca a dose como dada, o lembrete daquela dose some para os outros.
+- Se ninguém marca a dose como dada em **30 minutos**, o app lembra mais uma vez. Só uma vez.
 
 ### Registro de dose dada
 

@@ -11,8 +11,7 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Saúde
 
-- [ ] Lembrete de dose: vai para todos os tutores do pet, ou só para alguns (ex.: quem estiver em casa)? Quando alguém marca a dose como dada, o lembrete some para os outros?
-- [ ] Se ninguém marca a dose como dada, o app lembra de novo (ex.: 30 minutos depois)?
+- [ ] A leitura da carteirinha também importa as páginas de peso (ex.: 23 kg em 17/05/2026) para o histórico de peso do pet?
 - [ ] Leitura da carteirinha: feita no próprio celular (mais privado, mas fraca com letra à mão) ou por um serviço de IA na nuvem (lê melhor, mas a foto sai do aparelho e isso precisa de consentimento na LGPD)? Decidir depois de testar com a carteirinha do Bowie.
 
 ## Lista de compras
