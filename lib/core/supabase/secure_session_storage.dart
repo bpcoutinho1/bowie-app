@@ -1,7 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Keeps the Supabase session in the iOS Keychain.
+/// Keeps the Supabase session in the iOS Keychain or, on Android, in
+/// storage encrypted with a key from the Android Keystore.
 class SecureSessionStorage extends LocalStorage {
   SecureSessionStorage({
     required this.persistSessionKey,
