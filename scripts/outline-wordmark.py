@@ -10,7 +10,7 @@ Uso:
     python3 scripts/outline-wordmark.py Figtree.ttf
 
 Aceita a fonte variável (aplica wght=800) ou o arquivo estático Figtree-ExtraBold.ttf.
-Sobrescreve design/brand/logo/bowie-lockup-*.svg e grava bowie-wordmark*.svg.
+Sobrescreve design/brand/logo/bowie-lockup-*.svg (inclusive os negativos) e grava bowie-wordmark*.svg.
 """
 import os, re, sys
 from fontTools.ttLib import TTFont
@@ -93,14 +93,16 @@ def main():
         write(out, sym_w + gap + (x1 - x0), sym_h, body)
 
     # lockup vertical
-    inner, vb = symbol_inner("bowie-symbol.svg")
-    size = 84
-    d, x0, x1, y0, y1 = word_path(font, size)
-    W = max(vb[2], x1 - x0)
-    gap = 18
-    body = (f'<g transform="translate({(W - vb[2]) / 2 - vb[0]:.2f} {-vb[1]})">{inner}</g>'
-            f'<path transform="translate({(W - (x1 - x0)) / 2 - x0:.2f} {vb[3] + gap - y0:.2f})" fill="{NIGHT}" d="{d}"/>')
-    write("bowie-lockup-vertical.svg", W, vb[3] + gap + (y1 - y0), body)
+    for fname, col, out in (("bowie-symbol.svg", NIGHT, "bowie-lockup-vertical.svg"),
+                            ("bowie-symbol-negative.svg", WHITE, "bowie-lockup-vertical-negative.svg")):
+        inner, vb = symbol_inner(fname)
+        size = 84
+        d, x0, x1, y0, y1 = word_path(font, size)
+        W = max(vb[2], x1 - x0)
+        gap = 18
+        body = (f'<g transform="translate({(W - vb[2]) / 2 - vb[0]:.2f} {-vb[1]})">{inner}</g>'
+                f'<path transform="translate({(W - (x1 - x0)) / 2 - x0:.2f} {vb[3] + gap - y0:.2f})" fill="{col}" d="{d}"/>')
+        write(out, W, vb[3] + gap + (y1 - y0), body)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@
 | `bowie-symbol-mono.svg` | Uma cor: carimbo, bordado, brindes, fax/PB |
 | `bowie-lockup-horizontal(-negative).svg` | Assinatura principal: site, e-mail, apresentações |
 | `bowie-lockup-vertical.svg` | Espaços quadrados ou estreitos |
+| `bowie-lockup-vertical-negative.svg` | Espaços quadrados ou estreitos, sobre fundo escuro (ex.: login no tema escuro) |
 
 As versões em PNG (1024 px, fundo transparente) estão em `logo/png/`.
 

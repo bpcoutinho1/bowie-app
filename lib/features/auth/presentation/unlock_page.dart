@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
+import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/ui/bowie_logo.dart';
 import 'package:bowie/features/auth/presentation/sign_out.dart';
 
 class UnlockPage extends ConsumerStatefulWidget {
@@ -24,28 +27,34 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(BowieSpacing.s6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Unlock Bowie', style: theme.textTheme.headlineMedium),
-              const SizedBox(height: 8),
+              const Center(child: BowieLogo(height: 144)),
+              const SizedBox(height: BowieSpacing.s8),
               Text(
-                'Use Face ID, Touch ID, or your device passcode.',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                'Desbloquear',
+                style: BowieType.title1.copyWith(color: colors.text),
+              ),
+              const SizedBox(height: BowieSpacing.s2),
+              Text(
+                'Use a biometria ou o código de bloqueio do celular.',
+                style: BowieType.body.copyWith(color: colors.textMuted),
               ),
               if (_error != null) ...[
-                const SizedBox(height: 16),
-                Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                const SizedBox(height: BowieSpacing.s4),
+                Text(
+                  _error!,
+                  style: BowieType.callout.copyWith(color: colors.danger),
+                ),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: BowieSpacing.s6),
               FilledButton(
                 onPressed: _busy ? null : _unlock,
                 child: _busy
@@ -53,12 +62,12 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
                         dimension: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Unlock'),
+                    : const Text('Desbloquear'),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: BowieSpacing.s2),
               TextButton(
                 onPressed: _busy ? null : () => signOut(ref),
-                child: const Text('Sign out'),
+                child: const Text('Sair da conta'),
               ),
               const Spacer(flex: 2),
             ],

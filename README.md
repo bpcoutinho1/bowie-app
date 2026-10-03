@@ -44,7 +44,7 @@ The session is stored in the iOS Keychain, or in Keystore-encrypted storage on A
 
 ## Layout
 
-`lib/app` wires the theme, router, and providers. `lib/features/auth` is Supabase sign-in plus the device unlock. `lib/features/pets` is the pet, the tutor list, the local database, and sync. `lib/core` is config, errors, the secure session store, and connectivity.
+`lib/app` wires the theme, router, and providers. `lib/features/auth` is Supabase sign-in plus the device unlock. `lib/features/pets` is the pet, the tutor list, the local database, and sync. `lib/core` is config, errors, the secure session store, connectivity, and shared UI. `lib/app/design_tokens.dart` is generated from `design/tokens/tokens.json` by `scripts/generate-dart-tokens.py`; do not edit it by hand.
 
 Add each new area as another folder under `lib/features`. What to build, and in what order, is in `docs/produto/` (Portuguese).
 

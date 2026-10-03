@@ -23,21 +23,29 @@ O Bowie é um app de iOS e Android para pessoas que dividem o cuidado de um pet.
 | `local_auth` | Desbloqueio com biometria ou código do aparelho. |
 | `sqflite` | Banco SQLite local com pets, tutores e a fila de envio (outbox). |
 | `connectivity_plus` | Detecta se o aparelho está online. |
+| `flutter_svg` | Desenha o logo a partir dos SVGs de `design/brand/logo/`. |
+| `lucide_icons_flutter` | Ícones (Lucide, traço arredondado). |
+| `flutter_localizations` | Textos dos componentes do sistema em português (datas, botões padrão). |
 
 ## Organização do código
 
 ```
 lib/
   main.dart              inicialização: config, Supabase, SQLite, ProviderScope
-  app/                   app.dart, router.dart, theme.dart, providers.dart
+  app/                   app.dart, router.dart, shell.dart (abas), theme.dart, providers.dart
+                         design_tokens.dart (gerado de design/tokens/tokens.json)
   core/
     config/              AppConfig (lê SUPABASE_URL e SUPABASE_ANON_KEY)
     error/               AppFailure, o erro que a interface mostra
     supabase/            SecureSessionStorage (sessão no armazenamento seguro)
     sync/                NetworkStatus (online/offline)
+    ui/                  componentes compartilhados: BowieLogo, BowieCard, EmptyState, sino
   features/
     auth/                login, cadastro, desbloqueio do aparelho, sign out
     pets/                domínio (Pet, PetTutor), dados (local, remoto, sync) e telas
+    home/                aba Início
+    health/, shopping/   abas Saúde e Compras (em construção)
+    notifications/       central de notificações (ainda vazia)
 android/                 projeto Android (Gradle)
 ios/                     projeto iOS (Xcode)
 supabase/migrations/     esquema do banco, políticas de RLS
@@ -69,6 +77,14 @@ Ajustes do Android que os plugins exigem:
 - Permissões `INTERNET` e `USE_BIOMETRIC` no `AndroidManifest.xml`.
 - `android:allowBackup="false"`: o backup automático do Android restauraria a sessão cifrada em outro aparelho sem a chave, e o `flutter_secure_storage` falharia ao ler. Também evita que dados do app vão para o backup do Google.
 - Builds de release são assinadas com `android/key.properties`, que não vai para o git (veja o README da raiz).
+
+## Tema e textos
+
+- O tema (`lib/app/theme.dart`) é montado a partir de `lib/app/design_tokens.dart`, gerado por `scripts/generate-dart-tokens.py` a partir de `design/tokens/tokens.json`. Nunca edite `design_tokens.dart` à mão: mude o JSON e rode o script.
+- Os widgets pegam as cores com `context.colors` (os tokens semânticos, como `text`, `textMuted`, `danger`), e os textos com `BowieType` (a escala tipográfica).
+- O app segue o tema claro ou escuro do sistema.
+- A fonte Figtree fica em `assets/fonts/`, em três pesos (400, 600 e 800), gerados da fonte variável oficial.
+- Todos os textos estão em português do Brasil, escritos direto no código. O app não usa arquivos de tradução enquanto houver um só idioma.
 
 ## Inicialização
 

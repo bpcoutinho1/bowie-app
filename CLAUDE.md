@@ -31,7 +31,7 @@ supabase/migrations/   esquema do banco e políticas de RLS
 
 ## Design no Flutter
 
-**Regra:** `design/tokens/tokens.json` é a fonte da verdade. O tema Flutter (`lib/app/theme.dart` e o que vier a sair dele) deriva desse arquivo. Se um valor mudar, mude lá e atualize os derivados no mesmo commit, incluindo os de web em `design/tokens/`. Nunca escreva uma cor solta em widget: use sempre um token semântico, exposto pelo tema (por exemplo, via `ThemeExtension`).
+**Regra:** `design/tokens/tokens.json` é a fonte da verdade. O tema Flutter (`lib/app/theme.dart`) usa `lib/app/design_tokens.dart`, gerado por `python3 scripts/generate-dart-tokens.py`. Se um valor mudar, mude no JSON, rode o script e atualize os derivados de web em `design/tokens/` no mesmo commit. Nunca escreva uma cor solta em widget: use `context.colors` (a `ThemeExtension` `BowieColors`) e os estilos de `BowieType`.
 
 ### Cores
 
@@ -55,7 +55,7 @@ Nos widgets, use os **tokens semânticos** (`background`, `surface`, `text`, `te
 
 ### Tipografia
 
-- Fonte única: **Figtree** (licença OFL), nos pesos 400, 600 e 800 (500 opcional). Empacote os arquivos `.ttf` em `assets/fonts/` e declare-os no `pubspec.yaml`, sem baixar a fonte em tempo de execução.
+- Fonte única: **Figtree** (licença OFL), nos pesos 400, 600 e 800, já empacotada em `assets/fonts/` e declarada no `pubspec.yaml`.
 - ExtraBold (800) para títulos e para a assinatura "bowie". Semibold (600) para rótulos e ênfase. Regular (400) para leitura.
 - Use a escala de `typography` de `tokens.json` (display, title1–3, body, bodyStrong, callout, caption, overline), mapeada no `TextTheme`. Não invente tamanhos novos. `letterSpacing` está em em: multiplique pelo tamanho da fonte.
 - Respeite o tamanho de fonte do sistema (Dynamic Type no iOS, escala de fonte no Android). Não trave `textScaler`.
@@ -66,7 +66,7 @@ Nos widgets, use os **tokens semânticos** (`background`, `surface`, `text`, `te
 - Raios: `md` 12 para inputs e botões, `lg` 18 para cards, `xl` 28 para bottom sheets.
 - Cards: fundo `surface` com `shadow.card` sobre o fundo `background`. Sem bordas coloridas laterais.
 - Alvos de toque com no mínimo 44×44.
-- Ícones: um único conjunto de traço arredondado (Lucide ou Phosphor "regular"), na cor `text` ou `textMuted`. Sem emoji na interface.
+- Ícones: **Lucide** (`lucide_icons_flutter`, `LucideIcons.*`), na cor `text` ou `textMuted`. Sem emoji na interface. O Phosphor foi descartado: o pacote para Flutter não compila nas versões atuais.
 - Movimento: `motion.fast` (150 ms) para feedback e `motion.base` (250 ms) para transições, com a curva `motion.easing` (`Cubic(0.2, 0, 0, 1)`). Respeite "reduzir movimento" (`MediaQuery.disableAnimations`).
 - Acessibilidade: `Semantics`/`tooltip` em todo botão só com ícone; o foco visível usa `focusRing`.
 
@@ -84,6 +84,7 @@ Nos widgets, use os **tokens semânticos** (`background`, `surface`, `text`, `te
 ## Voz e microcopy
 
 - Português do Brasil, segunda pessoa ("você"), frases curtas.
+- Sem gênero para quem lê: "Você recebeu um convite", não "Você foi convidado".
 - Fale do pet pelo nome sempre que puder: "A vacina V10 do Bowie vence em 12 dias".
 - Seja caloroso sem infantilizar: nada de "au au!", diminutivos em excesso ou trocadilhos em mensagens de saúde.
 - Em incidentes de saúde, seja neutro e prático. O app registra informação e não faz diagnóstico; para sintomas graves, oriente procurar um veterinário.

@@ -79,17 +79,17 @@ class PetRepository {
   }) async {
     final normalized = normalizeEmail(email);
     if (!emailLooksValid(normalized)) {
-      throw const AppFailure('Enter a valid email.');
+      throw const AppFailure('Digite um email válido.');
     }
     if (normalized == normalizeEmail(byUser.email)) {
-      throw const AppFailure('You already care for this pet.');
+      throw const AppFailure('Você já cuida deste pet.');
     }
     final details = await _requireOwner(petId, byUser);
     final alreadyThere = details.tutors.any(
       (tutor) => tutor.email == normalized && tutor.deletedAt == null,
     );
     if (alreadyThere) {
-      throw const AppFailure('That person is already on this pet.');
+      throw const AppFailure('Essa pessoa já faz parte deste pet.');
     }
     final tutor = PetTutor(
       id: _ids.v4(),
@@ -109,10 +109,10 @@ class PetRepository {
   }) async {
     final tutor = await _store.getTutor(tutorId);
     if (tutor == null || tutor.deletedAt != null) {
-      throw const AppFailure('This invitation is no longer on this device.');
+      throw const AppFailure('Este convite não está mais disponível.');
     }
     if (tutor.email != normalizeEmail(user.email)) {
-      throw const AppFailure('This invitation was sent to a different email.');
+      throw const AppFailure('Este convite foi enviado para outro email.');
     }
     if (tutor.status == TutorStatus.accepted) return;
     await _store.saveTutor(
@@ -127,7 +127,7 @@ class PetRepository {
   Future<PetDetails> _requireMember(String petId, AppUser user) async {
     final details = await getDetails(petId);
     if (details == null || !_isAccepted(details, user)) {
-      throw const AppFailure('You cannot change this pet.');
+      throw const AppFailure('Você não pode alterar este pet.');
     }
     return details;
   }
@@ -142,7 +142,7 @@ class PetRepository {
           tutor.deletedAt == null,
     );
     if (!owner) {
-      throw const AppFailure('Only the owner can invite someone.');
+      throw const AppFailure('Só o tutor principal pode convidar pessoas.');
     }
     return details;
   }
@@ -160,10 +160,10 @@ class PetRepository {
   String _validatedName(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
-      throw const AppFailure('Enter a name.');
+      throw const AppFailure('Digite um nome.');
     }
     if (trimmed.length > 80) {
-      throw const AppFailure('Keep the name under 80 characters.');
+      throw const AppFailure('Use no máximo 80 caracteres no nome.');
     }
     return trimmed;
   }
