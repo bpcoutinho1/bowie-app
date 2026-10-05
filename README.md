@@ -13,7 +13,7 @@ cp dart_defines.example.json dart_defines.json
 flutter run --dart-define-from-file=dart_defines.json
 ```
 
-The launch config named Bowie passes that file for you. The same command runs on an iPhone, an Android phone, or an emulator; pick the device with `-d`.
+The launch config named Bowie passes that file for you. To run from Xcode, use `./scripts/abrir-no-xcode.sh` (step by step in `docs/guias/rodar-no-iphone.md`). The same command runs on an iPhone, an Android phone, or an emulator; pick the device with `-d`.
 
 ## Android release builds
 

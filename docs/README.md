@@ -8,6 +8,7 @@ Esta pasta guarda a documentação do projeto. O `README.md` da raiz continua se
 | --- | --- | --- |
 | [`produto/`](produto/) | O que o app **deve** fazer: visão, regras de negócio, prioridade do MVP e questões em aberto. | Fundador do produto. |
 | [`funcionamento/`](funcionamento/) | O que o app faz **hoje**: telas, autenticação, dados, sincronização e backend. | O código. |
+| [`guias/`](guias/) | Passo a passo para tarefas práticas, como [rodar o app no Xcode](guias/rodar-no-iphone.md). | — |
 | [`design/`](design/) | Regras de uso da marca. Os arquivos (tokens, logo, ícones) ficam em [`/design`](../design/). | Fundador do produto. |
 
 A diferença entre `produto/` e `funcionamento/` mostra o que ainda falta construir.
@@ -15,7 +16,6 @@ A diferença entre `produto/` e `funcionamento/` mostra o que ainda falta constr
 Seções que podem entrar depois, quando houver material para elas:
 
 - `decisoes/`: registros de decisão (ADRs), um arquivo por decisão, no formato `AAAA-MM-DD-titulo.md`.
-- `guias/`: passo a passo para tarefas de desenvolvimento (adicionar uma feature, criar uma migração, publicar uma build).
 
 ## Produto
 
