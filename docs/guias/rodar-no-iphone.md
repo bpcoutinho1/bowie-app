@@ -100,5 +100,7 @@ flutter run --dart-define-from-file=dart_defines.json
 | `CocoaPods not installed` | `brew install cocoapods` e rode o script de novo. |
 | "Signing for Runner requires a development team" | Faça o passo 6.1 e 6.2. |
 | "No valid code signing certificates were found" no Terminal | O script antigo pedia certificado mesmo para o simulador. Rode `git pull` e o script de novo. Para o iPhone, faça o passo 6. |
-| "Untrusted Developer" no iPhone | Faça o passo 6.7. |
+| "Untrusted Developer" ou "Developer App Certificate is not trusted" | O app já foi instalado: confie no seu Apple ID no iPhone (passo 6.7) e aperte Play de novo. O iPhone precisa estar com internet. |
+| "Your team has no devices from which to generate a provisioning profile" ou "No profiles for 'com.bowie.app.bowie' were found" | O Xcode está tentando instalar num iPhone que não está conectado. Para o simulador, escolha um simulador no topo do Xcode (e, se precisar, Team = None). Para o iPhone, conecte-o pelo cabo, toque em "Confiar" e ative o Modo de Desenvolvedor (passos 6.4 e 6.5). |
+| "No pubspec.yaml file found" | O Terminal está fora da pasta do projeto. Rode `cd ~/bowie-app` (ou digite `cd ` e arraste a pasta do Finder para o Terminal) e repita o comando. |
 | Email ou senha incorretos logo após criar a conta | Confira se "Confirm email" está desligado no Supabase. |
