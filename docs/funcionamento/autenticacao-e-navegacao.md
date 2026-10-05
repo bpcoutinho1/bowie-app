@@ -70,7 +70,7 @@ O sino no topo das abas abre `/notificacoes`, ainda vazia.
 - A tela mostra o logo e alterna entre "Entrar" e "Criar conta".
 - `AuthRepository` valida antes de chamar o Supabase: email com formato válido e senha com pelo menos 6 caracteres. O email é normalizado (sem espaços, minúsculo).
 - No cadastro, se o Supabase não devolver sessão (confirmação de email ligada), a tela volta para o modo de login e pede para confirmar o email.
-- Erros do Supabase viram `AppFailure` e aparecem em vermelho na tela. As mensagens mais comuns são traduzidas pelo código do erro (`authMessage` em `auth_repository.dart`), como "Email ou senha incorretos."; as demais viram "Algo deu errado. Tente de novo."
+- Erros do Supabase viram `AppFailure` e aparecem em vermelho na tela. As mensagens mais comuns são traduzidas pelo código do erro (`authMessage` em `auth_repository.dart`), como "Email ou senha incorretos."; as demais viram "Algo deu errado. Tente de novo." Uma falha de rede (o pedido nem chegou ao servidor) pede para conferir a internet; um erro do servidor (status 500 ou acima) mostra o código do erro, como "O servidor teve um problema (erro 500)". No modo de desenvolvimento, o status e o código do erro aparecem no Terminal.
 - Sem configuração do Supabase, os campos ficam desabilitados e a tela explica como criar o `dart_defines.json`.
 
 Quando o login dá certo, o stream de autenticação emite o usuário, o `AuthGate` muda e o router redireciona. A tela de login não navega sozinha.

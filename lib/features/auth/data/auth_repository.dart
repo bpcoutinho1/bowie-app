@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
@@ -60,8 +61,23 @@ class AuthRepository {
 
 /// Supabase sends English messages; show the common ones in Portuguese.
 String authMessage(AuthException error) {
+  if (kDebugMode) {
+    // Status and code show what the server said. Without a status the request
+    // never arrived, and the message is the network error (no user data).
+    debugPrint(
+      'Supabase auth error: status=${error.statusCode} code=${error.code}'
+      '${error.statusCode == null ? ' message=${error.message}' : ''}',
+    );
+  }
   if (error is AuthRetryableFetchException) {
-    return 'Não foi possível falar com o servidor. Confira a internet e tente de novo.';
+    // No status means the request never reached the server.
+    if (error.statusCode == null) {
+      return 'Não foi possível falar com o servidor. Confira a internet e tente de novo.';
+    }
+    if (error.message.contains('confirmation email')) {
+      return 'O servidor não conseguiu enviar o email de confirmação. Tente de novo mais tarde.';
+    }
+    return 'O servidor teve um problema (erro ${error.statusCode}). Tente de novo em alguns minutos.';
   }
   return switch (error.code) {
     'invalid_credentials' => 'Email ou senha incorretos.',
@@ -71,6 +87,8 @@ String authMessage(AuthException error) {
       'Confirme o seu email pelo link que enviamos e tente de novo.',
     'weak_password' => 'Escolha uma senha mais forte.',
     'email_address_invalid' => 'Digite um email válido.',
+    'email_address_not_authorized' =>
+      'O servidor não pode enviar emails para este endereço. Tente outro email.',
     'over_email_send_rate_limit' || 'over_request_rate_limit' =>
       'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.',
     'signup_disabled' => 'Novos cadastros estão desativados no momento.',
