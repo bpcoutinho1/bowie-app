@@ -99,5 +99,6 @@ flutter run --dart-define-from-file=dart_defines.json
 | "Esta versão ainda não está conectada ao servidor" na tela de login | O `dart_defines.json` está faltando ou com valores de exemplo. Corrija e rode `./scripts/abrir-no-xcode.sh` de novo. |
 | `CocoaPods not installed` | `brew install cocoapods` e rode o script de novo. |
 | "Signing for Runner requires a development team" | Faça o passo 6.1 e 6.2. |
+| "No valid code signing certificates were found" no Terminal | O script antigo pedia certificado mesmo para o simulador. Rode `git pull` e o script de novo. Para o iPhone, faça o passo 6. |
 | "Untrusted Developer" no iPhone | Faça o passo 6.7. |
 | Email ou senha incorretos logo após criar a conta | Confira se "Confirm email" está desligado no Supabase. |

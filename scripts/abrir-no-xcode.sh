@@ -35,8 +35,12 @@ echo "Baixando pacotes..."
 flutter pub get
 
 # Grava a configuração (inclusive o Supabase) que o Xcode usa ao apertar Play.
+# --no-codesign: só prepara o projeto, sem exigir certificado da Apple. O
+# simulador não precisa de assinatura; para o iPhone, o Xcode assina ao
+# apertar Play, depois de escolher um Team em Signing & Capabilities.
 echo "Preparando o projeto iOS..."
-flutter build ios --config-only --debug --dart-define-from-file=dart_defines.json
+flutter build ios --config-only --no-codesign --debug \
+  --dart-define-from-file=dart_defines.json
 
 echo "Abrindo no Xcode..."
 open ios/Runner.xcworkspace
