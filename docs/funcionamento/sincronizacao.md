@@ -45,7 +45,7 @@ Não há sincronização periódica nem ao voltar do segundo plano. Alterações
 `PetSyncService._once` (`lib/features/pets/data/pet_sync_service.dart`):
 
 1. Sem Supabase configurado ou sem sessão: termina como `SyncSkipped`.
-2. Offline: termina como `SyncWaiting`, com a mensagem "Saved on this device. Will sync when you are online." se houver pendências, ou "You are offline. Showing what is saved on this device." se não houver.
+2. Offline: termina como `SyncWaiting`, com a mensagem "Salvo no celular. Sincroniza quando a internet voltar." se houver pendências, ou "Você está sem internet. Mostrando o que está salvo no celular." se não houver.
 3. **Push**: envia a outbox, primeiro os `pets`, depois os `pet_tutors`, e dentro de cada grupo por ordem de criação. Pets vão antes para que o servidor já conheça o pet quando receber o vínculo.
    - Depois de cada envio, o item sai da outbox, mas só se o `payload` ainda for o mesmo que foi enviado. Se o usuário alterou o registro durante o envio, a nova versão continua na fila.
    - No primeiro erro, o push para e o ciclo termina.
@@ -73,7 +73,7 @@ Não há sincronização periódica nem ao voltar do segundo plano. Alterações
 | `SyncWaiting` | Offline ou erro de rede (`AppFailure.retryable`) | Faixa azul com a mensagem. |
 | `SyncFailed` | Erro do servidor, como violação de RLS | Faixa vermelha com a mensagem. |
 
-Erros de rede (`SocketException`, timeout, falha de DNS) viram "Could not reach the server. Changes stay on this device." e são tratados como temporários.
+Erros de rede (`SocketException`, timeout, falha de DNS) viram "Sem conexão com o servidor. As alterações ficam salvas no celular." e são tratados como temporários. Recusas do servidor (como uma regra de RLS) viram "O servidor recusou uma alteração. Tente de novo mais tarde."
 
 ## Limitações conhecidas
 

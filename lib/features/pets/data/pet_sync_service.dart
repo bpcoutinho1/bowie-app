@@ -75,11 +75,11 @@ class PetSyncService {
       final pending = await store.pending();
       if (pending.isEmpty) {
         return const SyncWaiting(
-          'You are offline. Showing what is saved on this device.',
+          'Você está sem internet. Mostrando o que está salvo no celular.',
         );
       }
       return const SyncWaiting(
-        'Saved on this device. Will sync when you are online.',
+        'Salvo no celular. Sincroniza quando a internet voltar.',
       );
     }
 
@@ -113,7 +113,7 @@ class PetSyncService {
           case 'pet_tutors':
             await remote.upsertTutor(item.payload);
           default:
-            return SyncFailed('Unknown local change: ${item.entity}.');
+            return SyncFailed('Alteração desconhecida: ${item.entity}.');
         }
         await store.removePendingIfUnchanged(item.id, item.payloadJson);
       } on AppFailure catch (error) {

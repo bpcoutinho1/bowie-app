@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
+import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/ui/bowie_card.dart';
+import 'package:bowie/core/ui/empty_state.dart';
+import 'package:bowie/core/ui/notifications_button.dart';
 import 'package:bowie/features/auth/presentation/sign_out.dart';
 import 'package:bowie/features/pets/data/pet_sync_controller.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
@@ -42,7 +48,7 @@ class PetsPage extends ConsumerWidget {
         title: const Text('Pets'),
         actions: [
           IconButton(
-            tooltip: sync.syncing ? 'Syncing' : 'Sync',
+            tooltip: sync.syncing ? 'Sincronizando' : 'Sincronizar',
             onPressed: sync.syncing
                 ? null
                 : () => ref.read(syncControllerProvider.notifier).sync(),
@@ -51,33 +57,37 @@ class PetsPage extends ConsumerWidget {
                     dimension: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.sync),
+                : const Icon(LucideIcons.refreshCw),
           ),
-          TextButton(
-            onPressed: () => signOut(ref),
-            child: const Text('Sign out'),
-          ),
+          TextButton(onPressed: () => signOut(ref), child: const Text('Sair')),
+          const NotificationsButton(),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/pets/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add pet'),
+        icon: const Icon(LucideIcons.plus),
+        label: const Text('Adicionar pet'),
       ),
       body: home.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            const Center(child: Text('Could not read pets on this device.')),
+        error: (error, _) => const Center(
+          child: Text('Não foi possível ler os pets salvos no celular.'),
+        ),
         data: (data) {
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
+            padding: const EdgeInsets.fromLTRB(
+              BowieSpacing.s4,
+              BowieSpacing.s2,
+              BowieSpacing.s4,
+              96,
+            ),
             children: [
               if (sync.message != null) ...[
                 _SyncBanner(status: sync),
                 const SizedBox(height: 16),
               ],
               if (data.invites.isNotEmpty) ...[
-                Text('Invitations', style: theme.textTheme.titleMedium),
+                Text('Convites', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
                 for (final invite in data.invites) ...[
                   _InviteCard(invite: invite),
@@ -86,30 +96,26 @@ class PetsPage extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
               if (data.pets.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 72),
-                  child: Column(
-                    children: [
-                      Text('No pets yet', style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Add a pet, then invite the other people who care for them.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                const Padding(
+                  padding: EdgeInsets.only(top: BowieSpacing.s12),
+                  child: EmptyState(
+                    icon: LucideIcons.pawPrint,
+                    title: 'Nenhum pet ainda',
+                    message:
+                        'Cadastre um pet e depois convide as pessoas que cuidam dele com você.',
                   ),
                 )
               else
-                for (final pet in data.pets)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(pet.name),
-                    trailing: const Icon(Icons.chevron_right),
+                for (final pet in data.pets) ...[
+                  BowieCard(
                     onTap: () => context.push('/pets/${pet.id}'),
+                    child: ListTile(
+                      title: Text(pet.name, style: BowieType.bodyStrong),
+                      trailing: const Icon(LucideIcons.chevronRight),
+                    ),
                   ),
+                  const SizedBox(height: BowieSpacing.s3),
+                ],
             ],
           );
         },
@@ -125,14 +131,13 @@ class _InviteCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      margin: EdgeInsets.zero,
+    return BowieCard(
       child: ListTile(
-        title: Text(invite.petName),
-        subtitle: const Text('You are invited to care for this pet.'),
+        title: Text(invite.petName, style: BowieType.bodyStrong),
+        subtitle: const Text('Você recebeu um convite para cuidar deste pet.'),
         trailing: TextButton(
           onPressed: () => _accept(context, ref),
-          child: const Text('Accept'),
+          child: const Text('Aceitar'),
         ),
       ),
     );
@@ -161,22 +166,29 @@ class _SyncBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colors = context.colors;
     final failed = status.failed;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: failed ? scheme.errorContainer : scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
+        color: failed ? colors.dangerSoft : colors.infoSoft,
+        borderRadius: BorderRadius.circular(BowieRadius.md),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Text(
-          status.message ?? '',
-          style: TextStyle(
-            color: failed
-                ? scheme.onErrorContainer
-                : scheme.onSecondaryContainer,
-          ),
+        padding: const EdgeInsets.all(BowieSpacing.s3),
+        child: Row(
+          children: [
+            Icon(
+              failed ? LucideIcons.circleAlert : LucideIcons.info,
+              color: failed ? colors.danger : colors.info,
+            ),
+            const SizedBox(width: BowieSpacing.s3),
+            Expanded(
+              child: Text(
+                status.message ?? '',
+                style: BowieType.callout.copyWith(color: colors.text),
+              ),
+            ),
+          ],
         ),
       ),
     );

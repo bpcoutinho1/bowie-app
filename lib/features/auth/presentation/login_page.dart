@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
+import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/ui/bowie_logo.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -29,32 +32,40 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final configured = ref.watch(appConfigProvider).isConfigured;
-    final theme = Theme.of(context);
+    final colors = context.colors;
 
     return Scaffold(
       body: SafeArea(
         child: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+          padding: const EdgeInsets.fromLTRB(
+            BowieSpacing.s6,
+            BowieSpacing.s12,
+            BowieSpacing.s6,
+            BowieSpacing.s6,
+          ),
           children: [
-            Text('Bowie', style: theme.textTheme.headlineLarge),
-            const SizedBox(height: 8),
+            const Center(child: BowieLogo(height: 144)),
+            const SizedBox(height: BowieSpacing.s8),
+            Text(
+              _creating ? 'Criar conta' : 'Entrar',
+              style: BowieType.title1.copyWith(color: colors.text),
+            ),
+            const SizedBox(height: BowieSpacing.s2),
             Text(
               _creating
-                  ? 'Create an account with the email you want to use.'
-                  : 'Sign in with the email you use for this account.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+                  ? 'Use o email que você quer usar no Bowie.'
+                  : 'Use o email e a senha da sua conta.',
+              style: BowieType.body.copyWith(color: colors.textMuted),
             ),
             if (!configured) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: BowieSpacing.s6),
               Text(
-                'This build has no Supabase project yet. Copy dart_defines.example.json to dart_defines.json, add the project URL and anon key, then run with --dart-define-from-file=dart_defines.json.',
-                style: theme.textTheme.bodyMedium,
+                'Esta versão ainda não está conectada ao servidor. Copie dart_defines.example.json para dart_defines.json, preencha a URL e a chave anon do Supabase e rode com --dart-define-from-file=dart_defines.json.',
+                style: BowieType.callout.copyWith(color: colors.textMuted),
               ),
             ],
-            const SizedBox(height: 32),
+            const SizedBox(height: BowieSpacing.s8),
             AutofillGroup(
               child: Column(
                 children: [
@@ -67,7 +78,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     autocorrect: false,
                     decoration: const InputDecoration(labelText: 'Email'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: BowieSpacing.s3),
                   TextField(
                     controller: _password,
                     enabled: configured && !_busy,
@@ -75,20 +86,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     autofillHints: const [AutofillHints.password],
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _submit(),
-                    decoration: const InputDecoration(labelText: 'Password'),
+                    decoration: const InputDecoration(labelText: 'Senha'),
                   ),
                 ],
               ),
             ),
             if (_error != null) ...[
-              const SizedBox(height: 16),
-              Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+              const SizedBox(height: BowieSpacing.s4),
+              Text(
+                _error!,
+                style: BowieType.callout.copyWith(color: colors.danger),
+              ),
             ],
             if (_notice != null) ...[
-              const SizedBox(height: 16),
-              Text(_notice!),
+              const SizedBox(height: BowieSpacing.s4),
+              Text(_notice!, style: BowieType.callout),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: BowieSpacing.s6),
             FilledButton(
               onPressed: configured && !_busy ? _submit : null,
               child: _busy
@@ -96,9 +110,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       dimension: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_creating ? 'Create account' : 'Sign in'),
+                  : Text(_creating ? 'Criar conta' : 'Entrar'),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: BowieSpacing.s2),
             TextButton(
               onPressed: _busy
                   ? null
@@ -111,8 +125,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     },
               child: Text(
                 _creating
-                    ? 'Already have an account? Sign in'
-                    : 'New here? Create an account',
+                    ? 'Já tem conta? Entrar'
+                    : 'Ainda não tem conta? Criar conta',
               ),
             ),
           ],
@@ -137,7 +151,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         if (needsConfirmation && mounted) {
           setState(() {
             _creating = false;
-            _notice = 'Check your email to confirm the account, then sign in.';
+            _notice =
+                'Enviamos um link para o seu email. Confirme a conta e depois entre.';
           });
         }
       } else {

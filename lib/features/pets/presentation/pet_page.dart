@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
@@ -53,12 +54,12 @@ class _PetPageState extends ConsumerState<PetPage> {
 
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(petId == null ? 'New pet' : 'Pet')),
+      appBar: AppBar(title: Text(petId == null ? 'Novo pet' : 'Pet')),
       body: switch (asyncDetails) {
         null => _form(context, details: null, theme: theme),
         AsyncLoading() => const Center(child: CircularProgressIndicator()),
         AsyncError() => const Center(
-          child: Text('Could not read this pet on this device.'),
+          child: Text('Não foi possível ler este pet no celular.'),
         ),
         AsyncData(value: final PetDetails details) => _form(
           context,
@@ -66,7 +67,7 @@ class _PetPageState extends ConsumerState<PetPage> {
           theme: theme,
         ),
         AsyncData() => const Center(
-          child: Text('This pet is not on this device.'),
+          child: Text('Este pet não está neste celular.'),
         ),
       },
     );
@@ -82,13 +83,18 @@ class _PetPageState extends ConsumerState<PetPage> {
 
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      padding: const EdgeInsets.fromLTRB(
+        BowieSpacing.s4,
+        BowieSpacing.s2,
+        BowieSpacing.s4,
+        BowieSpacing.s8,
+      ),
       children: [
         TextField(
           controller: _name,
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(labelText: 'Name'),
+          decoration: const InputDecoration(labelText: 'Nome'),
         ),
         if (_error != null) ...[
           const SizedBox(height: 12),
@@ -97,11 +103,11 @@ class _PetPageState extends ConsumerState<PetPage> {
         const SizedBox(height: 16),
         FilledButton(
           onPressed: _saving ? null : () => _save(details),
-          child: Text(_saving ? 'Saving' : 'Save'),
+          child: Text(_saving ? 'Salvando' : 'Salvar'),
         ),
         if (details != null) ...[
           const SizedBox(height: 32),
-          Text('People', style: theme.textTheme.titleMedium),
+          Text('Tutores', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
           for (final tutor in details.tutors)
             ListTile(
@@ -116,12 +122,14 @@ class _PetPageState extends ConsumerState<PetPage> {
               enabled: !_inviting,
               keyboardType: TextInputType.emailAddress,
               autocorrect: false,
-              decoration: const InputDecoration(labelText: 'Invite by email'),
+              decoration: const InputDecoration(
+                labelText: 'Convidar por email',
+              ),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: _inviting ? null : () => _invite(details),
-              child: Text(_inviting ? 'Inviting' : 'Invite'),
+              child: Text(_inviting ? 'Convidando' : 'Convidar'),
             ),
           ],
         ],
@@ -151,7 +159,7 @@ class _PetPageState extends ConsumerState<PetPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Name saved')));
+        ).showSnackBar(const SnackBar(content: Text('Nome salvo')));
       }
     } on AppFailure catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -173,9 +181,9 @@ class _PetPageState extends ConsumerState<PetPage> {
           .inviteTutor(petId: details.pet.id, email: _email.text, byUser: user);
       _email.clear();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invitation saved on this device')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Convite registrado')));
     } on AppFailure catch (error) {
       if (mounted) setState(() => _error = error.message);
     } finally {
@@ -195,8 +203,8 @@ class _PetPageState extends ConsumerState<PetPage> {
   }
 
   String _label(PetTutor tutor) {
-    if (tutor.role == PetRole.owner) return 'Owner';
-    if (tutor.status == TutorStatus.pending) return 'Invited';
+    if (tutor.role == PetRole.owner) return 'Tutor principal';
+    if (tutor.status == TutorStatus.pending) return 'Convite pendente';
     return 'Tutor';
   }
 }

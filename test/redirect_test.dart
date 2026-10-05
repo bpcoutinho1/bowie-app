@@ -7,6 +7,7 @@ void main() {
   test('loading stays on the loading route', () {
     expect(redirectFor(AuthGate.loading, '/loading'), isNull);
     expect(redirectFor(AuthGate.loading, '/pets'), '/loading');
+    expect(redirectFor(AuthGate.loading, homeLocation), '/loading');
   });
 
   test('signed out users can only see login', () {
@@ -20,9 +21,10 @@ void main() {
   });
 
   test('an unlocked session leaves the auth screens', () {
-    expect(redirectFor(AuthGate.ready, '/login'), '/pets');
-    expect(redirectFor(AuthGate.ready, '/unlock'), '/pets');
-    expect(redirectFor(AuthGate.ready, '/loading'), '/pets');
+    expect(redirectFor(AuthGate.ready, '/login'), homeLocation);
+    expect(redirectFor(AuthGate.ready, '/unlock'), homeLocation);
+    expect(redirectFor(AuthGate.ready, '/loading'), homeLocation);
+    expect(redirectFor(AuthGate.ready, homeLocation), isNull);
     expect(redirectFor(AuthGate.ready, '/pets'), isNull);
     expect(redirectFor(AuthGate.ready, '/pets/new'), isNull);
   });

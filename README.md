@@ -13,7 +13,7 @@ cp dart_defines.example.json dart_defines.json
 flutter run --dart-define-from-file=dart_defines.json
 ```
 
-The launch config named Bowie passes that file for you. The same command runs on an iPhone, an Android phone, or an emulator; pick the device with `-d`.
+The launch config named Bowie passes that file for you. To run from Xcode, use `./scripts/abrir-no-xcode.sh` (step by step in `docs/guias/rodar-no-iphone.md`). The same command runs on an iPhone, an Android phone, or an emulator; pick the device with `-d`.
 
 ## Android release builds
 
@@ -44,7 +44,7 @@ The session is stored in the iOS Keychain, or in Keystore-encrypted storage on A
 
 ## Layout
 
-`lib/app` wires the theme, router, and providers. `lib/features/auth` is Supabase sign-in plus the device unlock. `lib/features/pets` is the pet, the tutor list, the local database, and sync. `lib/core` is config, errors, the secure session store, and connectivity.
+`lib/app` wires the theme, router, and providers. `lib/features/auth` is Supabase sign-in plus the device unlock. `lib/features/pets` is the pet, the tutor list, the local database, and sync. `lib/core` is config, errors, the secure session store, connectivity, and shared UI. `lib/app/design_tokens.dart` is generated from `design/tokens/tokens.json` by `scripts/generate-dart-tokens.py`; do not edit it by hand.
 
 Add each new area as another folder under `lib/features`. What to build, and in what order, is in `docs/produto/` (Portuguese).
 

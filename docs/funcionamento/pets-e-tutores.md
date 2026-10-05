@@ -33,7 +33,7 @@ Todas passam por `PetRepository` (`lib/features/pets/data/pet_repository.dart`),
 
 ### Criar pet
 
-Tela: botão "Add pet" em `/pets`, que abre `/pets/new`.
+Tela: botão "Adicionar pet" em `/pets` (ou "Cadastrar pet" na aba Início, quando não há pets), que abre `/pets/new`.
 
 - Gera o `Pet` e um `PetTutor` com `role = owner`, `status = accepted` e o `user_id` do usuário atual.
 - Grava os dois na mesma transação e enfileira os dois.
@@ -41,26 +41,26 @@ Tela: botão "Add pet" em `/pets`, que abre `/pets/new`.
 
 ### Renomear pet
 
-Tela: `/pets/:id`, campo "Name" e botão "Save".
+Tela: `/pets/:id`, campo "Nome" e botão "Salvar".
 
 - Qualquer pessoa com vínculo `accepted` no pet pode renomear (dono ou tutor).
 
 ### Convidar tutor
 
-Tela: `/pets/:id`, campo "Invite by email". Só aparece para o dono.
+Tela: `/pets/:id`, campo "Convidar por email". Só aparece para o tutor principal.
 
 Validações:
 
 - O email precisa ter formato válido.
-- Não pode ser o próprio email ("You already care for this pet.").
-- Só o dono pode convidar ("Only the owner can invite someone.").
-- A pessoa não pode já estar no pet ("That person is already on this pet.").
+- Não pode ser o próprio email ("Você já cuida deste pet.").
+- Só o tutor principal pode convidar ("Só o tutor principal pode convidar pessoas.").
+- A pessoa não pode já estar no pet ("Essa pessoa já faz parte deste pet.").
 
 Cria um `PetTutor` com `role = tutor`, `status = pending` e `user_id` vazio. O app não envia email: o convite aparece para a outra pessoa quando ela sincroniza.
 
 ### Aceitar convite
 
-Tela: card "Invitations" em `/pets`, botão "Accept".
+Tela: card "Convites" em `/pets`, botão "Aceitar". A aba Início também mostra o convite e leva para `/pets`.
 
 - O convite precisa existir no aparelho e ter sido feito para o email do usuário.
 - Muda `status` para `accepted` e preenche `user_id`.
@@ -73,14 +73,14 @@ Não há como recusar um convite, remover um tutor ou excluir um pet pela interf
 **`/pets` (`PetsPage`)**
 
 - Faixa de status da sincronização, quando há mensagem (azul para aviso, vermelho para falha).
-- "Invitations": vínculos `pending` com o email do usuário, mais recentes primeiro.
+- "Convites": vínculos `pending` com o email do usuário, mais recentes primeiro.
 - Lista de pets em que o usuário tem vínculo `accepted`, em ordem alfabética.
-- Botão de sincronizar e botão "Sign out" na barra superior.
+- Botão de sincronizar, botão "Sair" e o sino na barra superior.
 
 **`/pets/:id` (`PetPage`)**
 
 - Nome editável.
-- "People": dono primeiro, depois os demais por email, com o rótulo "Owner", "Invited" ou "Tutor".
+- "Tutores": tutor principal primeiro, depois os demais por email, com o rótulo "Tutor principal", "Convite pendente" ou "Tutor".
 - Campo de convite, só para o dono.
 
 As duas telas recarregam sozinhas sempre que o banco local muda, seja por ação do usuário ou por dados vindos do servidor.
