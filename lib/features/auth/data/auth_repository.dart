@@ -62,9 +62,11 @@ class AuthRepository {
 /// Supabase sends English messages; show the common ones in Portuguese.
 String authMessage(AuthException error) {
   if (kDebugMode) {
-    // Only the status and code, so the Terminal shows what the server said.
+    // Status and code show what the server said. Without a status the request
+    // never arrived, and the message is the network error (no user data).
     debugPrint(
-      'Supabase auth error: status=${error.statusCode} code=${error.code}',
+      'Supabase auth error: status=${error.statusCode} code=${error.code}'
+      '${error.statusCode == null ? ' message=${error.message}' : ''}',
     );
   }
   if (error is AuthRetryableFetchException) {
