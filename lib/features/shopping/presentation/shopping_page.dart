@@ -13,6 +13,9 @@ import 'package:bowie/core/ui/notifications_button.dart';
 import 'package:bowie/features/shopping/data/shopping_repository.dart';
 import 'package:bowie/features/shopping/domain/shopping_catalog.dart';
 import 'package:bowie/features/shopping/domain/shopping_item.dart';
+import 'package:bowie/features/houses/houses.dart';
+import 'package:bowie/features/houses/house_selector.dart';
+import 'package:bowie/features/houses/houses_providers.dart';
 import 'package:bowie/features/shopping/presentation/shopping_providers.dart';
 
 /// The house's shopping list, as in Bring!: big tiles, a tap marks an item
@@ -55,7 +58,7 @@ class ShoppingPage extends ConsumerWidget {
         AsyncData(value: final list) when house != null => Column(
           children: [
             if (list.length > 1)
-              _HouseSelector(
+              HouseSelector(
                 houses: list,
                 selected: house,
                 onSelected: (id) =>
@@ -66,40 +69,6 @@ class ShoppingPage extends ConsumerWidget {
         ),
         _ => const Center(child: CircularProgressIndicator()),
       },
-    );
-  }
-}
-
-class _HouseSelector extends StatelessWidget {
-  const _HouseSelector({
-    required this.houses,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final List<House> houses;
-  final House selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: BowieSpacing.s4),
-        children: [
-          for (final house in houses) ...[
-            ChoiceChip(
-              avatar: const Icon(LucideIcons.house, size: 18),
-              label: Text(house.label),
-              selected: house.id == selected.id,
-              onSelected: (_) => onSelected(house.id),
-            ),
-            const SizedBox(width: BowieSpacing.s2),
-          ],
-        ],
-      ),
     );
   }
 }

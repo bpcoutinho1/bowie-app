@@ -44,6 +44,7 @@ class PetsPage extends ConsumerWidget {
     final home = ref.watch(petsHomeProvider);
     final sync = ref.watch(syncControllerProvider);
     final theme = Theme.of(context);
+    final colors = context.colors;
 
     return Scaffold(
       appBar: AppBar(
@@ -88,6 +89,18 @@ class PetsPage extends ConsumerWidget {
                 _SyncBanner(status: sync),
                 const SizedBox(height: 16),
               ],
+              BowieCard(
+                onTap: () => context.push('/pets/contatos'),
+                child: ListTile(
+                  leading: Icon(LucideIcons.bookUser, color: colors.text),
+                  title: Text('Contatos', style: BowieType.bodyStrong),
+                  subtitle: const Text(
+                    'Veterinários, creche, hotelzinho e mais',
+                  ),
+                  trailing: const Icon(LucideIcons.chevronRight),
+                ),
+              ),
+              const SizedBox(height: BowieSpacing.s4),
               if (data.invites.isNotEmpty) ...[
                 Text('Convites', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),

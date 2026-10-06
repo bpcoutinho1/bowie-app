@@ -7,6 +7,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 3. `20261007120000_pet_vaccines.sql`: tabela de doses de vacinas e vermífugos.
 4. `20261008120000_pet_photo_sex_transfer.sql`: sexo e foto do pet, o bucket `pet-photos` com suas políticas e a função `transfer_pet`. Pode rodar mais de uma vez.
 5. `20261009120000_shopping_items.sql`: lista de compras da casa (tabela `shopping_items` e função `is_house_member`). Pode rodar mais de uma vez.
+6. `20261010120000_diary_and_contacts.sql`: diário (`pet_events`) e contatos da casa (`house_contacts`). Precisa da 5. Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -77,6 +78,10 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 **`public.shopping_items`**: itens da lista de compras de uma casa (veja [compras](compras.md)). `house_id` é o id de usuário do tutor principal. `status` é `to_buy` ou `bought`. O gatilho `shopping_items_protect_identity` impede mudar `id` e `house_id`. RLS: quem é da casa (`is_house_member`) lê, insere e altera, e `updated_by` precisa ser o próprio usuário.
 
 `is_house_member(casa)`: verdadeiro quando a casa é do próprio usuário, ou quando ele é tutor `accepted` de um pet ativo cujo tutor principal é o dono da casa.
+
+**`public.house_contacts`**: contatos de uma casa (veja [contatos](contatos.md)). `category` é um dos tipos fixos, `phone` só dígitos (10 ou 11). RLS igual à de `shopping_items`, com `is_house_member`.
+
+**`public.pet_events`**: registros do diário (veja [diário](diario.md)). `kind` é `symptom`, `vet_visit`, `exam` ou `other`; `occurs_on` é o dia e `occurs_time` o horário opcional. `contact_id` aponta para `house_contacts` (vira vazio se o contato for apagado de vez). RLS igual à de `pet_vaccines`: tutores `accepted` do pet, com `updated_by` do próprio usuário.
 
 ## Fotos dos pets (Storage)
 

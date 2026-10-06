@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/photo_picker.dart';
+import 'package:bowie/features/contacts/domain/contact.dart';
+import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
@@ -25,6 +27,14 @@ abstract class PetRemoteApi {
   Future<List<VaccineDose>> pullDoses();
 
   Future<void> upsertShoppingItem(Map<String, dynamic> row);
+
+  Future<void> upsertEvent(Map<String, dynamic> row);
+
+  Future<List<PetEvent>> pullEvents();
+
+  Future<void> upsertContact(Map<String, dynamic> row);
+
+  Future<List<Contact>> pullContacts();
 
   Future<List<ShoppingItem>> pullShoppingItems();
 
@@ -86,6 +96,26 @@ class SupabasePetApi implements PetRemoteApi {
   @override
   Future<void> upsertShoppingItem(Map<String, dynamic> row) =>
       _save('shopping_items', row);
+
+  @override
+  Future<void> upsertEvent(Map<String, dynamic> row) =>
+      _save('pet_events', row);
+
+  @override
+  Future<List<PetEvent>> pullEvents() async {
+    final rows = await _pull('pet_events');
+    return rows.map(PetEvent.fromRow).toList();
+  }
+
+  @override
+  Future<void> upsertContact(Map<String, dynamic> row) =>
+      _save('house_contacts', row);
+
+  @override
+  Future<List<Contact>> pullContacts() async {
+    final rows = await _pull('house_contacts');
+    return rows.map(Contact.fromRow).toList();
+  }
 
   @override
   Future<List<ShoppingItem>> pullShoppingItems() async {

@@ -95,20 +95,3 @@ class ShoppingItem {
     );
   }
 }
-
-/// A house: the pets of one main tutor and everyone who cares for them.
-class House {
-  const House({
-    required this.id,
-    required this.ownerEmail,
-    required this.isMine,
-  });
-
-  /// The main tutor's user id.
-  final String id;
-  final String ownerEmail;
-  final bool isMine;
-
-  /// "Minha casa", or "Casa de ana@example.com" until accounts have a name.
-  String get label => isMine ? 'Minha casa' : 'Casa de $ownerEmail';
-}

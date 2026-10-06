@@ -6,7 +6,7 @@ O que a aba **Compras** faz hoje. As regras de produto estão em [`docs/produto/
 
 Não existe tabela de casas. A casa é o **id de usuário do tutor principal**: reúne os pets de que ele é tutor principal e quem é tutor `accepted` de algum deles.
 
-- `PetLocalStore.listHouses(email)` lista, a partir dos pets que a pessoa aceitou, os tutores principais desses pets. Cada um é uma casa.
+- `Houses` (`lib/features/houses/houses.dart`) é usada por Compras e Contatos. `PetLocalStore.listHouses(email)` lista, a partir dos pets que a pessoa aceitou, os tutores principais desses pets. Cada um é uma casa.
 - `House.label`: "Minha casa" para a própria. Para as outras, "Casa de ana@example.com": o cadastro ainda não tem nome, então o app usa o email do tutor principal.
 - Quem ainda não tem pet (nem como tutor) não tem casa. A aba convida a cadastrar o primeiro pet.
 
@@ -48,4 +48,6 @@ Qualquer pessoa da casa vê e altera a lista (`ShoppingRepository` e, no servido
 
 - Aviso na central de notificações quando alguém adiciona um item.
 - Atualização em tempo real: a lista de outra pessoa só muda na próxima sincronização dela (veja [sincronização](sincronizacao.md#quando-a-sincronização-roda)).
+
+O aviso de "Desfazer" some sozinho depois de 5 segundos (`persist: false`). Desde o Flutter 3.29, um aviso com ação fica na tela até ser fechado, e ele cobria o botão "Adicionar item".
 - Links de afiliado.

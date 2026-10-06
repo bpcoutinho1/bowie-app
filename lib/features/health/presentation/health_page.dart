@@ -15,7 +15,7 @@ import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
-import 'package:bowie/features/pets/presentation/pet_photo.dart';
+import 'package:bowie/features/pets/presentation/pet_selector.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
 
 class HealthPage extends ConsumerWidget {
@@ -66,7 +66,7 @@ class HealthPage extends ConsumerWidget {
         _ => Column(
           children: [
             if (pets.length > 1)
-              _PetSelector(
+              PetSelector(
                 pets: pets,
                 selected: pet,
                 onSelected: (id) =>
@@ -76,40 +76,6 @@ class HealthPage extends ConsumerWidget {
           ],
         ),
       },
-    );
-  }
-}
-
-class _PetSelector extends StatelessWidget {
-  const _PetSelector({
-    required this.pets,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final List<Pet> pets;
-  final Pet selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: BowieSpacing.s4),
-        children: [
-          for (final pet in pets) ...[
-            ChoiceChip(
-              avatar: PetAvatar(pet: pet, size: 24),
-              label: Text(pet.name),
-              selected: pet.id == selected.id,
-              onSelected: (_) => onSelected(pet.id),
-            ),
-            const SizedBox(width: BowieSpacing.s2),
-          ],
-        ],
-      ),
     );
   }
 }

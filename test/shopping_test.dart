@@ -11,11 +11,13 @@ import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/data/pet_sync_service.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
-import 'package:bowie/features/shopping/data/last_house.dart';
+import 'package:bowie/features/houses/last_house.dart';
 import 'package:bowie/features/shopping/data/shopping_repository.dart';
 import 'package:bowie/features/shopping/domain/shopping_catalog.dart';
 import 'package:bowie/features/shopping/domain/shopping_item.dart';
 import 'package:bowie/features/shopping/presentation/shopping_page.dart';
+import 'package:bowie/features/houses/houses.dart';
+import 'package:bowie/features/houses/houses_providers.dart';
 import 'package:bowie/features/shopping/presentation/shopping_providers.dart';
 
 import 'support/fakes.dart';

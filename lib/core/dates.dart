@@ -36,3 +36,50 @@ DateTime addMonths(DateTime day, int months) {
   final lastDay = DateTime(year, month + 1, 0).day;
   return DateTime(year, month, day.day > lastDay ? lastDay : day.day);
 }
+
+const monthNames = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+
+/// Sunday first, as Brazilian calendars show the week.
+const weekdayNames = [
+  'domingo',
+  'segunda-feira',
+  'terça-feira',
+  'quarta-feira',
+  'quinta-feira',
+  'sexta-feira',
+  'sábado',
+];
+
+/// "12 de outubro".
+String formatDayLong(DateTime day) =>
+    '${day.day} de ${monthNames[day.month - 1]}';
+
+/// "Outubro de 2026".
+String formatMonth(DateTime month) {
+  final name = monthNames[month.month - 1];
+  return '${name[0].toUpperCase()}${name.substring(1)} de ${month.year}';
+}
+
+/// "Hoje", "Amanhã", "Ontem", or "segunda-feira, 12 de outubro".
+String describeDay(DateTime day, DateTime today) {
+  final days = daysBetween(today, day);
+  if (days == 0) return 'Hoje';
+  if (days == 1) return 'Amanhã';
+  if (days == -1) return 'Ontem';
+  final weekday = weekdayNames[day.weekday % 7];
+  final text = '$weekday, ${formatDayLong(day)}';
+  return day.year == today.year ? text : '$text de ${day.year}';
+}

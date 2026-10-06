@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:bowie/core/sync/network_status.dart';
+import 'package:bowie/features/contacts/domain/contact.dart';
+import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/data/pet_remote_api.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
@@ -67,6 +69,32 @@ class FakeRemote implements PetRemoteApi {
 
   @override
   Future<List<ShoppingItem>> pullShoppingItems() async => List.of(shopping);
+
+  final events = <PetEvent>[];
+
+  @override
+  Future<void> upsertEvent(Map<String, dynamic> row) async {
+    calls.add('pet_events');
+    final event = PetEvent.fromRow(Map<String, Object?>.from(row));
+    events.removeWhere((other) => other.id == event.id);
+    events.add(event);
+  }
+
+  @override
+  Future<List<PetEvent>> pullEvents() async => List.of(events);
+
+  final contacts = <Contact>[];
+
+  @override
+  Future<void> upsertContact(Map<String, dynamic> row) async {
+    calls.add('house_contacts');
+    final contact = Contact.fromRow(Map<String, Object?>.from(row));
+    contacts.removeWhere((other) => other.id == contact.id);
+    contacts.add(contact);
+  }
+
+  @override
+  Future<List<Contact>> pullContacts() async => List.of(contacts);
 
   final photos = <String, Uint8List>{};
 
