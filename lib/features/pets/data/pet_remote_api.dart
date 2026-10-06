@@ -9,6 +9,7 @@ import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/shopping/domain/shopping_item.dart';
 
 abstract class PetRemoteApi {
   Future<void> upsertPet(Map<String, dynamic> row);
@@ -22,6 +23,10 @@ abstract class PetRemoteApi {
   Future<void> upsertDose(Map<String, dynamic> row);
 
   Future<List<VaccineDose>> pullDoses();
+
+  Future<void> upsertShoppingItem(Map<String, dynamic> row);
+
+  Future<List<ShoppingItem>> pullShoppingItems();
 
   Future<void> uploadPhoto(String path, Uint8List photo);
 
@@ -77,6 +82,16 @@ class SupabasePetApi implements PetRemoteApi {
   @override
   Future<void> upsertDose(Map<String, dynamic> row) =>
       _save('pet_vaccines', row);
+
+  @override
+  Future<void> upsertShoppingItem(Map<String, dynamic> row) =>
+      _save('shopping_items', row);
+
+  @override
+  Future<List<ShoppingItem>> pullShoppingItems() async {
+    final rows = await _pull('shopping_items');
+    return rows.map(ShoppingItem.fromRow).toList();
+  }
 
   @override
   Future<List<VaccineDose>> pullDoses() async {

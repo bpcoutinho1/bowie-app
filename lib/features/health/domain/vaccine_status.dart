@@ -1,5 +1,8 @@
 import 'package:bowie/core/dates.dart';
+import 'package:bowie/core/text.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
+
+export 'package:bowie/core/text.dart' show foldText;
 
 /// From docs/produto/saude.md: more than 30 days left is up to date, 30 or
 /// fewer is due soon, past the date is overdue. Older doses of the same
@@ -77,15 +80,3 @@ List<VaccineGroup> groupDoses(Iterable<VaccineDose> doses, DateTime today) {
 
 String groupKey(DoseKind kind, String name) =>
     '${kind.name}:${foldText(name.trim())}';
-
-/// Lowercase without accents, for matching names people type differently.
-String foldText(String value) {
-  const from = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
-  const to = 'aaaaaeeeeiiiiooooouuuucn';
-  final out = StringBuffer();
-  for (final char in value.toLowerCase().split('')) {
-    final i = from.indexOf(char);
-    out.write(i == -1 ? char : to[i]);
-  }
-  return out.toString();
-}

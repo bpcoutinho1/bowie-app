@@ -118,9 +118,9 @@ class PetSyncService {
     await sync();
   }
 
-  /// Pushes pets, then tutor rows, then photos and doses, so the server
-  /// always knows the pet (and the person's membership) before anything that
-  /// points to it.
+  /// Pushes pets, then tutor rows, then photos, doses and shopping items, so
+  /// the server always knows the pet (and the person's membership) before
+  /// anything that depends on it.
   Future<SyncResult?> _push(PetRemoteApi remote) async {
     final pending = await store.pending();
     pending.sort((a, b) {
@@ -140,6 +140,8 @@ class PetSyncService {
             await remote.upsertTutor(item.payload);
           case 'pet_vaccines':
             await remote.upsertDose(item.payload);
+          case 'shopping_items':
+            await remote.upsertShoppingItem(item.payload);
           case photoEntity:
             await _pushPhoto(remote, item);
           default:
@@ -168,7 +170,13 @@ class PetSyncService {
     final pets = await remote.pullPets();
     final tutors = await remote.pullTutors();
     final doses = await remote.pullDoses();
-    await store.applyRemote(pets: pets, tutors: tutors, doses: doses);
+    final shopping = await remote.pullShoppingItems();
+    await store.applyRemote(
+      pets: pets,
+      tutors: tutors,
+      doses: doses,
+      shopping: shopping,
+    );
   }
 
   int _rank(String entity) {
@@ -177,7 +185,8 @@ class PetSyncService {
       'pet_tutors' => 1,
       photoEntity => 2,
       'pet_vaccines' => 3,
-      _ => 4,
+      'shopping_items' => 4,
+      _ => 5,
     };
   }
 }
