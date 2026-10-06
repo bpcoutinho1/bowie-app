@@ -51,9 +51,12 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 1,
+      version: 2,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
+      },
+      onUpgrade: (db, from, to) async {
+        if (from < 2) await _addPetProfile(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -64,6 +67,7 @@ class PetLocalStore {
             deleted_at TEXT
           )
         ''');
+        await _addPetProfile(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -98,6 +102,17 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 2: species, breed, birth date and weight.
+  static Future<void> _addPetProfile(DatabaseExecutor db) async {
+    await db.execute('ALTER TABLE pets ADD COLUMN species TEXT');
+    await db.execute('ALTER TABLE pets ADD COLUMN breed TEXT');
+    await db.execute('ALTER TABLE pets ADD COLUMN birth_date TEXT');
+    await db.execute(
+      'ALTER TABLE pets ADD COLUMN birth_date_estimated INTEGER NOT NULL DEFAULT 0',
+    );
+    await db.execute('ALTER TABLE pets ADD COLUMN weight_kg REAL');
   }
 
   Future<List<Pet>> listPetsFor(String email) async {
@@ -248,14 +263,31 @@ class PetLocalStore {
   Future<void> _upsertPet(DatabaseExecutor db, Pet pet) {
     return db.rawInsert(
       '''
-      INSERT INTO pets (id, name, updated_at, deleted_at)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO pets (
+        id, name, species, breed, birth_date, birth_date_estimated,
+        weight_kg, updated_at, deleted_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
+        species = excluded.species,
+        breed = excluded.breed,
+        birth_date = excluded.birth_date,
+        birth_date_estimated = excluded.birth_date_estimated,
+        weight_kg = excluded.weight_kg,
         updated_at = excluded.updated_at,
         deleted_at = excluded.deleted_at
       ''',
-      [pet.id, pet.name, _iso(pet.updatedAt), _isoOrNull(pet.deletedAt)],
+      [
+        pet.id,
+        pet.name,
+        pet.species?.name,
+        pet.breed,
+        pet.birthDate == null ? null : formatDay(pet.birthDate!),
+        pet.birthDateEstimated ? 1 : 0,
+        pet.weightKg,
+        _iso(pet.updatedAt),
+        _isoOrNull(pet.deletedAt),
+      ],
     );
   }
 

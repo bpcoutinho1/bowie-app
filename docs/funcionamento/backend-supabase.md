@@ -1,6 +1,9 @@
 # Backend no Supabase
 
-O backend é só o Supabase: autenticação por email e duas tabelas no Postgres protegidas por Row Level Security (RLS). Não há funções de servidor nem API própria. O esquema está em `supabase/migrations/20260930120000_pets_and_tutors.sql`.
+O backend é só o Supabase: autenticação por email e duas tabelas no Postgres protegidas por Row Level Security (RLS). Não há funções de servidor nem API própria. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
+
+1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
+2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
 
 ## Configuração do app
 
@@ -15,7 +18,7 @@ O app lê duas variáveis de compilação, passadas com `--dart-define-from-file
 
 ## Tabelas
 
-**`public.pets`**: `id uuid`, `name text` (1 a 80 caracteres sem espaços nas pontas), `updated_at timestamptz`, `deleted_at timestamptz`.
+**`public.pets`**: `id uuid`, `name text` (1 a 80 caracteres sem espaços nas pontas), `species text` (`dog` ou `cat`), `breed text` (até 80), `birth_date date`, `birth_date_estimated boolean`, `weight_kg numeric(4,1)` (0,1 a 150), `updated_at timestamptz`, `deleted_at timestamptz`.
 
 **`public.pet_tutors`**: `id uuid`, `pet_id` (referência a `pets`, com `on delete cascade`), `user_id` (referência a `auth.users`, opcional), `email` (precisa conter `@`), `role` (`owner` ou `tutor`), `status` (`pending` ou `accepted`), `updated_at`, `deleted_at`.
 
@@ -24,6 +27,7 @@ Restrições extras:
 - `pet_tutors_one_owner_idx`: um único dono ativo por pet.
 - `pet_tutors_active_email_idx`: um email aparece no máximo uma vez por pet entre os vínculos ativos (sem diferenciar maiúsculas).
 - Gatilho `pet_tutors_protect_identity`: num update, `id`, `pet_id`, `email` e `role` não podem mudar.
+- Gatilho `pets_protect_deletion`: só o tutor principal pode mudar `deleted_at` de um pet.
 
 ## Funções auxiliares
 
@@ -67,4 +71,4 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 
 ## Aplicando o esquema
 
-Para um projeto novo, rode o arquivo de migração no SQL Editor do Supabase. Novas alterações de banco devem virar um novo arquivo em `supabase/migrations/` com o prefixo `AAAAMMDDHHMMSS_`.
+Rode cada arquivo de migração, em ordem, no SQL Editor do Supabase (New query → colar → Run). Cada um roda uma única vez. Novas alterações de banco devem virar um novo arquivo em `supabase/migrations/` com o prefixo `AAAAMMDDHHMMSS_`.

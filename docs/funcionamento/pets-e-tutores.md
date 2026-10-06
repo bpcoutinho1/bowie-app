@@ -10,8 +10,13 @@ Dois tipos de registro, nos mesmos formatos no SQLite e no Postgres:
 | --- | --- |
 | `id` | UUID v4 gerado no aparelho. |
 | `name` | Nome, de 1 a 80 caracteres depois de tirar espaços. |
+| `species` | `dog` (cão) ou `cat` (gato). Obrigatório em pets novos; vazio só em pets criados antes deste campo. |
+| `breed` | Raça, até 80 caracteres. Opcional. |
+| `birth_date` | Dia do nascimento. Obrigatório em pets novos. |
+| `birth_date_estimated` | `true` quando a data foi calculada a partir de uma idade aproximada. |
+| `weight_kg` | Peso atual, de 0,1 a 150 kg, com uma casa decimal. Opcional. |
 | `updated_at` | Momento da última alteração, em UTC. |
-| `deleted_at` | Marcação de exclusão lógica. Ainda não há tela para excluir. |
+| `deleted_at` | Marcação de exclusão lógica, usada ao excluir o pet. |
 
 **`PetTutor`** (`lib/features/pets/domain/pet_tutor.dart`): uma pessoa ligada a um pet.
 
@@ -35,15 +40,27 @@ Todas passam por `PetRepository` (`lib/features/pets/data/pet_repository.dart`),
 
 Tela: botão "Adicionar pet" em `/pets` (ou "Cadastrar pet" na aba Início, quando não há pets), que abre `/pets/new`.
 
+- Campos: nome, tipo (Cão ou Gato), raça, nascimento e peso atual.
+- Raça: sugestões de `lib/features/pets/domain/breeds.dart` conforme o tipo, com "Sem raça definida (SRD)" primeiro; a busca ignora maiúsculas e acentos, e dá para digitar uma raça fora da lista.
+- Nascimento: escolhida no calendário ou, com "Não sei a data exata", pela idade aproximada em anos. Nesse caso a data é o dia de hoje naquele ano, marcada como aproximada, e a idade aparece como "Cerca de 3 anos".
+- Peso: aceita vírgula ou ponto ("23,5") e é arredondado para uma casa decimal.
 - Gera o `Pet` e um `PetTutor` com `role = owner`, `status = accepted` e o `user_id` do usuário atual.
 - Grava os dois na mesma transação e enfileira os dois.
 - Navega para `/pets/<id>`.
 
-### Renomear pet
+### Editar pet
 
-Tela: `/pets/:id`, campo "Nome" e botão "Salvar".
+Tela: `/pets/:id`, os mesmos campos do cadastro e o botão "Salvar".
 
-- Qualquer pessoa com vínculo `accepted` no pet pode renomear (dono ou tutor).
+- Qualquer pessoa com vínculo `accepted` no pet pode editar (tutor principal ou tutor).
+
+### Excluir pet
+
+Tela: `/pets/:id`, botão "Excluir este pet", só para o tutor principal.
+
+- Pede confirmação com o nome do pet.
+- Marca `deleted_at` (exclusão lógica). O pet some das listas e da tela de todos os tutores depois da sincronização.
+- No servidor, o gatilho `pets_protect_deletion` impede que outra pessoa marque `deleted_at`.
 
 ### Convidar tutor
 
@@ -74,7 +91,7 @@ Não há como recusar um convite, remover um tutor ou excluir um pet pela interf
 
 - Faixa de status da sincronização, quando há mensagem (azul para aviso, vermelho para falha).
 - "Convites": vínculos `pending` com o email do usuário, mais recentes primeiro.
-- Lista de pets em que o usuário tem vínculo `accepted`, em ordem alfabética.
+- Lista de pets em que o usuário tem vínculo `accepted`, em ordem alfabética, com o resumo "Cão · Border Collie · 5 anos" (também na aba Início).
 - Botão de sincronizar, botão "Sair" e o sino na barra superior.
 
 **`/pets/:id` (`PetPage`)**
@@ -91,7 +108,8 @@ As duas telas recarregam sozinhas sempre que o banco local muda, seja por ação
 | --- | --- | --- |
 | Ver um pet | Vínculo `accepted`, ou convite `pending` para o seu email | App (consultas) e RLS |
 | Criar pet | Qualquer usuário autenticado | App e RLS |
-| Renomear pet | Vínculo `accepted` | `PetRepository` e RLS |
+| Editar pet | Vínculo `accepted` | `PetRepository` e RLS |
+| Excluir pet | Tutor principal | `PetRepository` e gatilho `pets_protect_deletion` |
 | Convidar | Dono | `PetRepository` e RLS |
 | Aceitar convite | Dono da conta com o email convidado | `PetRepository` e RLS |
 
