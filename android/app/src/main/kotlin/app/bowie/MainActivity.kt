@@ -1,4 +1,4 @@
-package com.bowie.app.bowie
+package app.bowie
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

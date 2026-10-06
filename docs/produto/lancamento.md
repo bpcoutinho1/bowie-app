@@ -8,7 +8,7 @@ O que precisa existir para os primeiros testes com outras pessoas e, depois, par
 | Conta Google Play Console | Pendente | US$ 25, pagamento único. Necessária para o teste interno e para o Google Play. |
 | Projeto no Supabase | Criado | Conferir a **região do servidor** (veja abaixo). |
 | Domínio | Pendente | Sugestão: `bowie.app`. |
-| Página web | Pendente | Política de privacidade, termos de uso e a página do link de convite, com os botões das lojas. |
+| Página web | Parcial | A [política de privacidade](../legal/politica-de-privacidade.md) está escrita; o link dela no GitHub serve para o TestFlight. Faltam os termos de uso e a página do link de convite, com os botões das lojas. |
 | Email de envio | Pendente | Depende do domínio. Sem domínio próprio, os emails de convite tendem a cair no spam. |
 
 ## Região do Supabase
@@ -20,5 +20,5 @@ O fuso horário não depende do servidor: o app grava datas em UTC e mostra no h
 ## Antes dos testes com outras pessoas
 
 - Contas nas lojas criadas.
-- Política de privacidade publicada. As lojas exigem o link antes de liberar qualquer teste externo.
+- Política de privacidade publicada. As lojas exigem o link antes de liberar qualquer teste externo. Passo a passo do TestFlight em [`docs/guias/testflight.md`](../guias/testflight.md).
 - Envio de email configurado, para os convites funcionarem.
