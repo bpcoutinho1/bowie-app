@@ -44,7 +44,8 @@ lib/
     auth/                login, cadastro, desbloqueio do aparelho, sign out
     pets/                domínio (Pet, PetTutor), dados (local, remoto, sync) e telas
     home/                aba Início
-    health/, shopping/   abas Saúde e Compras (em construção)
+    health/              aba Saúde: vacinas e vermífugos (veja saude.md)
+    shopping/            aba Compras (em construção)
     notifications/       central de notificações (ainda vazia)
 android/                 projeto Android (Gradle)
 ios/                     projeto iOS (Xcode)

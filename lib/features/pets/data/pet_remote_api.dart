@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
@@ -15,6 +16,10 @@ abstract class PetRemoteApi {
   Future<List<Pet>> pullPets();
 
   Future<List<PetTutor>> pullTutors();
+
+  Future<void> upsertDose(Map<String, dynamic> row);
+
+  Future<List<VaccineDose>> pullDoses();
 }
 
 /// Shown when the server refuses a change, usually because of a permission rule.
@@ -51,6 +56,16 @@ class SupabasePetApi implements PetRemoteApi {
         return _client.from(table).update(row).eq('id', id).select('id');
       });
     }
+  }
+
+  @override
+  Future<void> upsertDose(Map<String, dynamic> row) =>
+      _save('pet_vaccines', row);
+
+  @override
+  Future<List<VaccineDose>> pullDoses() async {
+    final rows = await _pull('pet_vaccines');
+    return rows.map(VaccineDose.fromRow).toList();
   }
 
   @override

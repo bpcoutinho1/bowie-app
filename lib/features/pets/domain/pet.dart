@@ -1,3 +1,5 @@
+import 'package:bowie/core/dates.dart';
+
 enum PetSpecies {
   dog('Cão'),
   cat('Gato');
@@ -90,17 +92,6 @@ class Pet {
       deletedAt: _optionalDate(row['deleted_at']),
     );
   }
-}
-
-/// `yyyy-mm-dd`, the format Postgres uses for `date`.
-String formatDay(DateTime day) {
-  String two(int n) => n.toString().padLeft(2, '0');
-  return '${day.year.toString().padLeft(4, '0')}-${two(day.month)}-${two(day.day)}';
-}
-
-DateTime parseDay(String value) {
-  final day = DateTime.parse(value.substring(0, 10));
-  return DateTime(day.year, day.month, day.day);
 }
 
 /// SQLite stores booleans as 0/1; Postgres sends true/false.

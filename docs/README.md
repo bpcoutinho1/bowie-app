@@ -28,6 +28,7 @@ Comece pelo [índice do produto](produto/README.md), que traz a prioridade do MV
 3. [Pets e tutores](funcionamento/pets-e-tutores.md): o modelo de dados e as regras de quem pode fazer o quê.
 4. [Armazenamento local e sincronização](funcionamento/sincronizacao.md): SQLite, outbox, push e pull.
 5. [Backend no Supabase](funcionamento/backend-supabase.md): tabelas, políticas de RLS e gatilhos.
+6. [Saúde](funcionamento/saude.md): vacinas e vermífugos, status e telas.
 
 ## Convenções
 

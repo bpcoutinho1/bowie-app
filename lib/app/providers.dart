@@ -6,6 +6,7 @@ import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
 import 'package:bowie/features/auth/data/device_lock.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
+import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_remote_api.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
@@ -87,6 +88,10 @@ final currentUserProvider = Provider<AppUser?>((ref) {
 
 final petRepositoryProvider = Provider<PetRepository>((ref) {
   return PetRepository(ref.watch(petLocalStoreProvider));
+});
+
+final healthRepositoryProvider = Provider<HealthRepository>((ref) {
+  return HealthRepository(ref.watch(petLocalStoreProvider));
 });
 
 final petRemoteApiProvider = Provider<PetRemoteApi?>((ref) {

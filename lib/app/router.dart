@@ -6,6 +6,9 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
+import 'package:bowie/features/health/domain/vaccine_dose.dart';
+import 'package:bowie/features/health/presentation/dose_form_page.dart';
+import 'package:bowie/features/health/presentation/dose_history_page.dart';
 import 'package:bowie/features/health/presentation/health_page.dart';
 import 'package:bowie/features/home/presentation/home_page.dart';
 import 'package:bowie/features/notifications/presentation/notifications_page.dart';
@@ -63,6 +66,33 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/saude',
                 builder: (context, state) => const HealthPage(),
+                routes: [
+                  GoRoute(
+                    path: 'doses/nova',
+                    builder: (context, state) {
+                      final query = state.uri.queryParameters;
+                      return DoseFormPage(
+                        petId: query['pet'],
+                        kind: DoseKind.values
+                            .where((kind) => kind.name == query['tipo'])
+                            .firstOrNull,
+                        name: query['nome'],
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'doses/:id',
+                    builder: (context, state) =>
+                        DoseHistoryPage(doseId: state.pathParameters['id']!),
+                    routes: [
+                      GoRoute(
+                        path: 'editar',
+                        builder: (context, state) =>
+                            DoseFormPage(doseId: state.pathParameters['id']),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
