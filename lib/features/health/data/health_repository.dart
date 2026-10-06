@@ -46,6 +46,9 @@ class HealthRepository {
 
   DateTime get today => dayOf(_now());
 
+  /// Every dose of the pet, including older ones.
+  Future<List<VaccineDose>> listDoses(String petId) => _store.listDoses(petId);
+
   Future<List<VaccineGroup>> listGroups(String petId) async {
     return groupDoses(await _store.listDoses(petId), today);
   }
@@ -59,6 +62,28 @@ class HealthRepository {
     required AppUser byUser,
   }) async {
     await _requireMember(input.petId, byUser);
+    final dose = _build(id, input, byUser);
+    await _store.saveDose(dose);
+    return dose;
+  }
+
+  /// Creates several doses at once, as from a card reading. Nothing is saved
+  /// unless every dose is valid.
+  Future<List<VaccineDose>> saveDoses({
+    required List<DoseInput> inputs,
+    required AppUser byUser,
+  }) async {
+    for (final petId in {for (final input in inputs) input.petId}) {
+      await _requireMember(petId, byUser);
+    }
+    final doses = [for (final input in inputs) _build(null, input, byUser)];
+    for (final dose in doses) {
+      await _store.saveDose(dose);
+    }
+    return doses;
+  }
+
+  VaccineDose _build(String? id, DoseInput input, AppUser byUser) {
     final name = input.name.trim();
     if (name.isEmpty) throw const AppFailure('Digite o nome da vacina.');
     if (name.length > 80) {
@@ -81,7 +106,7 @@ class HealthRepository {
       );
     }
 
-    final dose = VaccineDose(
+    return VaccineDose(
       id: id ?? _ids.v4(),
       petId: input.petId,
       kind: input.kind,
@@ -95,8 +120,6 @@ class HealthRepository {
       updatedBy: byUser.id,
       updatedAt: _now().toUtc(),
     );
-    await _store.saveDose(dose);
-    return dose;
   }
 
   /// Any accepted tutor can delete a record. The row keeps who did it.

@@ -30,6 +30,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>O Bowie usa a câmera para fotografar a carteirinha de vacinação do seu pet.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>O Bowie abre suas fotos para você escolher a da carteirinha de vacinação do seu pet.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>O Bowie usa o Face ID para desbloquear o app e proteger os dados dos seus pets.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

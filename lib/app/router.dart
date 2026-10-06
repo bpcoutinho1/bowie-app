@@ -7,6 +7,7 @@ import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
+import 'package:bowie/features/health/presentation/card_reading_page.dart';
 import 'package:bowie/features/health/presentation/dose_form_page.dart';
 import 'package:bowie/features/health/presentation/dose_history_page.dart';
 import 'package:bowie/features/health/presentation/health_page.dart';
@@ -67,6 +68,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/saude',
                 builder: (context, state) => const HealthPage(),
                 routes: [
+                  GoRoute(
+                    path: 'carteirinha',
+                    builder: (context, state) {
+                      final petId = state.uri.queryParameters['pet'];
+                      return petId == null
+                          ? const HealthPage()
+                          : CardReadingPage(petId: petId);
+                    },
+                  ),
                   GoRoute(
                     path: 'doses/nova',
                     builder: (context, state) {

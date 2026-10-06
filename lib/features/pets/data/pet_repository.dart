@@ -91,6 +91,24 @@ class PetRepository {
     await _store.savePet(_apply(details.pet, profile, _timestamp));
   }
 
+  /// Any accepted tutor can update the weight, as from a vaccine card.
+  Future<void> updateWeight({
+    required String petId,
+    required double weightKg,
+    required AppUser byUser,
+  }) async {
+    if (weightKg <= 0 || weightKg > 150) {
+      throw const AppFailure('Informe um peso entre 0,1 e 150 kg.');
+    }
+    final details = await _requireMember(petId, byUser);
+    await _store.savePet(
+      details.pet.copyWith(
+        weightKg: (weightKg * 10).round() / 10,
+        updatedAt: _timestamp,
+      ),
+    );
+  }
+
   /// Only the main tutor can delete a pet. The row is kept with [Pet.deletedAt]
   /// set, so the deletion syncs to the other tutors.
   Future<void> deletePet({

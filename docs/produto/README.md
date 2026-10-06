@@ -26,7 +26,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | 1 | Cadastro do usuário (nome, email, celular) | Parcial: só email e senha. |
 | 2 | Cadastro do pet (nome, nascimento, tipo, raça, peso, foto) | Parcial: nome, tipo, raça com sugestões, nascimento (ou idade aproximada), peso atual e exclusão pelo tutor principal. Falta a foto e o histórico de peso. |
 | 2a | Tutores (convite, remoção, transferência) | Parcial: só convite e aceite. |
-| 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status e edição/exclusão. Falta o lembrete por push e a leitura da carteirinha (IA na nuvem). |
+| 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Falta o lembrete por push, guardar a foto como comprovante e o histórico de peso. |
 | 4 | Medicamentos | Não iniciado. |
 | 5 | Histórico de incidentes | Não iniciado. |
 | 5a | Central de notificações | Não iniciado. Necessária para os convites de quem já tem conta. |

@@ -39,6 +39,7 @@ O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/s
 | Rota | Tela |
 | --- | --- |
 | `/saude` | `HealthPage`: vacinas e vermífugos do pet escolhido. Com mais de um pet, um seletor no topo troca de pet. Sem vacinas, convida a registrar a primeira. |
+| `/saude/carteirinha?pet=` | `CardReadingPage`: ler a carteirinha por foto (veja abaixo). Abre pelo ícone de leitura no topo da aba Saúde ou pelo botão "Ler a carteirinha" quando o pet ainda não tem vacinas. |
 | `/saude/doses/nova?pet=&tipo=&nome=` | `DoseFormPage`: registrar. `tipo` e `nome` são preenchidos quando se registra uma nova dose a partir do histórico. |
 | `/saude/doses/:id` | `DoseHistoryPage`: todas as doses daquela vacina, a mais nova primeiro, e o botão "Registrar nova dose". |
 | `/saude/doses/:id/editar` | `DoseFormPage`: editar ou excluir um registro. |
@@ -51,6 +52,24 @@ No formulário:
 
 A aba **Início** mostra, em cada pet, a vacina mais urgente com o mesmo selo de status.
 
+## Leitura da carteirinha
+
+A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md). A tela tem três etapas:
+
+1. **Fotos.** "Tirar foto" (câmera) ou "Da galeria" (várias de uma vez), até 4 fotos por leitura, com miniaturas que dá para remover. As fotos chegam redimensionadas para no máximo 2000 px, em JPEG com qualidade 85 (`ImagePickerPhotos`, `lib/features/health/data/photo_picker.dart`). O formato é conferido pelos primeiros bytes: JPEG, PNG e WebP passam; outros (como HEIC) mostram um aviso.
+2. **Leitura.** Na primeira vez, um diálogo pede consentimento antes de qualquer foto sair do celular ("Enviar as fotos para leitura?"). O aceite fica guardado no aparelho (`PrefsReadingConsent`, chave `card_reading_consent_v1`). `SupabaseCardReader` (`lib/features/health/data/card_reader.dart`) chama a Edge Function `read-vaccine-card` com as fotos em base64 e espera até 160 s. A tela mostra "Lendo a carteirinha de Bowie" e um botão "Cancelar", que descarta a resposta quando ela chegar. Erros voltam como mensagens em português (sem internet, servidor ocupado, foto ilegível).
+3. **Revisão.** `buildReview` (`lib/features/health/domain/card_reading.dart`) monta a lista:
+   - Doses repetidas na leitura (a mesma página em duas fotos) aparecem uma vez.
+   - Doses que o pet já tem (mesmo tipo, nome e data de aplicação) aparecem com "Já registrada" e desmarcadas.
+   - Doses sem nome, sem data, com aplicação no futuro ou com a próxima dose antes da aplicação aparecem desmarcadas, com o problema em vermelho. Marcar uma delas abre a correção.
+   - Campos que a leitura marcou como incertos aparecem em "Confira: lote, próxima dose", em amarelo.
+   - Tocar num registro abre a correção (bottom sheet). Ao confirmar, as dúvidas somem, porque a pessoa conferiu.
+   - As fotos aparecem em miniatura no topo; tocar abre a foto com zoom para comparar.
+   - Se a leitura achou peso, um item oferece atualizar o peso do perfil. Vem marcado quando o perfil não tem peso ou quando a medição é dos últimos 90 dias e diferente da atual.
+   - "Salvar N registros" grava tudo de uma vez (`HealthRepository.saveDoses`: se um registro for inválido, nada é salvo) e o peso (`PetRepository.updateWeight`). Sair com algo lido e não salvo pede confirmação.
+
+Nada é salvo sem passar pela revisão. As fotos não são guardadas: ficam só na memória enquanto a tela está aberta.
+
 ## Permissões
 
 Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir doses (`HealthRepository`, e no servidor as políticas de `pet_vaccines`).
@@ -58,4 +77,5 @@ Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir dos
 ## Ainda não existe
 
 - Lembrete por push 7 dias antes do vencimento.
-- Leitura da carteirinha pela câmera ou foto (IA na nuvem).
+- Guardar a foto da página como comprovante da dose.
+- Histórico de peso: a leitura só atualiza o peso atual do perfil.
