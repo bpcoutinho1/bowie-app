@@ -6,6 +6,25 @@ import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
+/// What a person fills in on the pet form.
+class PetProfile {
+  const PetProfile({
+    required this.name,
+    required this.species,
+    required this.birthDate,
+    this.breed,
+    this.birthDateEstimated = false,
+    this.weightKg,
+  });
+
+  final String name;
+  final PetSpecies? species;
+  final String? breed;
+  final DateTime? birthDate;
+  final bool birthDateEstimated;
+  final double? weightKg;
+}
+
 class PetDetails {
   const PetDetails({required this.pet, required this.tutors});
 
@@ -39,12 +58,15 @@ class PetRepository {
     return PetDetails(pet: pet, tutors: tutors);
   }
 
-  Future<Pet> createPet({required String name, required AppUser owner}) async {
+  Future<Pet> createPet({
+    required PetProfile profile,
+    required AppUser owner,
+  }) async {
     final timestamp = _timestamp;
-    final pet = Pet(
-      id: _ids.v4(),
-      name: _validatedName(name),
-      updatedAt: timestamp,
+    final pet = _apply(
+      Pet(id: _ids.v4(), name: '', updatedAt: timestamp),
+      profile,
+      timestamp,
     );
     final membership = PetTutor(
       id: _ids.v4(),
@@ -59,17 +81,71 @@ class PetRepository {
     return pet;
   }
 
-  Future<void> renamePet({
+  /// Any accepted tutor can edit the pet's profile.
+  Future<void> updatePet({
     required String petId,
-    required String name,
+    required PetProfile profile,
     required AppUser byUser,
   }) async {
     final details = await _requireMember(petId, byUser);
-    final renamed = details.pet.copyWith(
-      name: _validatedName(name),
-      updatedAt: _timestamp,
+    await _store.savePet(_apply(details.pet, profile, _timestamp));
+  }
+
+  /// Only the main tutor can delete a pet. The row is kept with [Pet.deletedAt]
+  /// set, so the deletion syncs to the other tutors.
+  Future<void> deletePet({
+    required String petId,
+    required AppUser byUser,
+  }) async {
+    final details = await _requireOwner(
+      petId,
+      byUser,
+      message: 'Só o tutor principal pode excluir o pet.',
     );
-    await _store.savePet(renamed);
+    final timestamp = _timestamp;
+    await _store.savePet(
+      details.pet.copyWith(deletedAt: timestamp, updatedAt: timestamp),
+    );
+  }
+
+  Pet _apply(Pet pet, PetProfile profile, DateTime timestamp) {
+    final species = profile.species;
+    if (species == null) {
+      throw const AppFailure('Escolha se é cão ou gato.');
+    }
+    final birthDate = profile.birthDate;
+    if (birthDate == null) {
+      throw const AppFailure(
+        'Informe a data de nascimento ou a idade aproximada.',
+      );
+    }
+    final today = _now();
+    final day = DateTime(birthDate.year, birthDate.month, birthDate.day);
+    if (day.isAfter(DateTime(today.year, today.month, today.day))) {
+      throw const AppFailure('A data de nascimento não pode estar no futuro.');
+    }
+    if (today.year - day.year > 40) {
+      throw const AppFailure('Confira a data de nascimento.');
+    }
+    final breed = profile.breed?.trim() ?? '';
+    if (breed.length > 80) {
+      throw const AppFailure('Use no máximo 80 caracteres na raça.');
+    }
+    final weight = profile.weightKg;
+    if (weight != null && (weight <= 0 || weight > 150)) {
+      throw const AppFailure('Informe um peso entre 0,1 e 150 kg.');
+    }
+    return pet.copyWith(
+      name: _validatedName(profile.name),
+      species: species,
+      breed: breed.isEmpty ? null : breed,
+      clearBreed: breed.isEmpty,
+      birthDate: day,
+      birthDateEstimated: profile.birthDateEstimated,
+      weightKg: weight == null ? null : (weight * 10).round() / 10,
+      clearWeight: weight == null,
+      updatedAt: timestamp,
+    );
   }
 
   Future<void> inviteTutor({
@@ -132,7 +208,11 @@ class PetRepository {
     return details;
   }
 
-  Future<PetDetails> _requireOwner(String petId, AppUser user) async {
+  Future<PetDetails> _requireOwner(
+    String petId,
+    AppUser user, {
+    String message = 'Só o tutor principal pode convidar pessoas.',
+  }) async {
     final details = await _requireMember(petId, user);
     final owner = details.tutors.any(
       (tutor) =>
@@ -142,7 +222,7 @@ class PetRepository {
           tutor.deletedAt == null,
     );
     if (!owner) {
-      throw const AppFailure('Só o tutor principal pode convidar pessoas.');
+      throw AppFailure(message);
     }
     return details;
   }

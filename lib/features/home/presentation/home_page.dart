@@ -8,6 +8,7 @@ import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
+import 'package:bowie/features/pets/presentation/pet_summary.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
 
 /// What matters today. For now it lists the pets; reminders arrive with Saúde.
@@ -71,6 +72,15 @@ class HomePage extends ConsumerWidget {
                           pet.name,
                           style: BowieType.title2.copyWith(color: colors.text),
                         ),
+                        if (petSummary(pet, DateTime.now()).isNotEmpty) ...[
+                          const SizedBox(height: BowieSpacing.s1),
+                          Text(
+                            petSummary(pet, DateTime.now()),
+                            style: BowieType.callout.copyWith(
+                              color: colors.textMuted,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: BowieSpacing.s2),
                         Text(
                           'Os lembretes de vacinas e remédios de ${pet.name} vão aparecer aqui.',

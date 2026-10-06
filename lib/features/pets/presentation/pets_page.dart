@@ -14,6 +14,7 @@ import 'package:bowie/features/auth/presentation/sign_out.dart';
 import 'package:bowie/features/pets/data/pet_sync_controller.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/pets/presentation/pet_summary.dart';
 
 class PetsHome {
   const PetsHome({required this.pets, required this.invites});
@@ -111,6 +112,9 @@ class PetsPage extends ConsumerWidget {
                     onTap: () => context.push('/pets/${pet.id}'),
                     child: ListTile(
                       title: Text(pet.name, style: BowieType.bodyStrong),
+                      subtitle: petSummary(pet, DateTime.now()).isEmpty
+                          ? null
+                          : Text(petSummary(pet, DateTime.now())),
                       trailing: const Icon(LucideIcons.chevronRight),
                     ),
                   ),

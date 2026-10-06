@@ -15,7 +15,7 @@ Guardar a data de nascimento, e não a idade, mantém a idade sempre certa e per
 
 ### Peso
 
-No MVP o cadastro guarda o peso atual. Cada alteração é gravada com data desde o início, para alimentar o **gráfico de evolução do peso**, que vem depois.
+No MVP o cadastro guarda o peso atual. O histórico com datas, que vai alimentar o **gráfico de evolução do peso**, ainda não é gravado: entra junto com o gráfico.
 
 Junto com o gráfico vem um lembrete mensal para registrar o peso: "Que tal registrar o peso do Bowie este mês?". Ele aparece só na [central de notificações](notificacoes.md), sem push.
 

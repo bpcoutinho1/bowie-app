@@ -6,9 +6,16 @@ import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/data/pet_sync_service.dart';
+import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
 import 'support/fakes.dart';
+
+PetProfile profile(String name) => PetProfile(
+  name: name,
+  species: PetSpecies.dog,
+  birthDate: DateTime(2021, 5, 4),
+);
 
 void main() {
   const owner = AppUser(id: 'owner-1', email: 'owner@example.com');
@@ -25,11 +32,18 @@ void main() {
   tearDown(() => store.close());
 
   test('creating a pet keeps the owner attached after a rename', () async {
-    final pet = await repo.createPet(name: '  Luna  ', owner: owner);
+    final pet = await repo.createPet(
+      profile: profile('  Luna  '),
+      owner: owner,
+    );
     expect(pet.name, 'Luna');
     expect((await repo.listPetsFor(owner.email)).single.name, 'Luna');
 
-    await repo.renamePet(petId: pet.id, name: 'Luna 2', byUser: owner);
+    await repo.updatePet(
+      petId: pet.id,
+      profile: profile('Luna 2'),
+      byUser: owner,
+    );
     final details = await repo.getDetails(pet.id);
     expect(details!.pet.name, 'Luna 2');
     expect(details.tutors.single.role, PetRole.owner);
@@ -37,13 +51,13 @@ void main() {
 
   test('blank names are rejected', () async {
     expect(
-      () => repo.createPet(name: '   ', owner: owner),
+      () => repo.createPet(profile: profile('   '), owner: owner),
       throwsA(isA<AppFailure>()),
     );
   });
 
   test('the owner can invite a tutor who can then accept', () async {
-    final pet = await repo.createPet(name: 'Luna', owner: owner);
+    final pet = await repo.createPet(profile: profile('Luna'), owner: owner);
     await repo.inviteTutor(
       petId: pet.id,
       email: 'Sam@Example.com',
@@ -60,7 +74,7 @@ void main() {
   });
 
   test('only the owner can invite', () async {
-    final pet = await repo.createPet(name: 'Luna', owner: owner);
+    final pet = await repo.createPet(profile: profile('Luna'), owner: owner);
     expect(
       () => repo.inviteTutor(
         petId: pet.id,
@@ -76,7 +90,7 @@ void main() {
   });
 
   test('a pending local edit is not replaced by a remote copy', () async {
-    final pet = await repo.createPet(name: 'Luna', owner: owner);
+    final pet = await repo.createPet(profile: profile('Luna'), owner: owner);
     await store.applyRemote(
       pets: [
         pet.copyWith(name: 'Remote', updatedAt: DateTime.utc(2026, 10, 1)),
@@ -108,7 +122,7 @@ void main() {
       network: network,
     );
 
-    final pet = await repo.createPet(name: 'Luna', owner: owner);
+    final pet = await repo.createPet(profile: profile('Luna'), owner: owner);
     expect(await sync.sync(), isA<SyncWaiting>());
     expect(remote.calls, isEmpty);
     expect(await store.pending(), hasLength(2));

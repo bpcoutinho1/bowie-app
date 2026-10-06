@@ -21,6 +21,8 @@ flowchart LR
 Arquivo `bowie.db`, criado por `PetLocalStore` (`lib/features/pets/data/pet_local_store.dart`). Tabelas:
 
 - `pets` e `pet_tutors`: espelho das tabelas do servidor.
+
+O banco tem versão: a 1 criou as tabelas, a 2 acrescentou o perfil do pet. Quem atualiza o app tem o banco migrado ao abrir (`onUpgrade` em `PetLocalStore.open`), sem perder dados.
 - `sync_outbox`: alterações que ainda não subiram. Colunas `entity` (`pets` ou `pet_tutors`), `entity_id`, `payload` (o registro em JSON) e `created_at`.
 
 A outbox tem índice único em `(entity, entity_id)`. Se o mesmo registro é alterado duas vezes antes de subir, fica só a última versão.

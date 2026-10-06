@@ -24,7 +24,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | --- | --- | --- |
 | 0 | Base: Android, tema e marca, textos em português | Concluído: Android, ícone e splash, tema claro e escuro a partir dos tokens, Figtree, textos em português e as quatro abas com o sino. Falta testar num aparelho Android. |
 | 1 | Cadastro do usuário (nome, email, celular) | Parcial: só email e senha. |
-| 2 | Cadastro do pet (nome, nascimento, tipo, raça, peso, foto) | Parcial: só nome. |
+| 2 | Cadastro do pet (nome, nascimento, tipo, raça, peso, foto) | Parcial: nome, tipo, raça com sugestões, nascimento (ou idade aproximada), peso atual e exclusão pelo tutor principal. Falta a foto e o histórico de peso. |
 | 2a | Tutores (convite, remoção, transferência) | Parcial: só convite e aceite. |
 | 3 | Vacinas e vermífugos | Não iniciado. |
 | 4 | Medicamentos | Não iniciado. |
