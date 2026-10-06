@@ -68,10 +68,10 @@ Todos os providers globais ficam em `lib/app/providers.dart`.
 
 | | iOS | Android |
 | --- | --- | --- |
-| Identificador | `com.bowie.app.bowie` | `com.bowie.app.bowie` |
+| Identificador | `app.bowie` | `app.bowie` (pacote Kotlin `app.bowie`) |
 | Versão mínima | iOS 13 | Android 7.0 (API 24), exigida por `local_auth` e `flutter_secure_storage` |
 | Ícone | `design/brand/app-icon/icon-1024.png` | Adaptativo: `adaptive-foreground-1024.png` sobre `#6FA8DC` |
-| Splash | `splash-icon-1024.png` sobre `#F4F6F8` | Igual; no Android 12+ o sistema usa o rosto do ícone adaptativo sobre `#F4F6F8` |
+| Splash | `splash-lockup.png` (lockup com a tagline) sobre `#F4F6F8` | Igual até o Android 11; no 12+ o rosto do ícone adaptativo no centro e "bowie" com a tagline no rodapé |
 
 Ícone e splash são gerados por `flutter_launcher_icons` e `flutter_native_splash`, configurados no `pubspec.yaml`.
 
