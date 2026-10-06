@@ -36,7 +36,7 @@ class _UnlockPageState extends ConsumerState<UnlockPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              const Center(child: BowieLogo(height: 144)),
+              const Center(child: BowieLogo(height: 144, tagline: true)),
               const SizedBox(height: BowieSpacing.s8),
               Text(
                 'Desbloquear',

@@ -7,6 +7,7 @@ import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
 import 'package:bowie/core/dates.dart';
+import 'package:bowie/core/ui/bowie_logo.dart';
 import 'package:bowie/features/contacts/presentation/contact_form_page.dart';
 import 'package:bowie/features/contacts/presentation/contacts_page.dart';
 import 'package:bowie/features/diary/presentation/diary_page.dart';
@@ -204,6 +205,9 @@ class LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    // Matches the native splash, so opening the app shows one steady screen.
+    return const Scaffold(
+      body: Center(child: BowieLogo(height: 200, tagline: true)),
+    );
   }
 }
