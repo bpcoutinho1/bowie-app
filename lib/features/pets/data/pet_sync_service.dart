@@ -94,7 +94,8 @@ class PetSyncService {
     }
   }
 
-  /// Pushes pets before tutor rows so the server sees the pet first.
+  /// Pushes pets, then tutor rows, then doses, so the server always knows
+  /// the pet (and the person's membership) before rows that point to it.
   Future<SyncResult?> _push(PetRemoteApi remote) async {
     final pending = await store.pending();
     pending.sort((a, b) {
@@ -112,6 +113,8 @@ class PetSyncService {
             await remote.upsertPet(item.payload);
           case 'pet_tutors':
             await remote.upsertTutor(item.payload);
+          case 'pet_vaccines':
+            await remote.upsertDose(item.payload);
           default:
             return SyncFailed('Alteração desconhecida: ${item.entity}.');
         }
@@ -127,14 +130,16 @@ class PetSyncService {
   Future<void> _pull(PetRemoteApi remote) async {
     final pets = await remote.pullPets();
     final tutors = await remote.pullTutors();
-    await store.applyRemote(pets: pets, tutors: tutors);
+    final doses = await remote.pullDoses();
+    await store.applyRemote(pets: pets, tutors: tutors, doses: doses);
   }
 
   int _rank(String entity) {
     return switch (entity) {
       'pets' => 0,
       'pet_tutors' => 1,
-      _ => 2,
+      'pet_vaccines' => 2,
+      _ => 3,
     };
   }
 }

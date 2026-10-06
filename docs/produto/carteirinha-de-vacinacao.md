@@ -2,6 +2,14 @@
 
 O app lê a foto da carteirinha e preenche os registros de vacina e vermífugo (veja [saúde](saude.md#vacinas-e-vermífugos)). Este documento descreve como uma carteirinha é organizada, o que deve ser extraído e as armadilhas. A carteirinha do Bowie é o exemplo de referência.
 
+## Como a leitura é feita
+
+Decisão do fundador (6 de outubro de 2026): a leitura usa **IA na nuvem**, porque a experiência precisa ser impecável e as datas de revacinação costumam ser escritas à mão.
+
+- A foto vai do celular para uma função no Supabase, que chama a IA. A chave da IA fica só no servidor, nunca dentro do app.
+- Antes do primeiro envio, o app pede consentimento explícito: a foto sai do aparelho para ser lida (LGPD).
+- O resultado volta como uma lista de doses para a pessoa conferir antes de salvar.
+
 ## Como a carteirinha é organizada
 
 Cada página é dedicada a **uma vacina** (o título da página: "Vacina V10", "Vacina contra Raiva"). Cada página tem várias linhas, uma por dose:

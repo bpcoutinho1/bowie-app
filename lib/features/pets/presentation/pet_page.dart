@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
+import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
@@ -173,7 +174,7 @@ class _PetPageState extends ConsumerState<PetPage> {
             child: Text(
               _birthDate == null
                   ? 'Escolher data de nascimento'
-                  : '${_formatDate(_birthDate!)} · ${describeAge(_birthDate!, DateTime.now())}',
+                  : '${formatDayBr(_birthDate!)} · ${describeAge(_birthDate!, DateTime.now())}',
             ),
           ),
         SwitchListTile(
@@ -488,9 +489,4 @@ String formatWeight(double kg) {
       ? rounded.toStringAsFixed(0)
       : rounded.toStringAsFixed(1);
   return text.replaceAll('.', ',');
-}
-
-String _formatDate(DateTime day) {
-  String two(int n) => n.toString().padLeft(2, '0');
-  return '${two(day.day)}/${two(day.month)}/${day.year}';
 }

@@ -4,6 +4,7 @@ O backend é só o Supabase: autenticação por email e duas tabelas no Postgres
 
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
+3. `20261007120000_pet_vaccines.sql`: tabela de doses de vacinas e vermífugos.
 
 ## Configuração do app
 
@@ -19,6 +20,8 @@ O app lê duas variáveis de compilação, passadas com `--dart-define-from-file
 ## Tabelas
 
 **`public.pets`**: `id uuid`, `name text` (1 a 80 caracteres sem espaços nas pontas), `species text` (`dog` ou `cat`), `breed text` (até 80), `birth_date date`, `birth_date_estimated boolean`, `weight_kg numeric(4,1)` (0,1 a 150), `updated_at timestamptz`, `deleted_at timestamptz`.
+
+**`public.pet_vaccines`**: doses de vacinas e vermífugos (veja [saúde](saude.md)). `next_due_on` precisa ser depois de `applied_on`. O gatilho `pet_vaccines_protect_identity` impede mudar `id` e `pet_id`. RLS: qualquer tutor `accepted` do pet lê, insere e altera, e `updated_by` precisa ser o próprio usuário.
 
 **`public.pet_tutors`**: `id uuid`, `pet_id` (referência a `pets`, com `on delete cascade`), `user_id` (referência a `auth.users`, opcional), `email` (precisa conter `@`), `role` (`owner` ou `tutor`), `status` (`pending` ou `accepted`), `updated_at`, `deleted_at`.
 

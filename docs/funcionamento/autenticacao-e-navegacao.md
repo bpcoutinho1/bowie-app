@@ -46,7 +46,7 @@ Definidas em `lib/app/router.dart`. A função `redirectFor` leva o usuário par
 | `/login` | `LoginPage` | `AuthGate.signedOut` |
 | `/unlock` | `UnlockPage` | `AuthGate.locked` |
 | `/inicio` | `HomePage` (aba Início) | `AuthGate.ready` |
-| `/saude` | `HealthPage` (aba Saúde, em construção) | `AuthGate.ready` |
+| `/saude` | `HealthPage` (aba Saúde) e as rotas de doses em [saúde](saude.md) | `AuthGate.ready` |
 | `/compras` | `ShoppingPage` (aba Compras, em construção) | `AuthGate.ready` |
 | `/pets` | `PetsPage` (aba Pets) | `AuthGate.ready` |
 | `/pets/new` | `PetPage` sem id (novo pet) | `AuthGate.ready` |
@@ -59,8 +59,9 @@ Em `ready`, quem estiver em `/login`, `/unlock` ou `/loading` é levado para `/i
 
 Depois do desbloqueio, o app mostra quatro abas na parte de baixo (`AppShell`, em `lib/app/shell.dart`), cada uma com a própria pilha de navegação (`StatefulShellRoute`):
 
-- **Início**: os pets da pessoa e convites pendentes. Sem pets, convida a cadastrar o primeiro.
-- **Saúde** e **Compras**: telas de "Em construção".
+- **Início**: os pets da pessoa, cada um com a vacina mais urgente, e os convites pendentes. Sem pets, convida a cadastrar o primeiro.
+- **Saúde**: vacinas e vermífugos (veja [saúde](saude.md)).
+- **Compras**: tela de "Em construção".
 - **Pets**: lista de pets, convites, sincronização e "Sair".
 
 O sino no topo das abas abre `/notificacoes`, ainda vazia.

@@ -1,24 +1,210 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:bowie/app/design_tokens.dart';
+import 'package:bowie/app/providers.dart';
+import 'package:bowie/app/theme.dart';
+import 'package:bowie/core/dates.dart';
+import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
+import 'package:bowie/features/health/domain/vaccine_dose.dart';
+import 'package:bowie/features/health/domain/vaccine_status.dart';
+import 'package:bowie/features/health/presentation/health_providers.dart';
+import 'package:bowie/features/health/presentation/status_badge.dart';
+import 'package:bowie/features/pets/domain/pet.dart';
+import 'package:bowie/features/pets/presentation/pets_page.dart';
 
-class HealthPage extends StatelessWidget {
+class HealthPage extends ConsumerWidget {
   const HealthPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final home = ref.watch(petsHomeProvider);
+    final pets = home.asData?.value.pets ?? const <Pet>[];
+    final selectedId = ref.watch(selectedPetIdProvider);
+    final pet =
+        pets.where((p) => p.id == selectedId).firstOrNull ?? pets.firstOrNull;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Saúde'),
         actions: const [NotificationsButton()],
       ),
-      body: const EmptyState(
-        icon: LucideIcons.heartPulse,
-        title: 'Em construção',
-        message:
-            'Vacinas, vermífugos, remédios e incidentes vão aparecer aqui.',
+      floatingActionButton: pet == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => context.push('/saude/doses/nova?pet=${pet.id}'),
+              icon: const Icon(LucideIcons.plus),
+              label: const Text('Registrar vacina'),
+            ),
+      body: switch (home) {
+        AsyncLoading() => const Center(child: CircularProgressIndicator()),
+        AsyncError() => const Center(
+          child: Text('Não foi possível ler os pets salvos no celular.'),
+        ),
+        _ when pet == null => EmptyState(
+          icon: LucideIcons.heartPulse,
+          title: 'Nenhum pet ainda',
+          message: 'Cadastre um pet para registrar as vacinas dele.',
+          action: FilledButton(
+            onPressed: () => context.push('/pets/new'),
+            child: const Text('Cadastrar pet'),
+          ),
+        ),
+        _ => Column(
+          children: [
+            if (pets.length > 1)
+              _PetSelector(
+                pets: pets,
+                selected: pet,
+                onSelected: (id) =>
+                    ref.read(selectedPetIdProvider.notifier).select(id),
+              ),
+            Expanded(child: _Vaccines(pet: pet)),
+          ],
+        ),
+      },
+    );
+  }
+}
+
+class _PetSelector extends StatelessWidget {
+  const _PetSelector({
+    required this.pets,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<Pet> pets;
+  final Pet selected;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 56,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: BowieSpacing.s4),
+        children: [
+          for (final pet in pets) ...[
+            ChoiceChip(
+              label: Text(pet.name),
+              selected: pet.id == selected.id,
+              onSelected: (_) => onSelected(pet.id),
+            ),
+            const SizedBox(width: BowieSpacing.s2),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Vaccines extends ConsumerWidget {
+  const _Vaccines({required this.pet});
+
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groups = ref.watch(vaccineGroupsProvider(pet.id));
+    final today = ref.watch(healthRepositoryProvider).today;
+    final colors = context.colors;
+
+    return groups.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => const Center(
+        child: Text('Não foi possível ler as vacinas salvas no celular.'),
+      ),
+      data: (groups) {
+        if (groups.isEmpty) {
+          return EmptyState(
+            icon: LucideIcons.syringe,
+            title: 'Nenhuma vacina registrada ainda',
+            message:
+                'Registre as vacinas e os vermífugos de ${pet.name} para '
+                'saber quando é a próxima dose.',
+            action: FilledButton(
+              onPressed: () => context.push('/saude/doses/nova?pet=${pet.id}'),
+              child: const Text('Adicionar a primeira'),
+            ),
+          );
+        }
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(
+            BowieSpacing.s4,
+            BowieSpacing.s2,
+            BowieSpacing.s4,
+            96,
+          ),
+          children: [
+            Text(
+              'Vacinas e vermífugos de ${pet.name}',
+              style: BowieType.title3.copyWith(color: colors.text),
+            ),
+            const SizedBox(height: BowieSpacing.s3),
+            for (final group in groups) ...[
+              _GroupCard(group: group, today: today),
+              const SizedBox(height: BowieSpacing.s3),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _GroupCard extends StatelessWidget {
+  const _GroupCard({required this.group, required this.today});
+
+  final VaccineGroup group;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final latest = group.latest;
+    return BowieCard(
+      onTap: () => context.push('/saude/doses/${latest.id}'),
+      child: Padding(
+        padding: const EdgeInsets.all(BowieSpacing.s4),
+        child: Row(
+          children: [
+            Icon(
+              group.kind == DoseKind.vaccine
+                  ? LucideIcons.syringe
+                  : LucideIcons.pill,
+              color: colors.categoryVaccines,
+            ),
+            const SizedBox(width: BowieSpacing.s3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
+                    style: BowieType.bodyStrong.copyWith(color: colors.text),
+                  ),
+                  Text(
+                    '${group.kind.label} · aplicada em '
+                    '${formatDayBr(latest.appliedOn)}',
+                    style: BowieType.caption.copyWith(color: colors.textMuted),
+                  ),
+                  const SizedBox(height: BowieSpacing.s2),
+                  StatusBadge(
+                    status: group.statusOn(today),
+                    text: describeDue(latest.nextDueOn, today),
+                  ),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight, color: colors.textMuted),
+          ],
+        ),
       ),
     );
   }

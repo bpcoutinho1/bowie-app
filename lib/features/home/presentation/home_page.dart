@@ -4,14 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:bowie/app/design_tokens.dart';
+import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
+import 'package:bowie/features/health/domain/vaccine_status.dart';
+import 'package:bowie/features/health/presentation/health_providers.dart';
+import 'package:bowie/features/health/presentation/status_badge.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
 
-/// What matters today. For now it lists the pets; reminders arrive with Saúde.
+/// What matters today: each pet with its most urgent vaccine.
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -82,12 +86,7 @@ class HomePage extends ConsumerWidget {
                           ),
                         ],
                         const SizedBox(height: BowieSpacing.s2),
-                        Text(
-                          'Os lembretes de vacinas e remédios de ${pet.name} vão aparecer aqui.',
-                          style: BowieType.callout.copyWith(
-                            color: colors.textMuted,
-                          ),
-                        ),
+                        _NextVaccine(petId: pet.id),
                       ],
                     ),
                   ),
@@ -98,6 +97,32 @@ class HomePage extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// The most urgent vaccine of a pet, or an invitation to register one.
+class _NextVaccine extends ConsumerWidget {
+  const _NextVaccine({required this.petId});
+
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groups = ref.watch(vaccineGroupsProvider(petId)).asData?.value;
+    final today = ref.watch(healthRepositoryProvider).today;
+    final colors = context.colors;
+    if (groups == null) return const SizedBox.shrink();
+    if (groups.isEmpty) {
+      return Text(
+        'Nenhuma vacina registrada ainda. Registre na aba Saúde.',
+        style: BowieType.callout.copyWith(color: colors.textMuted),
+      );
+    }
+    final next = groups.first;
+    return StatusBadge(
+      status: next.statusOn(today),
+      text: '${next.name}: ${describeDue(next.latest.nextDueOn, today)}',
     );
   }
 }

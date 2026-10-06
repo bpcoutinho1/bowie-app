@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 
+import 'package:bowie/core/dates.dart';
+import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
@@ -51,12 +53,13 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 2,
+      version: 3,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (db, from, to) async {
         if (from < 2) await _addPetProfile(db);
+        if (from < 3) await _addVaccines(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -68,6 +71,7 @@ class PetLocalStore {
           )
         ''');
         await _addPetProfile(db);
+        await _addVaccines(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -102,6 +106,30 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 3: vaccine and dewormer doses.
+  static Future<void> _addVaccines(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE pet_vaccines (
+        id TEXT PRIMARY KEY,
+        pet_id TEXT NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL,
+        name TEXT NOT NULL,
+        applied_on TEXT NOT NULL,
+        next_due_on TEXT NOT NULL,
+        product TEXT,
+        lot TEXT,
+        veterinarian TEXT,
+        notes TEXT,
+        updated_by TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX pet_vaccines_pet_idx ON pet_vaccines(pet_id)',
+    );
   }
 
   /// Version 2: species, breed, birth date and weight.
@@ -213,6 +241,35 @@ class PetLocalStore {
     _emit(ChangeReason.local);
   }
 
+  /// Doses of a pet that were not deleted, any order.
+  Future<List<VaccineDose>> listDoses(String petId) async {
+    final rows = await _db.query(
+      'pet_vaccines',
+      where: 'pet_id = ? AND deleted_at IS NULL',
+      whereArgs: [petId],
+    );
+    return rows.map(VaccineDose.fromRow).toList();
+  }
+
+  Future<VaccineDose?> getDose(String id) async {
+    final rows = await _db.query(
+      'pet_vaccines',
+      where: 'id = ? AND deleted_at IS NULL',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return VaccineDose.fromRow(rows.single);
+  }
+
+  Future<void> saveDose(VaccineDose dose) async {
+    await _db.transaction((txn) async {
+      await _upsertDose(txn, dose);
+      await _enqueue(txn, 'pet_vaccines', dose.id, dose.toRow());
+    });
+    _emit(ChangeReason.local);
+  }
+
   Future<List<OutboxItem>> pending() async {
     final rows = await _db.query(
       'sync_outbox',
@@ -233,6 +290,7 @@ class PetLocalStore {
   Future<void> applyRemote({
     required List<Pet> pets,
     required List<PetTutor> tutors,
+    List<VaccineDose> doses = const [],
   }) async {
     await _db.transaction((txn) async {
       final pendingKeys = await _pendingKeys(txn);
@@ -246,6 +304,11 @@ class PetLocalStore {
         if (pendingKeys.contains('pet_tutors:${tutor.id}')) continue;
         if (!knownPets.contains(tutor.petId)) continue;
         await _upsertTutor(txn, tutor);
+      }
+      for (final dose in doses) {
+        if (pendingKeys.contains('pet_vaccines:${dose.id}')) continue;
+        if (!knownPets.contains(dose.petId)) continue;
+        await _upsertDose(txn, dose);
       }
     });
     _emit(ChangeReason.remote);
@@ -317,6 +380,17 @@ class PetLocalStore {
         _isoOrNull(tutor.deletedAt),
       ],
     );
+  }
+
+  Future<void> _upsertDose(DatabaseExecutor db, VaccineDose dose) {
+    final row = dose.toRow();
+    final columns = row.keys.toList();
+    return db.rawInsert('''
+      INSERT INTO pet_vaccines (${columns.join(', ')})
+      VALUES (${List.filled(columns.length, '?').join(', ')})
+      ON CONFLICT(id) DO UPDATE SET
+        ${columns.where((c) => c != 'id').map((c) => '$c = excluded.$c').join(',\n        ')}
+      ''', row.values.toList());
   }
 
   Future<void> _enqueue(
