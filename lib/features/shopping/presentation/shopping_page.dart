@@ -305,6 +305,10 @@ class _ItemTile extends ConsumerWidget {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
+            // A snack bar with an action stays until dismissed by default;
+            // this one should leave on its own and free the add button.
+            persist: false,
+            duration: const Duration(seconds: 5),
             content: Text(
               next == ShoppingStatus.bought
                   ? '${item.name} foi para os itens frequentes'

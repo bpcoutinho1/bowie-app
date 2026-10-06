@@ -291,6 +291,10 @@ void main() {
     await settle();
     expect(find.text('Itens frequentes'), findsOneWidget);
     expect(find.text('Ração foi para os itens frequentes'), findsOneWidget);
+    // The message leaves on its own after 5 seconds.
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Ração foi para os itens frequentes'), findsNothing);
 
     await tester.tap(find.text('Ração'));
     await settle();
