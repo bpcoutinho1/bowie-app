@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 
+import 'package:bowie/core/dates.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
+import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
@@ -58,7 +60,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 6,
+      version: 7,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -68,6 +70,7 @@ class PetLocalStore {
         if (from < 4) await _addSexAndPhoto(db);
         if (from < 5) await _addShopping(db);
         if (from < 6) await _addDiaryAndContacts(db);
+        if (from < 7) await _addMedications(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -83,6 +86,7 @@ class PetLocalStore {
         await _addSexAndPhoto(db);
         await _addShopping(db);
         await _addDiaryAndContacts(db);
+        await _addMedications(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -117,6 +121,50 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 7: medications and the doses marked as given.
+  static Future<void> _addMedications(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE pet_medications (
+        id TEXT PRIMARY KEY,
+        pet_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        strength TEXT,
+        amount REAL NOT NULL,
+        unit TEXT NOT NULL,
+        frequency TEXT NOT NULL,
+        interval_count INTEGER NOT NULL DEFAULT 1,
+        times TEXT NOT NULL DEFAULT '[]',
+        start_on TEXT NOT NULL,
+        end_on TEXT,
+        notes TEXT,
+        updated_by TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX pet_medications_pet_idx ON pet_medications(pet_id)',
+    );
+    await db.execute('''
+      CREATE TABLE pet_medication_doses (
+        id TEXT PRIMARY KEY,
+        medication_id TEXT NOT NULL,
+        pet_id TEXT NOT NULL,
+        due_on TEXT NOT NULL,
+        period TEXT,
+        given_by TEXT NOT NULL,
+        given_by_email TEXT NOT NULL,
+        given_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX pet_medication_doses_pet_idx '
+      'ON pet_medication_doses(pet_id, due_on)',
+    );
   }
 
   /// Version 6: the pet diary and the house contacts.
@@ -428,6 +476,53 @@ class PetLocalStore {
     _emit(ChangeReason.local);
   }
 
+  /// Medications of a pet that were not deleted, any order.
+  Future<List<Medication>> listMedications(String petId) async {
+    final rows = await _db.query(
+      'pet_medications',
+      where: 'pet_id = ? AND deleted_at IS NULL',
+      whereArgs: [petId],
+    );
+    return rows.map(Medication.fromRow).toList();
+  }
+
+  Future<Medication?> getMedication(String id) async {
+    final rows = await _db.query(
+      'pet_medications',
+      where: 'id = ? AND deleted_at IS NULL',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return Medication.fromRow(rows.single);
+  }
+
+  Future<void> saveMedication(Medication medication) async {
+    await _db.transaction((txn) async {
+      await _upsert(txn, 'pet_medications', medication.toRow());
+      await _enqueue(txn, 'pet_medications', medication.id, medication.toRow());
+    });
+    _emit(ChangeReason.local);
+  }
+
+  /// Dose marks of a pet from [from] on, undone ones included.
+  Future<List<MedDose>> listMedDoses(String petId, DateTime from) async {
+    final rows = await _db.query(
+      'pet_medication_doses',
+      where: 'pet_id = ? AND due_on >= ?',
+      whereArgs: [petId, formatDay(from)],
+    );
+    return rows.map(MedDose.fromRow).toList();
+  }
+
+  Future<void> saveMedDose(MedDose dose) async {
+    await _db.transaction((txn) async {
+      await _upsert(txn, 'pet_medication_doses', dose.toRow());
+      await _enqueue(txn, 'pet_medication_doses', dose.id, dose.toRow());
+    });
+    _emit(ChangeReason.local);
+  }
+
   /// Diary entries of a pet that were not deleted, any order.
   Future<List<PetEvent>> listEvents(String petId) async {
     final rows = await _db.query(
@@ -523,6 +618,8 @@ class PetLocalStore {
     List<ShoppingItem> shopping = const [],
     List<PetEvent> events = const [],
     List<Contact> contacts = const [],
+    List<Medication> medications = const [],
+    List<MedDose> medDoses = const [],
   }) async {
     await _db.transaction((txn) async {
       final pendingKeys = await _pendingKeys(txn);
@@ -549,6 +646,16 @@ class PetLocalStore {
       for (final contact in contacts) {
         if (pendingKeys.contains('house_contacts:${contact.id}')) continue;
         await _upsert(txn, 'house_contacts', contact.toRow());
+      }
+      for (final medication in medications) {
+        if (pendingKeys.contains('pet_medications:${medication.id}')) continue;
+        if (!knownPets.contains(medication.petId)) continue;
+        await _upsert(txn, 'pet_medications', medication.toRow());
+      }
+      for (final dose in medDoses) {
+        if (pendingKeys.contains('pet_medication_doses:${dose.id}')) continue;
+        if (!knownPets.contains(dose.petId)) continue;
+        await _upsert(txn, 'pet_medication_doses', dose.toRow());
       }
       for (final event in events) {
         if (pendingKeys.contains('pet_events:${event.id}')) continue;

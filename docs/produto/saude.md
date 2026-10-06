@@ -55,12 +55,15 @@ O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e íc
 | Campo | Obrigatório | Observação |
 | --- | --- | --- |
 | Nome do remédio | Sim | |
-| Dosagem | Sim | Texto livre, ex.: "1 comprimido", "5 gotas". |
+| Concentração | Não | Ex.: "75 mg". |
+| Quantidade por dose | Sim | Número e unidade: comprimido, tablete, cápsula, gota, ml, sachê, pipeta, aplicação, coleira ou unidade. Ex.: "2 comprimidos", "5 gotas". |
 | Frequência | Sim | Diária, semanal, mensal ou a cada X dias ou meses. |
 | Períodos e horários | Se diária | Manhã, tarde e/ou noite, cada um com um horário. Ex.: manhã às 07h e noite às 19h. |
 | Início | Sim | Padrão: hoje. |
 | Fim | Não | Data em que o tratamento termina. |
-| Recorrente | Não | Marcado quando o remédio é para sempre, sem data de fim. Ex.: o Omega 3 do Bowie. |
+| Uso contínuo | Não | Marcado quando o remédio é para sempre, sem data de fim. Ex.: o Omega 3 do Bowie. |
+
+Exemplo, a rotina do Bowie (12 de outubro de 2026): de manhã, 2 comprimidos de Omega 3, 2 tabletes de calmante de camomila e 1 comprimido de pregabalina 75 mg; à noite, 1 comprimido de colágeno e 1 comprimido de pregabalina 75 mg. A pregabalina é um remédio só, com dois períodos (manhã e noite).
 
 Antipulgas e carrapaticidas também entram como medicamento. Ex.: a coleira antipulgas do Bowie é trocada a cada 8 meses (frequência "a cada 8 meses", recorrente).
 

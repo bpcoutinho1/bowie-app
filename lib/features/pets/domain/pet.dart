@@ -18,6 +18,13 @@ enum PetSex {
   final String label;
 }
 
+/// "do Bowie", "da Mia", or "de Luna" while the sex is unknown.
+String ofPet(Pet pet) => switch (pet.sex) {
+  PetSex.male => 'do ${pet.name}',
+  PetSex.female => 'da ${pet.name}',
+  null => 'de ${pet.name}',
+};
+
 class Pet {
   const Pet({
     required this.id,

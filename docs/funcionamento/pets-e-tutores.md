@@ -74,6 +74,10 @@ Onde aparece:
 - Abas **Início** e **Pets**: card do pet com a foto (`PetPhotoCard`). A foto ocupa os 55% da direita, nítida, enquadrada um pouco acima do centro para mostrar o rosto, e se dissolve no card em direção à esquerda. O nome e o resumo ficam nos 45% da esquerda, sobre a cor do card, para manter o contraste qualquer que seja a foto. Sem foto, o card mostra um círculo com uma pata.
 - Aba **Saúde**: foto pequena e redonda em cada opção do seletor de pets (`PetAvatar`).
 
+### Aniversário
+
+`birthdayNotice` (`lib/features/pets/domain/birthday.dart`) monta o aviso dos 30 dias antes até o dia ("Faltam 7 dias para o aniversário do Bowie"), com "do", "da" ou "de" pelo sexo (`ofPet`). Pets com idade aproximada não têm aviso. O Início mostra o aviso no card do pet, com um bolo na cor `smile`. Ainda não há push nem central de notificações: o aviso aparece ao abrir o app.
+
 ### Transferir o pet
 
 Tela: `/pets/:id`. Para o tutor principal, cada tutor que já aceitou o convite tem o botão "Transformar em tutor principal".

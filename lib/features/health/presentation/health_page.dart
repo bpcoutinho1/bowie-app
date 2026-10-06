@@ -10,9 +10,11 @@ import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
+import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
+import 'package:bowie/features/health/presentation/medications_section.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_selector.dart';
@@ -44,10 +46,26 @@ class HealthPage extends ConsumerWidget {
       ),
       floatingActionButton: pet == null
           ? null
-          : FloatingActionButton.extended(
-              onPressed: () => context.push('/saude/doses/nova?pet=${pet.id}'),
-              icon: const Icon(LucideIcons.plus),
-              label: const Text('Registrar vacina'),
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: 'medication',
+                  onPressed: () =>
+                      context.push('/saude/medicacoes/nova?pet=${pet.id}'),
+                  icon: const Icon(LucideIcons.plus),
+                  label: const Text('Registrar medicação'),
+                ),
+                const SizedBox(height: BowieSpacing.s3),
+                FloatingActionButton.extended(
+                  heroTag: 'vaccine',
+                  onPressed: () =>
+                      context.push('/saude/doses/nova?pet=${pet.id}'),
+                  icon: const Icon(LucideIcons.plus),
+                  label: const Text('Registrar vacina'),
+                ),
+              ],
             ),
       body: switch (home) {
         AsyncLoading() => const Center(child: CircularProgressIndicator()),
@@ -88,6 +106,9 @@ class _Vaccines extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groups = ref.watch(vaccineGroupsProvider(pet.id));
+    final medications =
+        ref.watch(medicationsProvider(pet.id)).asData?.value ??
+        const <Medication>[];
     final today = ref.watch(healthRepositoryProvider).today;
     final colors = context.colors;
 
@@ -97,12 +118,12 @@ class _Vaccines extends ConsumerWidget {
         child: Text('Não foi possível ler as vacinas salvas no celular.'),
       ),
       data: (groups) {
-        if (groups.isEmpty) {
+        if (groups.isEmpty && medications.isEmpty) {
           return EmptyState(
             icon: LucideIcons.syringe,
             title: 'Nenhuma vacina registrada ainda',
             message:
-                'Fotografe a carteirinha de ${pet.name} e o app registra as '
+                'Fotografe a carteirinha ${ofPet(pet)} e o app registra as '
                 'vacinas e os vermífugos para você conferir.',
             action: Column(
               children: [
@@ -127,14 +148,24 @@ class _Vaccines extends ConsumerWidget {
             BowieSpacing.s4,
             BowieSpacing.s2,
             BowieSpacing.s4,
-            96,
+            176,
           ),
           children: [
+            if (medications.isNotEmpty) ...[
+              MedicationsSection(pet: pet, medications: medications),
+              const SizedBox(height: BowieSpacing.s6),
+            ],
             Text(
-              'Vacinas e vermífugos de ${pet.name}',
+              'Vacinas e vermífugos ${ofPet(pet)}',
               style: BowieType.title3.copyWith(color: colors.text),
             ),
             const SizedBox(height: BowieSpacing.s3),
+            if (groups.isEmpty)
+              Text(
+                'Nenhuma vacina registrada ainda. Toque em "Registrar vacina" '
+                'ou leia a carteirinha pelo ícone no topo.',
+                style: BowieType.body.copyWith(color: colors.textMuted),
+              ),
             for (final group in groups) ...[
               _GroupCard(group: group, today: today),
               const SizedBox(height: BowieSpacing.s3),
