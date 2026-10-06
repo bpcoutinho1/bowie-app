@@ -71,7 +71,7 @@ Para mostrar a foto, `petPhotoProvider` usa o arquivo do celular. Se a foto foi 
 
 Onde aparece:
 
-- Abas **Início** e **Pets**: card do pet com a foto translúcida no fundo (`PetPhotoCard`). O texto fica nos 60% da esquerda, sobre um degradê da cor `surface`, para manter o contraste qualquer que seja a foto. Sem foto, o card mostra um círculo com uma pata.
+- Abas **Início** e **Pets**: card do pet com a foto (`PetPhotoCard`). A foto ocupa os 55% da direita, nítida, enquadrada um pouco acima do centro para mostrar o rosto, e se dissolve no card em direção à esquerda. O nome e o resumo ficam nos 45% da esquerda, sobre a cor do card, para manter o contraste qualquer que seja a foto. Sem foto, o card mostra um círculo com uma pata.
 - Aba **Saúde**: foto pequena e redonda em cada opção do seletor de pets (`PetAvatar`).
 
 ### Transferir o pet

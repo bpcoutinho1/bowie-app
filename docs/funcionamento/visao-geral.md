@@ -45,7 +45,7 @@ lib/
     pets/                domínio (Pet, PetTutor), dados (local, remoto, sync) e telas
     home/                aba Início
     health/              aba Saúde: vacinas e vermífugos (veja saude.md)
-    shopping/            aba Compras (em construção)
+    shopping/            aba Compras: lista da casa (veja compras.md)
     notifications/       central de notificações (ainda vazia)
 android/                 projeto Android (Gradle)
 ios/                     projeto iOS (Xcode)

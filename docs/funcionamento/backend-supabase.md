@@ -6,6 +6,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
 3. `20261007120000_pet_vaccines.sql`: tabela de doses de vacinas e vermífugos.
 4. `20261008120000_pet_photo_sex_transfer.sql`: sexo e foto do pet, o bucket `pet-photos` com suas políticas e a função `transfer_pet`. Pode rodar mais de uma vez.
+5. `20261009120000_shopping_items.sql`: lista de compras da casa (tabela `shopping_items` e função `is_house_member`). Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -72,6 +73,10 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 3. A partir daí o usuário é `is_accepted_member` e `is_pet_owner` desse pet.
 
 É por isso que o push envia os pets antes dos tutores (veja [Sincronização](sincronizacao.md#um-ciclo-de-sincronização)).
+
+**`public.shopping_items`**: itens da lista de compras de uma casa (veja [compras](compras.md)). `house_id` é o id de usuário do tutor principal. `status` é `to_buy` ou `bought`. O gatilho `shopping_items_protect_identity` impede mudar `id` e `house_id`. RLS: quem é da casa (`is_house_member`) lê, insere e altera, e `updated_by` precisa ser o próprio usuário.
+
+`is_house_member(casa)`: verdadeiro quando a casa é do próprio usuário, ou quando ele é tutor `accepted` de um pet ativo cujo tutor principal é o dono da casa.
 
 ## Fotos dos pets (Storage)
 

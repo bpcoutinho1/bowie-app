@@ -39,7 +39,7 @@ Exemplo: o Bruno é tutor principal do Bowie (casa do Bruno) e tutor convidado d
 
 - Cada casa tem a sua lista, separada. Os itens de uma casa nunca aparecem na outra.
 - A tela de compras abre na **casa própria** da pessoa, aquela em que ela é tutora principal.
-- Um seletor no topo da tela troca de casa. Cada casa aparece com o nome do tutor principal: "Casa do Bruno", "Casa da Ana".
+- Um seletor no topo da tela troca de casa. Cada casa aparece com o nome do tutor principal: "Casa do Bruno", "Casa da Ana". Enquanto o cadastro não tiver nome, o app mostra "Minha casa" para a própria e o email do tutor principal nas outras ("Casa de ana@exemplo.com").
 - Quem não tem casa própria (por exemplo, um passeador que só é tutor convidado) abre na última casa que usou.
 
 A lista por casa vale "por enquanto" e pode mudar.

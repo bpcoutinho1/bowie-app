@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/shopping/domain/shopping_item.dart';
 
 enum ChangeReason { local, remote }
 
@@ -55,7 +56,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 4,
+      version: 5,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -63,6 +64,7 @@ class PetLocalStore {
         if (from < 2) await _addPetProfile(db);
         if (from < 3) await _addVaccines(db);
         if (from < 4) await _addSexAndPhoto(db);
+        if (from < 5) await _addShopping(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -76,6 +78,7 @@ class PetLocalStore {
         await _addPetProfile(db);
         await _addVaccines(db);
         await _addSexAndPhoto(db);
+        await _addShopping(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -110,6 +113,26 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 5: the shopping list of each house.
+  static Future<void> _addShopping(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE shopping_items (
+        id TEXT PRIMARY KEY,
+        house_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        details TEXT,
+        catalog_key TEXT,
+        status TEXT NOT NULL,
+        updated_by TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX shopping_items_house_idx ON shopping_items(house_id)',
+    );
   }
 
   /// Version 4: sex and profile photo.
@@ -300,6 +323,69 @@ class PetLocalStore {
     _emit(ChangeReason.local);
   }
 
+  /// The houses a person belongs to: one per main tutor of the pets they
+  /// accepted, their own included.
+  Future<List<({String id, String ownerEmail})>> listHouses(
+    String email,
+  ) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT DISTINCT owner.user_id AS id, owner.email AS owner_email
+      FROM pet_tutors me
+      JOIN pets p ON p.id = me.pet_id AND p.deleted_at IS NULL
+      JOIN pet_tutors owner
+        ON owner.pet_id = me.pet_id
+       AND owner.role = ?
+       AND owner.status = ?
+       AND owner.deleted_at IS NULL
+       AND owner.user_id IS NOT NULL
+      WHERE me.email = ?
+        AND me.status = ?
+        AND me.deleted_at IS NULL
+      ORDER BY owner.email
+      ''',
+      [
+        PetRole.owner.name,
+        TutorStatus.accepted.name,
+        email,
+        TutorStatus.accepted.name,
+      ],
+    );
+    return [
+      for (final row in rows)
+        (id: row['id']! as String, ownerEmail: row['owner_email']! as String),
+    ];
+  }
+
+  /// Items of a house that were not deleted, any order.
+  Future<List<ShoppingItem>> listShoppingItems(String houseId) async {
+    final rows = await _db.query(
+      'shopping_items',
+      where: 'house_id = ? AND deleted_at IS NULL',
+      whereArgs: [houseId],
+    );
+    return rows.map(ShoppingItem.fromRow).toList();
+  }
+
+  Future<ShoppingItem?> getShoppingItem(String id) async {
+    final rows = await _db.query(
+      'shopping_items',
+      where: 'id = ? AND deleted_at IS NULL',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return ShoppingItem.fromRow(rows.single);
+  }
+
+  Future<void> saveShoppingItem(ShoppingItem item) async {
+    await _db.transaction((txn) async {
+      await _upsert(txn, 'shopping_items', item.toRow());
+      await _enqueue(txn, 'shopping_items', item.id, item.toRow());
+    });
+    _emit(ChangeReason.local);
+  }
+
   Future<List<OutboxItem>> pending() async {
     final rows = await _db.query(
       'sync_outbox',
@@ -321,6 +407,7 @@ class PetLocalStore {
     required List<Pet> pets,
     required List<PetTutor> tutors,
     List<VaccineDose> doses = const [],
+    List<ShoppingItem> shopping = const [],
   }) async {
     await _db.transaction((txn) async {
       final pendingKeys = await _pendingKeys(txn);
@@ -339,6 +426,10 @@ class PetLocalStore {
         if (pendingKeys.contains('pet_vaccines:${dose.id}')) continue;
         if (!knownPets.contains(dose.petId)) continue;
         await _upsertDose(txn, dose);
+      }
+      for (final item in shopping) {
+        if (pendingKeys.contains('shopping_items:${item.id}')) continue;
+        await _upsert(txn, 'shopping_items', item.toRow());
       }
     });
     _emit(ChangeReason.remote);

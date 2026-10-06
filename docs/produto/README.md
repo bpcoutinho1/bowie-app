@@ -30,7 +30,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | 4 | Medicamentos | Não iniciado. |
 | 5 | Histórico de incidentes | Não iniciado. |
 | 5a | Central de notificações | Não iniciado. Necessária para os convites de quem já tem conta. |
-| 6 | Lista de compras | Não iniciado. A ordem ainda precisa ser confirmada (veja [questões em aberto](questoes-em-aberto.md)). |
+| 6 | Lista de compras | Parcial: lista por casa com "A comprar" e "Itens frequentes", catálogo com ícones, seletor de casa e sincronização. Feita antes de medicamentos e incidentes, por decisão do fundador (9 de outubro de 2026). Falta o aviso na central de notificações e a atualização em tempo real. |
 
 Atualize a coluna "Situação no código" sempre que uma área avançar.
 

@@ -5,10 +5,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 ## Saúde
 
 
-## Lista de compras
-
-- [ ] Em que posição da prioridade do MVP a lista entra?
-
 ## Negócio
 
 - [ ] Quais funções serão pagas no plano freemium, e a partir de quando?

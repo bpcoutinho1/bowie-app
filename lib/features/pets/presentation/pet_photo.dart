@@ -64,9 +64,10 @@ class PetAvatar extends ConsumerWidget {
   }
 }
 
-/// A card for choosing a pet: the photo shows translucent behind the name
-/// and the summary. With a photo, the text keeps to the left 60%, over the
-/// solid side of a gradient, so it keeps its contrast whatever the photo.
+/// A card for choosing a pet. With a photo, the photo fills the right side
+/// at full strength and fades into the card towards the left, where the name
+/// and the summary sit on the plain card color, so the text keeps its
+/// contrast whatever the photo.
 class PetPhotoCard extends ConsumerWidget {
   const PetPhotoCard({
     super.key,
@@ -121,8 +122,8 @@ class PetPhotoCard extends ConsumerWidget {
             const SizedBox(width: BowieSpacing.s3),
             Expanded(child: text),
           ] else ...[
-            Expanded(flex: 3, child: text),
-            const Spacer(flex: 2),
+            Expanded(flex: 9, child: text),
+            const Spacer(flex: 11),
           ],
           if (onTap != null)
             Icon(LucideIcons.chevronRight, color: colors.textMuted),
@@ -131,41 +132,50 @@ class PetPhotoCard extends ConsumerWidget {
     );
     if (file == null) return BowieCard(onTap: onTap, child: content);
 
+    final height = large ? 164.0 : 120.0;
     return BowieCard(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(BowieRadius.lg),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ExcludeSemantics(
-                child: Opacity(
-                  opacity: 0.6,
-                  child: Image.file(file, fit: BoxFit.cover, cacheWidth: 900),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    stops: const [0, 0.6, 1],
-                    colors: [
-                      colors.surface,
-                      colors.surface.withValues(alpha: 0.9),
-                      colors.surface.withValues(alpha: 0.1),
-                    ],
+        child: LayoutBuilder(
+          builder: (context, constraints) => Stack(
+            children: [
+              Positioned(
+                top: 0,
+                right: 0,
+                bottom: 0,
+                // The photo takes the right 55%; the text keeps to the left 45%.
+                width: constraints.maxWidth * 0.55,
+                child: ExcludeSemantics(
+                  // Fades the photo's left edge into the card.
+                  child: ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (rect) => const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      stops: [0, 0.45, 1],
+                      colors: [
+                        Color(0x00000000),
+                        Color(0xE6000000),
+                        Color(0xFF000000),
+                      ],
+                    ).createShader(rect),
+                    child: Image.file(
+                      file,
+                      fit: BoxFit.cover,
+                      // Faces are usually in the upper half of the photo.
+                      alignment: const Alignment(0, -0.3),
+                      cacheWidth: 900,
+                    ),
                   ),
                 ),
               ),
-            ),
-            ConstrainedBox(
-              constraints: BoxConstraints(minHeight: large ? 132 : 96),
-              child: Align(alignment: Alignment.centerLeft, child: content),
-            ),
-          ],
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: height),
+                child: Align(alignment: Alignment.centerLeft, child: content),
+              ),
+            ],
+          ),
         ),
       ),
     );

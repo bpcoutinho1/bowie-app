@@ -6,6 +6,7 @@ import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/data/pet_remote_api.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/shopping/domain/shopping_item.dart';
 
 class FakeNetwork implements NetworkStatus {
   FakeNetwork({this.online = true});
@@ -53,6 +54,19 @@ class FakeRemote implements PetRemoteApi {
 
   @override
   Future<List<VaccineDose>> pullDoses() async => List.of(doses);
+
+  final shopping = <ShoppingItem>[];
+
+  @override
+  Future<void> upsertShoppingItem(Map<String, dynamic> row) async {
+    calls.add('shopping_items');
+    final item = ShoppingItem.fromRow(Map<String, Object?>.from(row));
+    shopping.removeWhere((other) => other.id == item.id);
+    shopping.add(item);
+  }
+
+  @override
+  Future<List<ShoppingItem>> pullShoppingItems() async => List.of(shopping);
 
   final photos = <String, Uint8List>{};
 
