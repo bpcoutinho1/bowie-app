@@ -31,7 +31,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final configured = ref.watch(appConfigProvider).isConfigured;
+    final configProblem = ref.watch(appConfigProvider).problem;
+    final configured = configProblem == null;
     final colors = context.colors;
 
     return Scaffold(
@@ -58,10 +59,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   : 'Use o email e a senha da sua conta.',
               style: BowieType.body.copyWith(color: colors.textMuted),
             ),
-            if (!configured) ...[
+            if (configProblem != null) ...[
               const SizedBox(height: BowieSpacing.s6),
               Text(
-                'Esta versão ainda não está conectada ao servidor. Copie dart_defines.example.json para dart_defines.json, preencha a URL e a chave anon do Supabase e rode com --dart-define-from-file=dart_defines.json.',
+                configProblem,
                 style: BowieType.callout.copyWith(color: colors.textMuted),
               ),
             ],

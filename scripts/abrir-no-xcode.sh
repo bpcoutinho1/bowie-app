@@ -31,6 +31,12 @@ if grep -q "YOUR_PROJECT\|YOUR_ANON_KEY" dart_defines.json; then
   exit 1
 fi
 
+if grep -q "•" dart_defines.json; then
+  echo "A chave no dart_defines.json está mascarada (com •)." >&2
+  echo "No painel do Supabase, use o botão de copiar ao lado da chave anon e cole de novo." >&2
+  exit 1
+fi
+
 echo "Baixando pacotes..."
 flutter pub get
 

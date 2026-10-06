@@ -11,7 +11,7 @@ O app lê duas variáveis de compilação, passadas com `--dart-define-from-file
 | `SUPABASE_URL` | URL do projeto (`https://<ref>.supabase.co`). |
 | `SUPABASE_ANON_KEY` | Chave pública (anon) do projeto. |
 
-`AppConfig.isConfigured` recusa valores vazios, URLs sem `https://` e os textos de exemplo de `dart_defines.example.json`.
+`AppConfig.problem` (`lib/core/config/app_config.dart`) recusa valores vazios, os textos de exemplo de `dart_defines.example.json`, URLs sem `https://` e chaves com caracteres inválidos, como as bolinhas (`•`) de uma chave copiada mascarada do painel. Nesses casos o app não chama o Supabase, e a tela de login explica o que corrigir.
 
 ## Tabelas
 
