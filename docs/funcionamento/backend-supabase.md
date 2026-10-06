@@ -1,6 +1,6 @@
 # Backend no Supabase
 
-O backend é só o Supabase: autenticação por email e duas tabelas no Postgres protegidas por Row Level Security (RLS). Não há funções de servidor nem API própria. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
+O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e uma Edge Function para ler a carteirinha de vacinação. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
 
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
@@ -71,6 +71,29 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 3. A partir daí o usuário é `is_accepted_member` e `is_pet_owner` desse pet.
 
 É por isso que o push envia os pets antes dos tutores (veja [Sincronização](sincronizacao.md#um-ciclo-de-sincronização)).
+
+## Edge Function `read-vaccine-card`
+
+`supabase/functions/read-vaccine-card/index.ts` (Deno). Recebe `POST {images: [{media_type, data}]}` com 1 a 4 fotos em base64 (JPEG, PNG ou WebP) e devolve as doses e os pesos lidos:
+
+```json
+{
+  "is_vaccine_card": true,
+  "doses": [{"kind": "vaccine", "name": "V10", "applied_on": "2026-05-04", "next_due_on": "2027-05-04",
+             "product": "Vanguard Plus (Zoetis)", "lot": "003/25", "veterinarian": "…", "uncertain_fields": []}],
+  "weights": [{"measured_on": "2026-05-04", "weight_kg": 21.4}],
+  "issues": ""
+}
+```
+
+- **Quem pode chamar:** só usuários logados. A função confere o token com `auth.getUser()` e responde 401 sem ele.
+- **IA:** chama a API da Anthropic (modelo `claude-opus-5-5`, esforço alto) com saída estruturada por JSON Schema, para a resposta sempre ter esse formato. Com o modelo sobrecarregado, a API usa um modelo reserva automaticamente (`fallbacks: "default"`). As regras de leitura (o "Revacinar em" e não o "Venc." da etiqueta, anos com dois dígitos, linhas vazias) estão no prompt e vêm de [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md).
+- **Conferência:** a resposta é validada com zod. Datas impossíveis viram `""` e entram em `uncertain_fields`; uma próxima dose antes da aplicação também. Pesos fora de 0 a 150 kg são descartados.
+- **Erros:** sempre `{error, message}`, com `message` em português para o app mostrar. 400 (pedido inválido), 401, 422 (foto ilegível ou recusada), 502 (falha da IA), 503 (sem chave configurada ou limite de uso).
+- **Privacidade:** as fotos não são gravadas. O log só tem o id do usuário e contagens (fotos, doses, pesos).
+- **Segredo:** `ANTHROPIC_API_KEY`, guardado em Edge Functions → Secrets. Nunca vai para o app nem para o repositório.
+
+Para publicar ou atualizar, veja o [guia](../guias/publicar-leitura-da-carteirinha.md).
 
 ## Aplicando o esquema
 

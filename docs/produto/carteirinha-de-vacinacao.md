@@ -9,6 +9,9 @@ Decisão do fundador (6 de outubro de 2026): a leitura usa **IA na nuvem**, porq
 - A foto vai do celular para uma função no Supabase, que chama a IA. A chave da IA fica só no servidor, nunca dentro do app.
 - Antes do primeiro envio, o app pede consentimento explícito: a foto sai do aparelho para ser lida (LGPD).
 - O resultado volta como uma lista de doses para a pessoa conferir antes de salvar.
+- A IA é a da Anthropic, que não usa os dados enviados pela API para treinar modelos. As fotos não ficam guardadas no servidor do Bowie.
+
+O que o código faz hoje está em [`docs/funcionamento/saude.md`](../funcionamento/saude.md#leitura-da-carteirinha).
 
 ## Como a carteirinha é organizada
 

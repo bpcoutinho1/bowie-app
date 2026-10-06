@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bowie/app/providers.dart';
+import 'package:bowie/features/health/data/card_reader.dart';
+import 'package:bowie/features/health/data/photo_picker.dart';
+import 'package:bowie/features/health/data/reading_consent.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 
@@ -33,3 +36,15 @@ final doseProvider = FutureProvider.autoDispose.family<VaccineDose?, String>((
   ref.onDispose(changes.cancel);
   return repository.getDose(id);
 });
+
+/// Null when the app has no server configured.
+final cardReaderProvider = Provider<CardReader?>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return client == null ? null : SupabaseCardReader(client);
+});
+
+final readingConsentProvider = Provider<ReadingConsent>(
+  (ref) => PrefsReadingConsent(),
+);
+
+final photoPickerProvider = Provider<PhotoPicker>((ref) => ImagePickerPhotos());

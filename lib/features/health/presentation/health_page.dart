@@ -31,7 +31,15 @@ class HealthPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Saúde'),
-        actions: const [NotificationsButton()],
+        actions: [
+          if (pet != null)
+            IconButton(
+              tooltip: 'Ler carteirinha',
+              onPressed: () => context.push('/saude/carteirinha?pet=${pet.id}'),
+              icon: const Icon(LucideIcons.scanText),
+            ),
+          const NotificationsButton(),
+        ],
       ),
       floatingActionButton: pet == null
           ? null
@@ -126,11 +134,23 @@ class _Vaccines extends ConsumerWidget {
             icon: LucideIcons.syringe,
             title: 'Nenhuma vacina registrada ainda',
             message:
-                'Registre as vacinas e os vermífugos de ${pet.name} para '
-                'saber quando é a próxima dose.',
-            action: FilledButton(
-              onPressed: () => context.push('/saude/doses/nova?pet=${pet.id}'),
-              child: const Text('Adicionar a primeira'),
+                'Fotografe a carteirinha de ${pet.name} e o app registra as '
+                'vacinas e os vermífugos para você conferir.',
+            action: Column(
+              children: [
+                FilledButton.icon(
+                  onPressed: () =>
+                      context.push('/saude/carteirinha?pet=${pet.id}'),
+                  icon: const Icon(LucideIcons.scanText),
+                  label: const Text('Ler a carteirinha'),
+                ),
+                const SizedBox(height: BowieSpacing.s3),
+                TextButton(
+                  onPressed: () =>
+                      context.push('/saude/doses/nova?pet=${pet.id}'),
+                  child: const Text('Registrar à mão'),
+                ),
+              ],
             ),
           );
         }
