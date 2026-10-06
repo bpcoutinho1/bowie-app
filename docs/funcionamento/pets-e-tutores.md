@@ -40,7 +40,7 @@ Todas passam por `PetRepository` (`lib/features/pets/data/pet_repository.dart`),
 
 ### Criar pet
 
-Tela: botão "Adicionar pet" em `/pets` (ou "Cadastrar pet" na aba Início, quando não há pets), que abre `/pets/new`.
+Tela: botão "Adicionar pet" em `/pets`, o card "Adicionar novo pet" no fim da aba Início (ou "Cadastrar pet", quando ainda não há pets), que abrem `/pets/new`.
 
 - Campos: foto, nome, tipo (Cão ou Gato), sexo (Macho ou Fêmea), raça, nascimento e peso atual.
 - Raça: sugestões de `lib/features/pets/domain/breeds.dart` conforme o tipo, com "Sem raça definida (SRD)" primeiro; a busca ignora maiúsculas e acentos, e dá para digitar uma raça fora da lista.

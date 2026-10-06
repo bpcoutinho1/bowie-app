@@ -75,9 +75,56 @@ class HomePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: BowieSpacing.s3),
               ],
+              const _AddPetCard(),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// A blank pet card that opens the registration of a new pet.
+class _AddPetCard extends StatelessWidget {
+  const _AddPetCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return BowieCard(
+      onTap: () => context.push('/pets/new'),
+      child: Padding(
+        padding: const EdgeInsets.all(BowieSpacing.s4),
+        child: Row(
+          children: [
+            ClipOval(
+              child: SizedBox.square(
+                dimension: 56,
+                child: ColoredBox(
+                  color: colors.surfaceMuted,
+                  child: Icon(LucideIcons.plus, color: colors.textMuted),
+                ),
+              ),
+            ),
+            const SizedBox(width: BowieSpacing.s3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Adicionar novo pet',
+                    style: BowieType.bodyStrong.copyWith(color: colors.text),
+                  ),
+                  Text(
+                    'Cão ou gato, com foto e carteirinha.',
+                    style: BowieType.callout.copyWith(color: colors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight, color: colors.textMuted),
+          ],
+        ),
       ),
     );
   }
