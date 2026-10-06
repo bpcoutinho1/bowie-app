@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
@@ -52,6 +53,52 @@ class FakeRemote implements PetRemoteApi {
 
   @override
   Future<List<VaccineDose>> pullDoses() async => List.of(doses);
+
+  final photos = <String, Uint8List>{};
+
+  @override
+  Future<void> uploadPhoto(String path, Uint8List photo) async {
+    calls.add('upload $path');
+    photos[path] = photo;
+  }
+
+  @override
+  Future<void> removePhoto(String path) async {
+    calls.add('remove $path');
+    photos.remove(path);
+  }
+
+  @override
+  Future<Uint8List?> downloadPhoto(String path) async => photos[path];
+
+  /// Mirrors transfer_pet on the server.
+  @override
+  Future<void> transferPet({
+    required String petId,
+    required String tutorId,
+  }) async {
+    calls.add('transfer');
+    final now = DateTime.now().toUtc();
+    for (var i = 0; i < tutors.length; i++) {
+      final tutor = tutors[i];
+      if (tutor.petId != petId) continue;
+      final role = tutor.id == tutorId
+          ? PetRole.owner
+          : tutor.role == PetRole.owner
+          ? PetRole.tutor
+          : tutor.role;
+      tutors[i] = PetTutor(
+        id: tutor.id,
+        petId: tutor.petId,
+        userId: tutor.userId,
+        email: tutor.email,
+        role: role,
+        status: tutor.status,
+        updatedAt: now,
+        deletedAt: tutor.deletedAt,
+      );
+    }
+  }
 
   @override
   Future<List<Pet>> pullPets() async => List.of(pets);

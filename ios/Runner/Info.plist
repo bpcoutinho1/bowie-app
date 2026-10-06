@@ -31,9 +31,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>O Bowie usa a câmera para fotografar a carteirinha de vacinação do seu pet.</string>
+	<string>O Bowie usa a câmera para fotografar o seu pet e a carteirinha de vacinação dele.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>O Bowie abre suas fotos para você escolher a da carteirinha de vacinação do seu pet.</string>
+	<string>O Bowie abre suas fotos para você escolher a foto do seu pet ou da carteirinha de vacinação dele.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>O Bowie usa o Face ID para desbloquear o app e proteger os dados dos seus pets.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>

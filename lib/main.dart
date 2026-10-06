@@ -7,12 +7,14 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/core/config/app_config.dart';
 import 'package:bowie/core/supabase/secure_session_storage.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final config = AppConfig.fromEnvironment();
   final client = await openSupabase(config);
   final store = await PetLocalStore.open();
+  final photos = await PetPhotoStore.open();
 
   runApp(
     ProviderScope(
@@ -20,6 +22,7 @@ Future<void> main() async {
         appConfigProvider.overrideWithValue(config),
         supabaseClientProvider.overrideWithValue(client),
         petLocalStoreProvider.overrideWithValue(store),
+        petPhotoStoreProvider.overrideWithValue(photos),
       ],
       child: const BowieApp(),
     ),

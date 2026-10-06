@@ -9,12 +9,14 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/breeds.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_age.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/pets/presentation/pet_photo.dart';
 
 final petDetailsProvider = FutureProvider.autoDispose
     .family<PetDetails?, String>((ref, id) async {
@@ -41,7 +43,14 @@ class _PetPageState extends ConsumerState<PetPage> {
   final _weight = TextEditingController();
   final _email = TextEditingController();
   PetSpecies? _species;
+  PetSex? _sex;
   DateTime? _birthDate;
+
+  /// A photo chosen but not saved yet. [_removePhoto] marks the saved photo
+  /// to be removed on save.
+  Uint8List? _newPhoto;
+  var _removePhoto = false;
+  String? _transferringTo;
   var _unknownBirthDate = false;
   var _seeded = false;
   var _saving = false;
@@ -64,6 +73,7 @@ class _PetPageState extends ConsumerState<PetPage> {
     _seeded = true;
     _name.text = pet.name;
     _species = pet.species;
+    _sex = pet.sex;
     _breed.text = pet.breed ?? '';
     _unknownBirthDate = pet.birthDateEstimated;
     final birth = pet.birthDate;
@@ -123,6 +133,20 @@ class _PetPageState extends ConsumerState<PetPage> {
         BowieSpacing.s8,
       ),
       children: [
+        _PhotoField(
+          saved: _removePhoto ? null : details?.pet,
+          picked: _newPhoto,
+          onPick: _pickPhoto,
+          onRemove:
+              (_newPhoto != null || details?.pet.photoPath != null) &&
+                  !_removePhoto
+              ? () => setState(() {
+                  _newPhoto = null;
+                  _removePhoto = details?.pet.photoPath != null;
+                })
+              : null,
+        ),
+        gap,
         TextField(
           controller: _name,
           textCapitalization: TextCapitalization.words,
@@ -144,6 +168,21 @@ class _PetPageState extends ConsumerState<PetPage> {
             setState(
               () => _species = selection.isEmpty ? null : selection.first,
             );
+          },
+        ),
+        gap,
+        Text('Sexo', style: BowieType.bodyStrong.copyWith(color: colors.text)),
+        const SizedBox(height: BowieSpacing.s2),
+        SegmentedButton<PetSex>(
+          emptySelectionAllowed: true,
+          showSelectedIcon: false,
+          segments: [
+            for (final sex in PetSex.values)
+              ButtonSegment(value: sex, label: Text(sex.label)),
+          ],
+          selected: {?_sex},
+          onSelectionChanged: (selection) {
+            setState(() => _sex = selection.isEmpty ? null : selection.first);
           },
         ),
         gap,
@@ -216,12 +255,31 @@ class _PetPageState extends ConsumerState<PetPage> {
           const SizedBox(height: BowieSpacing.s8),
           Text('Tutores', style: theme.textTheme.titleMedium),
           const SizedBox(height: BowieSpacing.s2),
-          for (final tutor in details.tutors)
+          for (final tutor in details.tutors) ...[
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(tutor.email),
               subtitle: Text(_label(tutor)),
             ),
+            if (owner &&
+                tutor.role == PetRole.tutor &&
+                tutor.status == TutorStatus.accepted)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: _transferringTo != null
+                      ? null
+                      : () => _transfer(details, tutor),
+                  icon: _transferringTo == tutor.id
+                      ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(LucideIcons.crown),
+                  label: const Text('Transformar em tutor principal'),
+                ),
+              ),
+          ],
           if (owner) ...[
             const SizedBox(height: BowieSpacing.s2),
             TextField(
@@ -277,6 +335,7 @@ class _PetPageState extends ConsumerState<PetPage> {
     return PetProfile(
       name: _name.text,
       species: _species,
+      sex: _sex,
       breed: _breed.text,
       birthDate: birthDate,
       birthDateEstimated: _unknownBirthDate,
@@ -296,6 +355,7 @@ class _PetPageState extends ConsumerState<PetPage> {
       final profile = _profile();
       if (details == null) {
         final pet = await repository.createPet(profile: profile, owner: user);
+        await _savePhoto(pet.id, user);
         if (!mounted) return;
         context.go('/pets/${pet.id}');
       } else {
@@ -304,6 +364,7 @@ class _PetPageState extends ConsumerState<PetPage> {
           profile: profile,
           byUser: user,
         );
+        await _savePhoto(details.pet.id, user);
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
@@ -313,6 +374,126 @@ class _PetPageState extends ConsumerState<PetPage> {
       if (mounted) setState(() => _error = error.message);
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _savePhoto(String petId, AppUser user) async {
+    final photo = _newPhoto;
+    if (photo == null && !_removePhoto) return;
+    await ref
+        .read(petRepositoryProvider)
+        .setPhoto(petId: petId, photo: photo, byUser: user);
+    if (!mounted) return;
+    setState(() {
+      _newPhoto = null;
+      _removePhoto = false;
+    });
+  }
+
+  Future<void> _pickPhoto() async {
+    final source = await showModalBottomSheet<PhotoSource>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(LucideIcons.camera),
+              title: const Text('Tirar foto'),
+              onTap: () => Navigator.of(context).pop(PhotoSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(LucideIcons.images),
+              title: const Text('Escolher da galeria'),
+              onTap: () => Navigator.of(context).pop(PhotoSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
+    try {
+      final picked = await ref
+          .read(photoPickerProvider)
+          .pick(source, max: 1, maxSide: 1200);
+      if (!mounted || picked.isEmpty) return;
+      final photo = picked.first;
+      if (photoMediaType(photo) == null) {
+        setState(
+          () => _error =
+              'Formato de foto não aceito. Tente tirar a foto pela câmera.',
+        );
+        return;
+      }
+      setState(() {
+        _newPhoto = photo;
+        _removePhoto = false;
+        _error = null;
+      });
+    } on Exception {
+      if (!mounted) return;
+      setState(
+        () => _error = source == PhotoSource.camera
+            ? 'Não foi possível abrir a câmera. Confira se o Bowie tem '
+                  'permissão nos Ajustes do celular.'
+            : 'Não foi possível abrir as fotos. Confira se o Bowie tem '
+                  'permissão nos Ajustes do celular.',
+      );
+    }
+  }
+
+  Future<void> _transfer(PetDetails details, PetTutor tutor) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+    final name = details.pet.name;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Transformar em tutor principal?'),
+        content: Text(
+          '${tutor.email} passa a ser tutor principal de $name: poderá '
+          'convidar e remover pessoas, transferir e excluir $name.\n\n'
+          'Você continua como tutor, com acesso a tudo, mas sem essas '
+          'permissões. Só o novo tutor principal pode desfazer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Transferir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _transferringTo = tutor.id;
+      _error = null;
+    });
+    try {
+      await ref
+          .read(petRepositoryProvider)
+          .checkTransfer(
+            petId: details.pet.id,
+            tutorId: tutor.id,
+            byUser: user,
+          );
+      await ref
+          .read(syncServiceProvider)
+          .transferPet(petId: details.pet.id, tutorId: tutor.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${tutor.email} agora é tutor principal')),
+      );
+    } on AppFailure catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    } finally {
+      if (mounted) setState(() => _transferringTo = null);
     }
   }
 
@@ -400,6 +581,88 @@ class _PetPageState extends ConsumerState<PetPage> {
     if (tutor.role == PetRole.owner) return 'Tutor principal';
     if (tutor.status == TutorStatus.pending) return 'Convite pendente';
     return 'Tutor';
+  }
+}
+
+/// The profile photo: the one chosen now, the saved one, or an invitation
+/// to add one.
+class _PhotoField extends StatelessWidget {
+  const _PhotoField({
+    required this.saved,
+    required this.picked,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  final Pet? saved;
+  final Uint8List? picked;
+  final VoidCallback onPick;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    const size = 112.0;
+    final picked = this.picked;
+    final saved = this.saved;
+    final hasPhoto = picked != null || saved?.photoPath != null;
+    final Widget image;
+    if (picked != null) {
+      image = ClipOval(
+        child: Image.memory(
+          picked,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else if (saved != null) {
+      image = PetAvatar(pet: saved, size: size);
+    } else {
+      image = ClipOval(
+        child: SizedBox.square(
+          dimension: size,
+          child: ColoredBox(
+            color: colors.surfaceMuted,
+            child: Icon(LucideIcons.camera, size: 36, color: colors.textMuted),
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        Semantics(
+          button: true,
+          label: hasPhoto ? 'Trocar foto' : 'Adicionar foto',
+          child: InkWell(
+            onTap: onPick,
+            customBorder: const CircleBorder(),
+            child: image,
+          ),
+        ),
+        const SizedBox(height: BowieSpacing.s2),
+        if (picked != null && saved != null)
+          Text(
+            'Toque em Salvar para guardar a foto nova.',
+            style: BowieType.caption.copyWith(color: colors.textMuted),
+          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: onPick,
+              child: Text(hasPhoto ? 'Trocar foto' : 'Adicionar foto'),
+            ),
+            if (onRemove != null)
+              TextButton(
+                onPressed: onRemove,
+                style: TextButton.styleFrom(foregroundColor: colors.danger),
+                child: const Text('Remover'),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 }
 

@@ -73,7 +73,7 @@ O tutor principal não pode simplesmente sair: antes, precisa transferir o pet p
 
 ## Transferência
 
-O tutor principal pode transferir o pet para um tutor que já aceitou o convite. Esse é o caminho para o tutor principal sair: ele transfere o papel e depois sai ou é removido.
+O tutor principal pode transferir o pet para um tutor que já aceitou o convite, pelo botão "Transformar em tutor principal" ao lado desse tutor, na tela do pet. A transferência pede confirmação e precisa de internet. Esse é o caminho para o tutor principal sair: ele transfere o papel e depois sai ou é removido.
 
 Depois da transferência:
 
@@ -83,6 +83,6 @@ Depois da transferência:
 ## Diferenças em relação ao código atual
 
 - O código chama o tutor principal de `owner`. Na interface e na documentação, use "tutor principal".
-- Ainda não existem nome e celular no cadastro, email de convite, remoção e saída de tutor, transferência nem exclusão de pet.
+- Ainda não existem nome e celular no cadastro, email de convite, remoção e saída de tutor.
 - Hoje o convidado precisa tocar em "Accept" no app para aceitar. Pela regra acima, o cadastro com o email do convite já basta.
-- No banco atual não há política de exclusão (`delete`) e o gatilho `pet_tutors_protect_identity` impede trocar o papel (`role`) de um vínculo. A transferência vai exigir uma mudança no esquema.
+- No banco atual não há política de exclusão (`delete`). O papel (`role`) de um vínculo só muda pela função `transfer_pet` (veja [backend](../funcionamento/backend-supabase.md#transferência-do-pet)).

@@ -4,12 +4,14 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 
-import 'package:bowie/core/dates.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
 enum ChangeReason { local, remote }
+
+/// Outbox entity for photo files; the entity id is the photo path.
+const photoEntity = 'pet_photos';
 
 class OutboxItem {
   const OutboxItem({
@@ -53,13 +55,14 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 3,
+      version: 4,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (db, from, to) async {
         if (from < 2) await _addPetProfile(db);
         if (from < 3) await _addVaccines(db);
+        if (from < 4) await _addSexAndPhoto(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -72,6 +75,7 @@ class PetLocalStore {
         ''');
         await _addPetProfile(db);
         await _addVaccines(db);
+        await _addSexAndPhoto(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -106,6 +110,12 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 4: sex and profile photo.
+  static Future<void> _addSexAndPhoto(DatabaseExecutor db) async {
+    await db.execute('ALTER TABLE pets ADD COLUMN sex TEXT');
+    await db.execute('ALTER TABLE pets ADD COLUMN photo_path TEXT');
   }
 
   /// Version 3: vaccine and dewormer doses.
@@ -233,6 +243,26 @@ class PetLocalStore {
     _emit(ChangeReason.local);
   }
 
+  /// Saves the pet and queues the photo files to send to or remove from the
+  /// server, all at once.
+  Future<void> savePetWithPhotos(
+    Pet pet, {
+    List<String> upload = const [],
+    List<String> remove = const [],
+  }) async {
+    await _db.transaction((txn) async {
+      await _upsertPet(txn, pet);
+      await _enqueue(txn, 'pets', pet.id, pet.toRow());
+      for (final photo in upload) {
+        await _enqueue(txn, photoEntity, photo, {'op': 'upload'});
+      }
+      for (final photo in remove) {
+        await _enqueue(txn, photoEntity, photo, {'op': 'remove'});
+      }
+    });
+    _emit(ChangeReason.local);
+  }
+
   Future<void> saveTutor(PetTutor tutor) async {
     await _db.transaction((txn) async {
       await _upsertTutor(txn, tutor);
@@ -324,34 +354,23 @@ class PetLocalStore {
   }
 
   Future<void> _upsertPet(DatabaseExecutor db, Pet pet) {
-    return db.rawInsert(
-      '''
-      INSERT INTO pets (
-        id, name, species, breed, birth_date, birth_date_estimated,
-        weight_kg, updated_at, deleted_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    final row = pet.toRow()
+      ..['birth_date_estimated'] = pet.birthDateEstimated ? 1 : 0;
+    return _upsert(db, 'pets', row);
+  }
+
+  Future<void> _upsert(
+    DatabaseExecutor db,
+    String table,
+    Map<String, Object?> row,
+  ) {
+    final columns = row.keys.toList();
+    return db.rawInsert('''
+      INSERT INTO $table (${columns.join(', ')})
+      VALUES (${List.filled(columns.length, '?').join(', ')})
       ON CONFLICT(id) DO UPDATE SET
-        name = excluded.name,
-        species = excluded.species,
-        breed = excluded.breed,
-        birth_date = excluded.birth_date,
-        birth_date_estimated = excluded.birth_date_estimated,
-        weight_kg = excluded.weight_kg,
-        updated_at = excluded.updated_at,
-        deleted_at = excluded.deleted_at
-      ''',
-      [
-        pet.id,
-        pet.name,
-        pet.species?.name,
-        pet.breed,
-        pet.birthDate == null ? null : formatDay(pet.birthDate!),
-        pet.birthDateEstimated ? 1 : 0,
-        pet.weightKg,
-        _iso(pet.updatedAt),
-        _isoOrNull(pet.deletedAt),
-      ],
-    );
+        ${columns.where((c) => c != 'id').map((c) => '$c = excluded.$c').join(',\n        ')}
+      ''', row.values.toList());
   }
 
   Future<void> _upsertTutor(DatabaseExecutor db, PetTutor tutor) {
@@ -383,14 +402,7 @@ class PetLocalStore {
   }
 
   Future<void> _upsertDose(DatabaseExecutor db, VaccineDose dose) {
-    final row = dose.toRow();
-    final columns = row.keys.toList();
-    return db.rawInsert('''
-      INSERT INTO pet_vaccines (${columns.join(', ')})
-      VALUES (${List.filled(columns.length, '?').join(', ')})
-      ON CONFLICT(id) DO UPDATE SET
-        ${columns.where((c) => c != 'id').map((c) => '$c = excluded.$c').join(',\n        ')}
-      ''', row.values.toList());
+    return _upsert(db, 'pet_vaccines', dose.toRow());
   }
 
   Future<void> _enqueue(

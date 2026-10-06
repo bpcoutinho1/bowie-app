@@ -27,6 +27,7 @@ void main() {
 
   PetProfile bowie({
     PetSpecies? species = PetSpecies.dog,
+    PetSex? sex = PetSex.male,
     DateTime? birthDate,
     double? weight = 23.46,
     String breed = ' Border Collie ',
@@ -34,6 +35,7 @@ void main() {
     return PetProfile(
       name: 'Bowie',
       species: species,
+      sex: sex,
       breed: breed,
       birthDate: birthDate ?? DateTime(2021, 5, 4),
       weightKg: weight,
@@ -45,6 +47,7 @@ void main() {
     final saved = (await repo.getDetails(pet.id))!.pet;
 
     expect(saved.species, PetSpecies.dog);
+    expect(saved.sex, PetSex.male);
     expect(saved.breed, 'Border Collie');
     expect(saved.birthDate, DateTime(2021, 5, 4));
     expect(saved.birthDateEstimated, isFalse);
@@ -58,14 +61,19 @@ void main() {
         .payload;
 
     expect(row['species'], 'dog');
+    expect(row['sex'], 'male');
     expect(row['birth_date'], '2021-05-04');
     expect(row['birth_date_estimated'], false);
     expect(row['weight_kg'], 23.5);
   });
 
-  test('species and birth date are required', () async {
+  test('species, sex and birth date are required', () async {
     expect(
       () => repo.createPet(profile: bowie(species: null), owner: owner),
+      throwsA(isA<AppFailure>()),
+    );
+    expect(
+      () => repo.createPet(profile: bowie(sex: null), owner: owner),
       throwsA(isA<AppFailure>()),
     );
     expect(
@@ -73,6 +81,7 @@ void main() {
         profile: const PetProfile(
           name: 'Bowie',
           species: PetSpecies.dog,
+          sex: PetSex.male,
           birthDate: null,
         ),
         owner: owner,

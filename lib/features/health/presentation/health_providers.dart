@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/features/health/data/card_reader.dart';
-import 'package:bowie/features/health/data/photo_picker.dart';
 import 'package:bowie/features/health/data/reading_consent.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
@@ -46,5 +45,3 @@ final cardReaderProvider = Provider<CardReader?>((ref) {
 final readingConsentProvider = Provider<ReadingConsent>(
   (ref) => PrefsReadingConsent(),
 );
-
-final photoPickerProvider = Provider<PhotoPicker>((ref) => ImagePickerPhotos());

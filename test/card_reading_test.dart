@@ -12,7 +12,7 @@ import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/health/data/card_reader.dart';
 import 'package:bowie/features/health/data/health_repository.dart';
-import 'package:bowie/features/health/data/photo_picker.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/data/reading_consent.dart';
 import 'package:bowie/features/health/domain/card_reading.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
@@ -89,7 +89,11 @@ class FakeReader implements CardReader {
 
 class FakePicker implements PhotoPicker {
   @override
-  Future<List<Uint8List>> pick(PhotoSource source, {required int max}) async {
+  Future<List<Uint8List>> pick(
+    PhotoSource source, {
+    required int max,
+    double maxSide = 2000,
+  }) async {
     return [png];
   }
 }
@@ -192,6 +196,7 @@ void main() {
         profile: PetProfile(
           name: 'Bowie',
           species: PetSpecies.dog,
+          sex: PetSex.male,
           birthDate: DateTime(2021, 5, 4),
         ),
         owner: owner,
@@ -256,6 +261,7 @@ void main() {
         profile: PetProfile(
           name: 'Bowie',
           species: PetSpecies.dog,
+          sex: PetSex.male,
           birthDate: DateTime(2021, 5, 4),
         ),
         owner: owner,

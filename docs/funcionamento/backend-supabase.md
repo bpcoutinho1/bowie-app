@@ -5,6 +5,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
 3. `20261007120000_pet_vaccines.sql`: tabela de doses de vacinas e vermífugos.
+4. `20261008120000_pet_photo_sex_transfer.sql`: sexo e foto do pet, o bucket `pet-photos` com suas políticas e a função `transfer_pet`. Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -19,7 +20,7 @@ O app lê duas variáveis de compilação, passadas com `--dart-define-from-file
 
 ## Tabelas
 
-**`public.pets`**: `id uuid`, `name text` (1 a 80 caracteres sem espaços nas pontas), `species text` (`dog` ou `cat`), `breed text` (até 80), `birth_date date`, `birth_date_estimated boolean`, `weight_kg numeric(4,1)` (0,1 a 150), `updated_at timestamptz`, `deleted_at timestamptz`.
+**`public.pets`**: `id uuid`, `name text` (1 a 80 caracteres sem espaços nas pontas), `species text` (`dog` ou `cat`), `sex text` (`male` ou `female`), `photo_path text` (precisa começar com o id do pet), `breed text` (até 80), `birth_date date`, `birth_date_estimated boolean`, `weight_kg numeric(4,1)` (0,1 a 150), `updated_at timestamptz`, `deleted_at timestamptz`.
 
 **`public.pet_vaccines`**: doses de vacinas e vermífugos (veja [saúde](saude.md)). `next_due_on` precisa ser depois de `applied_on`. O gatilho `pet_vaccines_protect_identity` impede mudar `id` e `pet_id`. RLS: qualquer tutor `accepted` do pet lê, insere e altera, e `updated_by` precisa ser o próprio usuário.
 
@@ -29,7 +30,7 @@ Restrições extras:
 
 - `pet_tutors_one_owner_idx`: um único dono ativo por pet.
 - `pet_tutors_active_email_idx`: um email aparece no máximo uma vez por pet entre os vínculos ativos (sem diferenciar maiúsculas).
-- Gatilho `pet_tutors_protect_identity`: num update, `id`, `pet_id`, `email` e `role` não podem mudar.
+- Gatilho `pet_tutors_protect_identity`: num update, `id`, `pet_id`, `email` e `role` não podem mudar. O `role` só muda dentro de `transfer_pet`.
 - Gatilho `pets_protect_deletion`: só o tutor principal pode mudar `deleted_at` de um pet.
 
 ## Funções auxiliares
@@ -71,6 +72,18 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 3. A partir daí o usuário é `is_accepted_member` e `is_pet_owner` desse pet.
 
 É por isso que o push envia os pets antes dos tutores (veja [Sincronização](sincronizacao.md#um-ciclo-de-sincronização)).
+
+## Fotos dos pets (Storage)
+
+Bucket privado `pet-photos`, até 5 MB por arquivo, só JPEG, PNG e WebP. Cada foto fica em `<id do pet>/<id da foto>.<extensão>`. A função `pet_of_photo(name)` tira o id do pet do caminho, e as políticas de `storage.objects` deixam ver, enviar, substituir e apagar só quem é tutor `accepted` daquele pet. Não há links públicos.
+
+## Transferência do pet
+
+`transfer_pet(target_pet uuid, new_owner uuid)`, chamada pelo app com `rpc`. Roda com `security definer`:
+
+1. Só o tutor principal do pet pode chamar (erro `42501` se não for).
+2. `new_owner` precisa ser um vínculo `tutor`, `accepted`, com `user_id` e ativo, do mesmo pet (erro `P0002` se não for).
+3. Rebaixa o tutor principal atual a `tutor` e depois promove o novo, numa transação só, respeitando o índice de um dono por pet. Uma configuração local da transação (`bowie.transferring`) libera a troca de `role` no gatilho `pet_tutors_protect_identity`.
 
 ## Edge Function `read-vaccine-card`
 

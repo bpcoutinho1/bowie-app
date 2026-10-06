@@ -5,29 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/domain/card_reading.dart';
+
+export 'package:bowie/core/photo_picker.dart' show photoMediaType;
 
 /// Up to four photos per reading, as the Edge Function accepts.
 const maxCardPhotos = 4;
-
-/// The media type of a photo from its first bytes, or null when the format is
-/// not one the reading accepts (JPEG, PNG or WebP).
-String? photoMediaType(Uint8List bytes) {
-  bool starts(List<int> prefix, [int offset = 0]) {
-    if (bytes.length < offset + prefix.length) return false;
-    for (var i = 0; i < prefix.length; i++) {
-      if (bytes[offset + i] != prefix[i]) return false;
-    }
-    return true;
-  }
-
-  if (starts(const [0xFF, 0xD8, 0xFF])) return 'image/jpeg';
-  if (starts(const [0x89, 0x50, 0x4E, 0x47])) return 'image/png';
-  if (starts(ascii.encode('RIFF')) && starts(ascii.encode('WEBP'), 8)) {
-    return 'image/webp';
-  }
-  return null;
-}
 
 /// Sends photos of a vaccine card to be read in the cloud.
 abstract interface class CardReader {
