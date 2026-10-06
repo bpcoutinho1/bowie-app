@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:uuid/uuid.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
@@ -11,6 +15,7 @@ class PetProfile {
   const PetProfile({
     required this.name,
     required this.species,
+    required this.sex,
     required this.birthDate,
     this.breed,
     this.birthDateEstimated = false,
@@ -19,6 +24,7 @@ class PetProfile {
 
   final String name;
   final PetSpecies? species;
+  final PetSex? sex;
   final String? breed;
   final DateTime? birthDate;
   final bool birthDateEstimated;
@@ -33,11 +39,16 @@ class PetDetails {
 }
 
 class PetRepository {
-  PetRepository(this._store, {Uuid? ids, DateTime Function()? now})
-    : _ids = ids ?? const Uuid(),
-      _now = now ?? DateTime.now;
+  PetRepository(
+    this._store, {
+    this._photos,
+    Uuid? ids,
+    DateTime Function()? now,
+  }) : _ids = ids ?? const Uuid(),
+       _now = now ?? DateTime.now;
 
   final PetLocalStore _store;
+  final PetPhotoStore? _photos;
   final Uuid _ids;
   final DateTime Function() _now;
 
@@ -109,6 +120,70 @@ class PetRepository {
     );
   }
 
+  /// Any accepted tutor can set the profile photo, or remove it with null.
+  /// The photo is kept on the phone and uploaded on the next sync; the old
+  /// one is removed from the phone and from the server.
+  Future<Pet> setPhoto({
+    required String petId,
+    required Uint8List? photo,
+    required AppUser byUser,
+  }) async {
+    final photos = _photos;
+    if (photos == null) {
+      throw const AppFailure('Não foi possível guardar fotos neste celular.');
+    }
+    final details = await _requireMember(petId, byUser);
+    final old = details.pet.photoPath;
+    String? path;
+    if (photo != null) {
+      final type = photoMediaType(photo);
+      if (type == null) {
+        throw const AppFailure(
+          'Formato de foto não aceito. Tente tirar a foto pela câmera.',
+        );
+      }
+      if (photo.length > 5 * 1024 * 1024) {
+        throw const AppFailure('A foto é grande demais. Escolha outra.');
+      }
+      path = photos.newPath(petId, type);
+      await photos.write(path, photo);
+    }
+    final pet = details.pet.copyWith(
+      photoPath: path,
+      clearPhoto: path == null,
+      updatedAt: _timestamp,
+    );
+    await _store.savePetWithPhotos(pet, upload: [?path], remove: [?old]);
+    if (old != null) await photos.delete(old);
+    return pet;
+  }
+
+  /// Checks that [byUser] is the main tutor and [tutorId] is a tutor of the
+  /// same pet who accepted the invite. The transfer itself runs on the server.
+  Future<PetTutor> checkTransfer({
+    required String petId,
+    required String tutorId,
+    required AppUser byUser,
+  }) async {
+    final details = await _requireOwner(
+      petId,
+      byUser,
+      message: 'Só o tutor principal pode transferir o pet.',
+    );
+    final target = details.tutors
+        .where((tutor) => tutor.id == tutorId)
+        .firstOrNull;
+    if (target == null ||
+        target.role != PetRole.tutor ||
+        target.status != TutorStatus.accepted ||
+        target.deletedAt != null) {
+      throw const AppFailure(
+        'Só quem já aceitou o convite pode virar tutor principal.',
+      );
+    }
+    return target;
+  }
+
   /// Only the main tutor can delete a pet. The row is kept with [Pet.deletedAt]
   /// set, so the deletion syncs to the other tutors.
   Future<void> deletePet({
@@ -121,15 +196,27 @@ class PetRepository {
       message: 'Só o tutor principal pode excluir o pet.',
     );
     final timestamp = _timestamp;
-    await _store.savePet(
-      details.pet.copyWith(deletedAt: timestamp, updatedAt: timestamp),
+    final photo = details.pet.photoPath;
+    // The photo goes too, from the phone and from the server.
+    await _store.savePetWithPhotos(
+      details.pet.copyWith(
+        deletedAt: timestamp,
+        updatedAt: timestamp,
+        clearPhoto: true,
+      ),
+      remove: [?photo],
     );
+    if (photo != null) await _photos?.delete(photo);
   }
 
   Pet _apply(Pet pet, PetProfile profile, DateTime timestamp) {
     final species = profile.species;
     if (species == null) {
       throw const AppFailure('Escolha se é cão ou gato.');
+    }
+    final sex = profile.sex;
+    if (sex == null) {
+      throw const AppFailure('Escolha se é macho ou fêmea.');
     }
     final birthDate = profile.birthDate;
     if (birthDate == null) {
@@ -156,6 +243,7 @@ class PetRepository {
     return pet.copyWith(
       name: _validatedName(profile.name),
       species: species,
+      sex: sex,
       breed: breed.isEmpty ? null : breed,
       clearBreed: breed.isEmpty,
       birthDate: day,

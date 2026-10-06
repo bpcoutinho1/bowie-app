@@ -13,7 +13,7 @@ import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/features/health/data/card_reader.dart';
 import 'package:bowie/features/health/data/health_repository.dart';
-import 'package:bowie/features/health/data/photo_picker.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/domain/card_reading.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';

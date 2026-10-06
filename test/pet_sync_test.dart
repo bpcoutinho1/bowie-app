@@ -14,6 +14,7 @@ import 'support/fakes.dart';
 PetProfile profile(String name) => PetProfile(
   name: name,
   species: PetSpecies.dog,
+  sex: PetSex.male,
   birthDate: DateTime(2021, 5, 4),
 );
 

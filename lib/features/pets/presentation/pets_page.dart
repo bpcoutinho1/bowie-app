@@ -14,6 +14,7 @@ import 'package:bowie/features/auth/presentation/sign_out.dart';
 import 'package:bowie/features/pets/data/pet_sync_controller.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/pets/presentation/pet_photo.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
 
 class PetsHome {
@@ -108,15 +109,10 @@ class PetsPage extends ConsumerWidget {
                 )
               else
                 for (final pet in data.pets) ...[
-                  BowieCard(
+                  PetPhotoCard(
+                    pet: pet,
+                    subtitle: petSummary(pet, DateTime.now()),
                     onTap: () => context.push('/pets/${pet.id}'),
-                    child: ListTile(
-                      title: Text(pet.name, style: BowieType.bodyStrong),
-                      subtitle: petSummary(pet, DateTime.now()).isEmpty
-                          ? null
-                          : Text(petSummary(pet, DateTime.now())),
-                      trailing: const Icon(LucideIcons.chevronRight),
-                    ),
                   ),
                   const SizedBox(height: BowieSpacing.s3),
                 ],

@@ -6,10 +6,13 @@
 | --- | --- | --- |
 | Nome | Sim | De 1 a 80 caracteres. |
 | Tipo | Sim | Cão ou gato. |
+| Sexo | Sim | Macho ou fêmea. |
 | Data de nascimento | Sim | O app mostra a idade calculada ("5 anos", "8 meses"). Quem não sabe a data marca "Não sei a data exata" e informa a idade aproximada ("uns 3 anos"); o app calcula uma data estimada e mostra a idade como aproximada ("cerca de 3 anos"). |
 | Raça | Não | Sugestões conforme o tipo (lista abaixo), com opção de digitar outra. "Sem raça definida (SRD)" é a primeira opção. |
 | Peso atual | Não | Em kg, com uma casa decimal. |
 | Foto | Não | Uma foto de perfil, da câmera ou da galeria. |
+
+A foto aparece translúcida no fundo dos cards em que se escolhe o pet (abas Início e Pets), atrás do nome e do resumo ("Cão · Macho · Border Collie · 5 anos"). Assim, quem tem mais de um pet reconhece cada um pela foto. No seletor de pets da aba Saúde, ela aparece pequena e redonda ao lado do nome.
 
 Guardar a data de nascimento, e não a idade, mantém a idade sempre certa e permite lembrar o aniversário do pet no futuro.
 

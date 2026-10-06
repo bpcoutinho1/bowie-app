@@ -24,8 +24,8 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | --- | --- | --- |
 | 0 | Base: Android, tema e marca, textos em português | Concluído: Android, ícone e splash, tema claro e escuro a partir dos tokens, Figtree, textos em português e as quatro abas com o sino. Falta testar num aparelho Android. |
 | 1 | Cadastro do usuário (nome, email, celular) | Parcial: só email e senha. |
-| 2 | Cadastro do pet (nome, nascimento, tipo, raça, peso, foto) | Parcial: nome, tipo, raça com sugestões, nascimento (ou idade aproximada), peso atual e exclusão pelo tutor principal. Falta a foto e o histórico de peso. |
-| 2a | Tutores (convite, remoção, transferência) | Parcial: só convite e aceite. |
+| 2 | Cadastro do pet (nome, nascimento, tipo, sexo, raça, peso, foto) | Parcial: nome, tipo, sexo, raça com sugestões, nascimento (ou idade aproximada), peso atual, foto (câmera ou galeria, translúcida nos cards de escolha do pet) e exclusão pelo tutor principal. Falta o histórico de peso. |
+| 2a | Tutores (convite, remoção, transferência) | Parcial: convite, aceite e transferência ("Transformar em tutor principal"). Falta remoção e saída. |
 | 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Falta o lembrete por push, guardar a foto como comprovante e o histórico de peso. |
 | 4 | Medicamentos | Não iniciado. |
 | 5 | Histórico de incidentes | Não iniciado. |

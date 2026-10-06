@@ -22,8 +22,10 @@ Arquivo `bowie.db`, criado por `PetLocalStore` (`lib/features/pets/data/pet_loca
 
 - `pets` e `pet_tutors`: espelho das tabelas do servidor.
 
-O banco tem versão: a 1 criou as tabelas, a 2 acrescentou o perfil do pet, a 3 a tabela `pet_vaccines`. Quem atualiza o app tem o banco migrado ao abrir (`onUpgrade` em `PetLocalStore.open`), sem perder dados.
-- `sync_outbox`: alterações que ainda não subiram. Colunas `entity` (`pets` ou `pet_tutors`), `entity_id`, `payload` (o registro em JSON) e `created_at`.
+O banco tem versão: a 1 criou as tabelas, a 2 acrescentou o perfil do pet, a 3 a tabela `pet_vaccines`, a 4 o sexo e a foto do pet. Quem atualiza o app tem o banco migrado ao abrir (`onUpgrade` em `PetLocalStore.open`), sem perder dados.
+- `sync_outbox`: alterações que ainda não subiram. Colunas `entity` (`pets`, `pet_tutors`, `pet_vaccines` ou `pet_photos`), `entity_id`, `payload` (o registro em JSON) e `created_at`. Em `pet_photos`, o `entity_id` é o caminho da foto e o `payload` diz se é para enviar (`upload`) ou remover (`remove`) o arquivo.
+
+As fotos dos pets ficam em arquivos, fora do banco: pasta `pet_photos` nos documentos do app (`PetPhotoStore`).
 
 A outbox tem índice único em `(entity, entity_id)`. Se o mesmo registro é alterado duas vezes antes de subir, fica só a última versão.
 
@@ -48,7 +50,7 @@ Não há sincronização periódica nem ao voltar do segundo plano. Alterações
 
 1. Sem Supabase configurado ou sem sessão: termina como `SyncSkipped`.
 2. Offline: termina como `SyncWaiting`, com a mensagem "Salvo no celular. Sincroniza quando a internet voltar." se houver pendências, ou "Você está sem internet. Mostrando o que está salvo no celular." se não houver.
-3. **Push**: envia a outbox, primeiro os `pets`, depois os `pet_tutors`, depois as `pet_vaccines`, e dentro de cada grupo por ordem de criação. Pets vão antes para que o servidor já conheça o pet (e o vínculo da pessoa) quando receber o que aponta para ele.
+3. **Push**: envia a outbox, primeiro os `pets`, depois os `pet_tutors`, depois as fotos (`pet_photos`, para o Storage) e as `pet_vaccines`, e dentro de cada grupo por ordem de criação. Uma foto trocada antes de subir já não está no celular e é pulada. Pets vão antes para que o servidor já conheça o pet (e o vínculo da pessoa) quando receber o que aponta para ele.
    - Depois de cada envio, o item sai da outbox, mas só se o `payload` ainda for o mesmo que foi enviado. Se o usuário alterou o registro durante o envio, a nova versão continua na fila.
    - No primeiro erro, o push para e o ciclo termina.
 4. **Pull**: baixa todos os `pets`, `pet_tutors` e `pet_vaccines` que o usuário pode ver (de 200 em 200, ordenados por `updated_at` e `id`) e aplica no SQLite.

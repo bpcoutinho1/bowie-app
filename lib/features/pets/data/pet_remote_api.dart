@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
@@ -20,7 +22,21 @@ abstract class PetRemoteApi {
   Future<void> upsertDose(Map<String, dynamic> row);
 
   Future<List<VaccineDose>> pullDoses();
+
+  Future<void> uploadPhoto(String path, Uint8List photo);
+
+  Future<void> removePhoto(String path);
+
+  /// Null when the photo is not on the server (yet).
+  Future<Uint8List?> downloadPhoto(String path);
+
+  /// Makes the tutor row [tutorId] the main tutor of [petId]; the current
+  /// main tutor becomes a regular tutor. Runs on the server in one step.
+  Future<void> transferPet({required String petId, required String tutorId});
 }
+
+/// Private bucket for pet profile photos.
+const petPhotosBucket = 'pet-photos';
 
 /// Shown when the server refuses a change, usually because of a permission rule.
 const _rejected = 'O servidor recusou uma alteração. Tente de novo mais tarde.';
@@ -69,6 +85,69 @@ class SupabasePetApi implements PetRemoteApi {
   }
 
   @override
+  Future<void> uploadPhoto(String path, Uint8List photo) {
+    return _guard(
+      () => _client.storage
+          .from(petPhotosBucket)
+          .uploadBinary(
+            path,
+            photo,
+            fileOptions: FileOptions(
+              contentType: photoMediaType(photo) ?? 'image/jpeg',
+              upsert: true,
+            ),
+          ),
+    );
+  }
+
+  @override
+  Future<void> removePhoto(String path) {
+    return _guard(() => _client.storage.from(petPhotosBucket).remove([path]));
+  }
+
+  @override
+  Future<Uint8List?> downloadPhoto(String path) async {
+    // Best effort: a photo that is missing, not uploaded yet or unreachable
+    // just does not show, and is tried again later.
+    try {
+      return await _client.storage.from(petPhotosBucket).download(path);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> transferPet({
+    required String petId,
+    required String tutorId,
+  }) async {
+    try {
+      await _client.rpc(
+        'transfer_pet',
+        params: {'target_pet': petId, 'new_owner': tutorId},
+      );
+    } on PostgrestException catch (error) {
+      throw AppFailure(switch (error.code) {
+        '42501' => 'Só o tutor principal pode transferir o pet.',
+        'P0002' => 'Só quem já aceitou o convite pode virar tutor principal.',
+        _ => 'O servidor não conseguiu transferir o pet. Tente de novo.',
+      });
+    } on AppFailure {
+      rethrow;
+    } catch (error) {
+      if (_isOffline(error)) {
+        throw const AppFailure(
+          'Para transferir o pet, conecte-se à internet.',
+          retryable: true,
+        );
+      }
+      throw const AppFailure(
+        'O servidor não conseguiu transferir o pet. Tente de novo.',
+      );
+    }
+  }
+
+  @override
   Future<List<Pet>> pullPets() async {
     final rows = await _pull('pets');
     return rows.map(Pet.fromRow).toList();
@@ -106,6 +185,14 @@ class SupabasePetApi implements PetRemoteApi {
       return await action();
     } on PostgrestException catch (error) {
       if (error.code == '23505') rethrow;
+      throw const AppFailure(_rejected);
+    } on StorageException catch (error) {
+      if (_isOffline(error)) {
+        throw const AppFailure(
+          'Sem conexão com o servidor. As alterações ficam salvas no celular.',
+          retryable: true,
+        );
+      }
       throw const AppFailure(_rejected);
     } on SocketException {
       throw const AppFailure(

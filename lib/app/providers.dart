@@ -2,12 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/config/app_config.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
 import 'package:bowie/features/auth/data/device_lock.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/data/pet_remote_api.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/data/pet_sync_service.dart';
@@ -21,6 +23,12 @@ final supabaseClientProvider = Provider<SupabaseClient?>((ref) => null);
 final petLocalStoreProvider = Provider<PetLocalStore>((ref) {
   throw StateError('PetLocalStore is opened in main.');
 });
+
+final petPhotoStoreProvider = Provider<PetPhotoStore>((ref) {
+  throw StateError('PetPhotoStore is opened in main.');
+});
+
+final photoPickerProvider = Provider<PhotoPicker>((ref) => ImagePickerPhotos());
 
 final networkStatusProvider = Provider<NetworkStatus>(
   (ref) => PluginNetworkStatus(),
@@ -87,7 +95,10 @@ final currentUserProvider = Provider<AppUser?>((ref) {
 });
 
 final petRepositoryProvider = Provider<PetRepository>((ref) {
-  return PetRepository(ref.watch(petLocalStoreProvider));
+  return PetRepository(
+    ref.watch(petLocalStoreProvider),
+    photos: ref.watch(petPhotoStoreProvider),
+  );
 });
 
 final healthRepositoryProvider = Provider<HealthRepository>((ref) {
@@ -107,5 +118,6 @@ final syncServiceProvider = Provider<PetSyncService>((ref) {
     remote: ref.watch(petRemoteApiProvider),
     isSignedIn: () => client?.auth.currentSession != null,
     network: ref.watch(networkStatusProvider),
+    photos: ref.watch(petPhotoStoreProvider),
   );
 });

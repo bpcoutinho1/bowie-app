@@ -12,6 +12,7 @@ import 'package:bowie/core/ui/notifications_button.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
+import 'package:bowie/features/pets/presentation/pet_photo.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
 
@@ -65,31 +66,12 @@ class HomePage extends ConsumerWidget {
                 const SizedBox(height: BowieSpacing.s3),
               ],
               for (final pet in data.pets) ...[
-                BowieCard(
+                PetPhotoCard(
+                  pet: pet,
+                  large: true,
+                  subtitle: petSummary(pet, DateTime.now()),
+                  below: _NextVaccine(petId: pet.id),
                   onTap: () => context.push('/pets/${pet.id}'),
-                  child: Padding(
-                    padding: const EdgeInsets.all(BowieSpacing.s4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          pet.name,
-                          style: BowieType.title2.copyWith(color: colors.text),
-                        ),
-                        if (petSummary(pet, DateTime.now()).isNotEmpty) ...[
-                          const SizedBox(height: BowieSpacing.s1),
-                          Text(
-                            petSummary(pet, DateTime.now()),
-                            style: BowieType.callout.copyWith(
-                              color: colors.textMuted,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: BowieSpacing.s2),
-                        _NextVaccine(petId: pet.id),
-                      ],
-                    ),
-                  ),
                 ),
                 const SizedBox(height: BowieSpacing.s3),
               ],

@@ -11,10 +11,12 @@ Dois tipos de registro, nos mesmos formatos no SQLite e no Postgres:
 | `id` | UUID v4 gerado no aparelho. |
 | `name` | Nome, de 1 a 80 caracteres depois de tirar espaços. |
 | `species` | `dog` (cão) ou `cat` (gato). Obrigatório em pets novos; vazio só em pets criados antes deste campo. |
+| `sex` | `male` (macho) ou `female` (fêmea). Obrigatório ao salvar; vazio só em pets criados antes deste campo. |
 | `breed` | Raça, até 80 caracteres. Opcional. |
 | `birth_date` | Dia do nascimento. Obrigatório em pets novos. |
 | `birth_date_estimated` | `true` quando a data foi calculada a partir de uma idade aproximada. |
 | `weight_kg` | Peso atual, de 0,1 a 150 kg, com uma casa decimal. Opcional. |
+| `photo_path` | Caminho da foto de perfil no bucket privado `pet-photos`: `<id do pet>/<id da foto>.jpg` (ou `.png`, `.webp`). Opcional. |
 | `updated_at` | Momento da última alteração, em UTC. |
 | `deleted_at` | Marcação de exclusão lógica, usada ao excluir o pet. |
 
@@ -40,7 +42,7 @@ Todas passam por `PetRepository` (`lib/features/pets/data/pet_repository.dart`),
 
 Tela: botão "Adicionar pet" em `/pets` (ou "Cadastrar pet" na aba Início, quando não há pets), que abre `/pets/new`.
 
-- Campos: nome, tipo (Cão ou Gato), raça, nascimento e peso atual.
+- Campos: foto, nome, tipo (Cão ou Gato), sexo (Macho ou Fêmea), raça, nascimento e peso atual.
 - Raça: sugestões de `lib/features/pets/domain/breeds.dart` conforme o tipo, com "Sem raça definida (SRD)" primeiro; a busca ignora maiúsculas e acentos, e dá para digitar uma raça fora da lista.
 - Nascimento: escolhida no calendário ou, com "Não sei a data exata", pela idade aproximada em anos. Nesse caso a data é o dia de hoje naquele ano, marcada como aproximada, e a idade aparece como "Cerca de 3 anos".
 - Peso: aceita vírgula ou ponto ("23,5") e é arredondado para uma casa decimal.
@@ -54,12 +56,39 @@ Tela: `/pets/:id`, os mesmos campos do cadastro e o botão "Salvar".
 
 - Qualquer pessoa com vínculo `accepted` no pet pode editar (tutor principal ou tutor).
 
+### Foto do pet
+
+Tela: `/pets/:id` e `/pets/new`, no topo. Tocar na foto ou em "Adicionar foto" abre "Tirar foto" e "Escolher da galeria". A foto chega redimensionada para no máximo 1200 px. "Remover" tira a foto. Nada muda até tocar em "Salvar" (ou "Cadastrar pet").
+
+`PetRepository.setPhoto`:
+
+- Qualquer tutor `accepted` pode trocar ou remover a foto.
+- Aceita JPEG, PNG e WebP, até 5 MB, conferindo os primeiros bytes.
+- Grava o arquivo no celular (`PetPhotoStore`, pasta `pet_photos` nos documentos do app), com um caminho novo a cada foto, e salva o pet com o `photo_path` novo.
+- Na mesma transação, enfileira o envio da foto nova e a remoção da antiga no servidor (veja [sincronização](sincronizacao.md)). A foto antiga sai do celular na hora.
+
+Para mostrar a foto, `petPhotoProvider` usa o arquivo do celular. Se a foto foi posta por outro tutor, baixa do servidor uma vez e guarda.
+
+Onde aparece:
+
+- Abas **Início** e **Pets**: card do pet com a foto translúcida no fundo (`PetPhotoCard`). O texto fica nos 60% da esquerda, sobre um degradê da cor `surface`, para manter o contraste qualquer que seja a foto. Sem foto, o card mostra um círculo com uma pata.
+- Aba **Saúde**: foto pequena e redonda em cada opção do seletor de pets (`PetAvatar`).
+
+### Transferir o pet
+
+Tela: `/pets/:id`. Para o tutor principal, cada tutor que já aceitou o convite tem o botão "Transformar em tutor principal".
+
+- Pede confirmação, explicando o que muda.
+- `PetRepository.checkTransfer` confere no celular que quem pede é o tutor principal e que o escolhido aceitou o convite.
+- `PetSyncService.transferPet` precisa de internet: sincroniza as pendências, chama a função `transfer_pet` no servidor e sincroniza de novo para trazer os papéis trocados. Sem internet, mostra "Para transferir o pet, conecte-se à internet."
+- O antigo tutor principal vira tutor e perde os botões de convidar, transferir e excluir.
+
 ### Excluir pet
 
 Tela: `/pets/:id`, botão "Excluir este pet", só para o tutor principal.
 
 - Pede confirmação com o nome do pet.
-- Marca `deleted_at` (exclusão lógica). O pet some das listas e da tela de todos os tutores depois da sincronização.
+- Marca `deleted_at` (exclusão lógica) e apaga a foto, do celular e do servidor. O pet some das listas e da tela de todos os tutores depois da sincronização.
 - No servidor, o gatilho `pets_protect_deletion` impede que outra pessoa marque `deleted_at`.
 
 ### Convidar tutor
@@ -83,7 +112,7 @@ Tela: card "Convites" em `/pets`, botão "Aceitar". A aba Início também mostra
 - Muda `status` para `accepted` e preenche `user_id`.
 - O pet passa a aparecer na lista.
 
-Não há como recusar um convite, remover um tutor ou excluir um pet pela interface.
+Não há como recusar um convite, remover um tutor ou sair de um pet pela interface.
 
 ## O que cada tela mostra
 
@@ -91,14 +120,14 @@ Não há como recusar um convite, remover um tutor ou excluir um pet pela interf
 
 - Faixa de status da sincronização, quando há mensagem (azul para aviso, vermelho para falha).
 - "Convites": vínculos `pending` com o email do usuário, mais recentes primeiro.
-- Lista de pets em que o usuário tem vínculo `accepted`, em ordem alfabética, com o resumo "Cão · Border Collie · 5 anos" (também na aba Início).
+- Lista de pets em que o usuário tem vínculo `accepted`, em ordem alfabética, com a foto translúcida e o resumo "Cão · Macho · Border Collie · 5 anos" (também na aba Início).
 - Botão de sincronizar, botão "Sair" e o sino na barra superior.
 
 **`/pets/:id` (`PetPage`)**
 
-- Nome editável.
+- Foto, nome, tipo, sexo, raça, nascimento e peso, editáveis.
 - "Tutores": tutor principal primeiro, depois os demais por email, com o rótulo "Tutor principal", "Convite pendente" ou "Tutor".
-- Campo de convite, só para o dono.
+- Para o tutor principal: "Transformar em tutor principal" em cada tutor que aceitou, campo de convite e "Excluir este pet".
 
 As duas telas recarregam sozinhas sempre que o banco local muda, seja por ação do usuário ou por dados vindos do servidor.
 
@@ -111,6 +140,8 @@ As duas telas recarregam sozinhas sempre que o banco local muda, seja por ação
 | Editar pet | Vínculo `accepted` | `PetRepository` e RLS |
 | Excluir pet | Tutor principal | `PetRepository` e gatilho `pets_protect_deletion` |
 | Convidar | Dono | `PetRepository` e RLS |
+| Trocar ou remover a foto | Vínculo `accepted` | `PetRepository` e políticas do Storage |
+| Transferir | Tutor principal, para um tutor `accepted` | `PetRepository` e função `transfer_pet` |
 | Aceitar convite | Dono da conta com o email convidado | `PetRepository` e RLS |
 
 As regras no aparelho dão retorno imediato. As regras do servidor (veja [Backend no Supabase](backend-supabase.md)) são as que valem.

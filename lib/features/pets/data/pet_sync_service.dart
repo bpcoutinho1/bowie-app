@@ -1,6 +1,7 @@
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/data/pet_remote_api.dart';
 
 sealed class SyncResult {
@@ -33,12 +34,14 @@ class PetSyncService {
     required this.remote,
     required this.isSignedIn,
     required this.network,
+    this.photos,
   });
 
   final PetLocalStore store;
   final PetRemoteApi? remote;
   final bool Function() isSignedIn;
   final NetworkStatus network;
+  final PetPhotoStore? photos;
 
   Future<SyncResult>? _flight;
   var _rerun = false;
@@ -94,8 +97,30 @@ class PetSyncService {
     }
   }
 
-  /// Pushes pets, then tutor rows, then doses, so the server always knows
-  /// the pet (and the person's membership) before rows that point to it.
+  /// Makes [tutorId] the main tutor of [petId]. Needs the internet: pending
+  /// changes go up first, the server swaps the roles, and the result comes
+  /// back down.
+  Future<void> transferPet({
+    required String petId,
+    required String tutorId,
+  }) async {
+    final api = remote;
+    if (api == null || !isSignedIn()) {
+      throw const AppFailure('Este app ainda não está conectado ao servidor.');
+    }
+    if (!await network.isOnline) {
+      throw const AppFailure('Para transferir o pet, conecte-se à internet.');
+    }
+    final before = await sync();
+    if (before is SyncWaiting) throw AppFailure(before.message);
+    if (before is SyncFailed) throw AppFailure(before.message);
+    await api.transferPet(petId: petId, tutorId: tutorId);
+    await sync();
+  }
+
+  /// Pushes pets, then tutor rows, then photos and doses, so the server
+  /// always knows the pet (and the person's membership) before anything that
+  /// points to it.
   Future<SyncResult?> _push(PetRemoteApi remote) async {
     final pending = await store.pending();
     pending.sort((a, b) {
@@ -115,6 +140,8 @@ class PetSyncService {
             await remote.upsertTutor(item.payload);
           case 'pet_vaccines':
             await remote.upsertDose(item.payload);
+          case photoEntity:
+            await _pushPhoto(remote, item);
           default:
             return SyncFailed('Alteração desconhecida: ${item.entity}.');
         }
@@ -125,6 +152,16 @@ class PetSyncService {
       }
     }
     return null;
+  }
+
+  Future<void> _pushPhoto(PetRemoteApi remote, OutboxItem item) async {
+    if (item.payload['op'] == 'remove') {
+      await remote.removePhoto(item.entityId);
+      return;
+    }
+    // A photo replaced before it went up is no longer on the phone: skip it.
+    final photo = await photos?.read(item.entityId);
+    if (photo != null) await remote.uploadPhoto(item.entityId, photo);
   }
 
   Future<void> _pull(PetRemoteApi remote) async {
@@ -138,8 +175,9 @@ class PetSyncService {
     return switch (entity) {
       'pets' => 0,
       'pet_tutors' => 1,
-      'pet_vaccines' => 2,
-      _ => 3,
+      photoEntity => 2,
+      'pet_vaccines' => 3,
+      _ => 4,
     };
   }
 }
