@@ -118,9 +118,9 @@ class PetSyncService {
     await sync();
   }
 
-  /// Pushes pets, then tutor rows, then photos, doses and shopping items, so
-  /// the server always knows the pet (and the person's membership) before
-  /// anything that depends on it.
+  /// Pushes pets, then tutor rows, then photos, doses, shopping items,
+  /// contacts and diary entries, so the server always knows what a row
+  /// depends on (the pet, the person's membership, the contact) first.
   Future<SyncResult?> _push(PetRemoteApi remote) async {
     final pending = await store.pending();
     pending.sort((a, b) {
@@ -142,6 +142,10 @@ class PetSyncService {
             await remote.upsertDose(item.payload);
           case 'shopping_items':
             await remote.upsertShoppingItem(item.payload);
+          case 'house_contacts':
+            await remote.upsertContact(item.payload);
+          case 'pet_events':
+            await remote.upsertEvent(item.payload);
           case photoEntity:
             await _pushPhoto(remote, item);
           default:
@@ -171,11 +175,15 @@ class PetSyncService {
     final tutors = await remote.pullTutors();
     final doses = await remote.pullDoses();
     final shopping = await remote.pullShoppingItems();
+    final contacts = await remote.pullContacts();
+    final events = await remote.pullEvents();
     await store.applyRemote(
       pets: pets,
       tutors: tutors,
       doses: doses,
       shopping: shopping,
+      contacts: contacts,
+      events: events,
     );
   }
 
@@ -186,7 +194,10 @@ class PetSyncService {
       photoEntity => 2,
       'pet_vaccines' => 3,
       'shopping_items' => 4,
-      _ => 5,
+      // Contacts before the diary entries that point to them.
+      'house_contacts' => 5,
+      'pet_events' => 6,
+      _ => 7,
     };
   }
 }

@@ -11,7 +11,9 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 3. [Lançamento](lancamento.md): contas nas lojas, Supabase, domínio e o que falta para os testes.
 4. [Contas e tutores](contas-e-tutores.md): cadastro do usuário, tutor principal, convites, remoção e transferência.
 5. [Pets](pets.md): cadastro do pet e lista de raças sugeridas.
-6. [Saúde](saude.md): vacinas, vermífugos, medicamentos e incidentes.
+6. [Saúde](saude.md): vacinas, vermífugos e medicamentos.
+6a. [Diário](diario.md): sintomas, consultas e exames, com calendário e agendamentos.
+6b. [Contatos](contatos.md): a agenda de profissionais e lugares da casa.
 7. [Lista de compras](compras.md): a lista compartilhada, no estilo do app Bring.
 8. [Leitura da carteirinha](carteirinha-de-vacinacao.md): como o app lê a foto da carteirinha, com o exemplo do Bowie.
 9. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
@@ -28,7 +30,8 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | 2a | Tutores (convite, remoção, transferência) | Parcial: convite, aceite e transferência ("Transformar em tutor principal"). Falta remoção e saída. |
 | 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Falta o lembrete por push, guardar a foto como comprovante e o histórico de peso. |
 | 4 | Medicamentos | Não iniciado. |
-| 5 | Histórico de incidentes | Não iniciado. |
+| 5 | Diário (antes "histórico de incidentes") | Parcial: sintomas, consultas, exames e outros, com calendário, agendamentos, contato ligado ao registro e o próximo agendamento no Início. Falta foto nos registros, lembrete por push e aviso na central. |
+| 5b | Contatos | Concluído: agenda por casa, por tipo, com ligar, WhatsApp, email e mapa. |
 | 5a | Central de notificações | Não iniciado. Necessária para os convites de quem já tem conta. |
 | 6 | Lista de compras | Parcial: lista por casa com "A comprar" e "Itens frequentes", catálogo com ícones, seletor de casa e sincronização. Feita antes de medicamentos e incidentes, por decisão do fundador (9 de outubro de 2026). Falta o aviso na central de notificações e a atualização em tempo real. |
 

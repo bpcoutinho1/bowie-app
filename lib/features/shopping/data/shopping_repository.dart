@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/text.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
+import 'package:bowie/features/houses/houses.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/shopping/domain/shopping_catalog.dart';
 import 'package:bowie/features/shopping/domain/shopping_item.dart';
@@ -17,28 +18,19 @@ class ShoppingList {
 
 class ShoppingRepository {
   ShoppingRepository(this._store, {Uuid? ids, DateTime Function()? now})
-    : _ids = ids ?? const Uuid(),
+    : _houses = Houses(_store),
+      _ids = ids ?? const Uuid(),
       _now = now ?? DateTime.now;
 
   final PetLocalStore _store;
+  final Houses _houses;
   final Uuid _ids;
   final DateTime Function() _now;
 
   Stream<ChangeReason> get changes => _store.changes;
 
   /// The houses [user] belongs to, their own first.
-  Future<List<House>> listHouses(AppUser user) async {
-    final rows = await _store.listHouses(normalizeEmail(user.email));
-    final houses = [
-      for (final row in rows)
-        House(
-          id: row.id,
-          ownerEmail: row.ownerEmail,
-          isMine: row.id == user.id,
-        ),
-    ]..sort((a, b) => a.isMine == b.isMine ? 0 : (a.isMine ? -1 : 1));
-    return houses;
-  }
+  Future<List<House>> listHouses(AppUser user) => _houses.list(user);
 
   Future<ShoppingList> listItems(String houseId) async {
     final items = await _store.listShoppingItems(houseId)
@@ -158,13 +150,8 @@ class ShoppingRepository {
     return item;
   }
 
-  Future<void> _requireMember(String houseId, AppUser user) async {
-    if (houseId == user.id) return;
-    final houses = await listHouses(user);
-    if (!houses.any((house) => house.id == houseId)) {
-      throw const AppFailure('Você não faz parte desta casa.');
-    }
-  }
+  Future<void> _requireMember(String houseId, AppUser user) =>
+      _houses.requireMember(houseId, user);
 
   String _name(String name) {
     final text = name.trim();

@@ -6,6 +6,11 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
+import 'package:bowie/core/dates.dart';
+import 'package:bowie/features/contacts/presentation/contact_form_page.dart';
+import 'package:bowie/features/contacts/presentation/contacts_page.dart';
+import 'package:bowie/features/diary/presentation/diary_page.dart';
+import 'package:bowie/features/diary/presentation/event_form_page.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/presentation/card_reading_page.dart';
 import 'package:bowie/features/health/presentation/dose_form_page.dart';
@@ -109,6 +114,32 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/diario',
+                builder: (context, state) => const DiaryPage(),
+                routes: [
+                  GoRoute(
+                    path: 'novo',
+                    builder: (context, state) {
+                      final query = state.uri.queryParameters;
+                      final day = DateTime.tryParse(query['dia'] ?? '');
+                      return EventFormPage(
+                        petId: query['pet'],
+                        day: day == null ? null : dayOf(day),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) =>
+                        EventFormPage(eventId: state.pathParameters['id']),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/compras',
                 builder: (context, state) => const ShoppingPage(),
               ),
@@ -123,6 +154,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'new',
                     builder: (context, state) => const PetPage(),
+                  ),
+                  GoRoute(
+                    path: 'contatos',
+                    builder: (context, state) => const ContactsPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'novo',
+                        builder: (context, state) => ContactFormPage(
+                          houseId: state.uri.queryParameters['casa'],
+                        ),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => ContactFormPage(
+                          contactId: state.pathParameters['id'],
+                        ),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: ':id',

@@ -11,11 +11,13 @@ import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/data/pet_sync_service.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
-import 'package:bowie/features/shopping/data/last_house.dart';
+import 'package:bowie/features/houses/last_house.dart';
 import 'package:bowie/features/shopping/data/shopping_repository.dart';
 import 'package:bowie/features/shopping/domain/shopping_catalog.dart';
 import 'package:bowie/features/shopping/domain/shopping_item.dart';
 import 'package:bowie/features/shopping/presentation/shopping_page.dart';
+import 'package:bowie/features/houses/houses.dart';
+import 'package:bowie/features/houses/houses_providers.dart';
 import 'package:bowie/features/shopping/presentation/shopping_providers.dart';
 
 import 'support/fakes.dart';
@@ -291,6 +293,10 @@ void main() {
     await settle();
     expect(find.text('Itens frequentes'), findsOneWidget);
     expect(find.text('Ração foi para os itens frequentes'), findsOneWidget);
+    // The message leaves on its own after 5 seconds.
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Ração foi para os itens frequentes'), findsNothing);
 
     await tester.tap(find.text('Ração'));
     await settle();

@@ -9,6 +9,9 @@ import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
+import 'package:bowie/core/dates.dart';
+import 'package:bowie/features/diary/data/diary_repository.dart';
+import 'package:bowie/features/diary/presentation/diary_providers.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
@@ -70,7 +73,13 @@ class HomePage extends ConsumerWidget {
                   pet: pet,
                   large: true,
                   subtitle: petSummary(pet, DateTime.now()),
-                  below: _NextVaccine(petId: pet.id),
+                  below: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _NextVaccine(petId: pet.id),
+                      _NextAppointment(petId: pet.id),
+                    ],
+                  ),
                   onTap: () => context.push('/pets/${pet.id}'),
                 ),
                 const SizedBox(height: BowieSpacing.s3),
@@ -79,6 +88,49 @@ class HomePage extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// Today's timed entries and the next scheduled one, from the diary.
+class _NextAppointment extends ConsumerWidget {
+  const _NextAppointment({required this.petId});
+
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final events = ref.watch(petEventsProvider(petId)).asData?.value;
+    final today = ref.watch(diaryRepositoryProvider).today;
+    final colors = context.colors;
+    if (events == null) return const SizedBox.shrink();
+    final todayTimed =
+        events.where((e) => e.occursOn == today && e.time != null).toList()
+          ..sort((a, b) => a.time!.compareTo(b.time!));
+    final next =
+        todayTimed.firstOrNull ?? upcomingEvents(events, today).firstOrNull;
+    if (next == null) return const SizedBox.shrink();
+    final when = [
+      describeDay(next.occursOn, today),
+      if (next.time != null) 'às ${next.time}',
+    ].join(' ');
+    return Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      child: Row(
+        children: [
+          Icon(LucideIcons.calendarClock, size: 16, color: colors.textMuted),
+          const SizedBox(width: BowieSpacing.s1),
+          Flexible(
+            child: Text(
+              '${next.title} · $when',
+              style: BowieType.caption.copyWith(
+                color: colors.text,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

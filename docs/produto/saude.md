@@ -1,6 +1,6 @@
 # Saúde
 
-Três áreas: vacinas e vermífugos, medicamentos e incidentes. Todos os tutores do pet podem registrar e editar tudo.
+Duas áreas: vacinas e vermífugos, e medicamentos. Os incidentes (sintomas, consultas, exames) ficam no [diário](diario.md). Todos os tutores do pet podem registrar e editar tudo.
 
 O app registra informações e **não faz diagnóstico**. Em incidentes, o texto é neutro e prático. Para sintomas graves, o app orienta procurar um veterinário.
 
@@ -84,14 +84,7 @@ Um medicamento tem data de fim **ou** é recorrente. Depois da data de fim, ele 
 
 ## Histórico de incidentes
 
-| Campo | Obrigatório | Observação |
-| --- | --- | --- |
-| Data do incidente | Sim | Padrão: hoje. |
-| O que ocorreu | Sim | Ex.: diarreia, vômito, consulta, doença. |
-| Observações | Não | Campo aberto. |
-| Fotos | Não | Uma ou mais. Ex.: fotografar as fezes para comparar depois. |
-
-O histórico aparece em ordem cronológica, do mais recente para o mais antigo. Fotos de incidentes podem ser sensíveis: elas só ficam visíveis para os tutores do pet (veja [dados e privacidade](dados-e-privacidade.md)).
+Virou o [diário](diario.md), com aba própria e calendário.
 
 ## Excluir registros
 
