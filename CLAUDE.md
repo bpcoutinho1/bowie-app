@@ -17,7 +17,7 @@ docs/design/           regras de uso da marca
 design/tokens/         tokens.json (fonte da verdade) e derivados para web (tokens.css, theme.ts, tailwind.preset.js)
 design/brand/logo/     símbolo, wordmark e lockups em SVG (+ PNG em logo/png/)
 design/brand/app-icon/ ícone 1024, foreground adaptativo Android, splash
-scripts/               outline-wordmark.py (regenera o logo em curvas)
+scripts/               outline-wordmark.py (regenera o logo em curvas), make-splash.py (lockup com tagline e imagens do splash)
 lib/                   app Flutter (veja docs/funcionamento/visao-geral.md)
 supabase/migrations/   esquema do banco e políticas de RLS
 ```
@@ -79,7 +79,7 @@ Nos widgets, use os **tokens semânticos** (`background`, `surface`, `text`, `te
 - Ícone e splash (sugestão: `flutter_launcher_icons` e `flutter_native_splash`):
   - iOS: `design/brand/app-icon/icon-1024.png` (sem transparência; o sistema aplica a máscara).
   - Android adaptativo: `adaptive-foreground-1024.png` sobre fundo `#6FA8DC`.
-  - Splash: `splash-icon-1024.png` sobre `#F4F6F8` (tema claro).
+  - Splash: `splash-lockup.png` (lockup vertical com a tagline "Quem ama, lembra.") sobre `#F4F6F8`. No Android 12+, o sistema só mostra o ícone (`adaptive-foreground-1024.png`), e "bowie" com a tagline vão no rodapé (`splash-branding-android12.png`). Regenere com `python3 scripts/make-splash.py` e `dart run flutter_native_splash:create`.
 
 ## Voz e microcopy
 

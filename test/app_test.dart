@@ -26,6 +26,7 @@ void main() {
     await pumpLogin(tester);
 
     expect(find.bySemanticsLabel('Bowie'), findsOneWidget);
+    expect(find.text('Quem ama, lembra.'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Entrar'), findsOneWidget);
     expect(
       find.textContaining('não está conectada ao servidor'),
@@ -37,7 +38,11 @@ void main() {
     await pumpLogin(tester);
 
     final toggle = find.text('Ainda não tem conta? Criar conta');
-    await tester.ensureVisible(toggle);
+    await tester.scrollUntilVisible(
+      toggle,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(toggle);
     await tester.pump();

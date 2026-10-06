@@ -5,14 +5,24 @@
 | Arquivo | Quando usar |
 |---|---|
 | `bowie-symbol.svg` | Símbolo principal (rosto + anel + coração). Avatares de redes, materiais impressos, selos |
-| `bowie-symbol-no-ring.svg` | Só o rosto. Dentro do app, ícone, splash, cabeçalhos |
+| `bowie-symbol-no-ring.svg` | Só o rosto. Dentro do app, ícone, cabeçalhos |
 | `bowie-symbol-negative.svg` | Sobre fundos escuros (Azul Noite ou fotos escuras) |
 | `bowie-symbol-mono.svg` | Uma cor: carimbo, bordado, brindes, fax/PB |
 | `bowie-lockup-horizontal(-negative).svg` | Assinatura principal: site, e-mail, apresentações |
 | `bowie-lockup-vertical.svg` | Espaços quadrados ou estreitos |
 | `bowie-lockup-vertical-negative.svg` | Espaços quadrados ou estreitos, sobre fundo escuro (ex.: login no tema escuro) |
+| `bowie-lockup-vertical-tagline(-negative).svg` | Lockup vertical com a tagline: tela de abertura (splash) |
 
 As versões em PNG (1024 px, fundo transparente) estão em `logo/png/`.
+
+## Tagline
+
+**"Quem ama, lembra."** Aprovada pelo fundador em 11 de outubro de 2026.
+
+- Fica centralizada embaixo do lockup vertical, em Figtree SemiBold (600), na cor `textMuted` (`#4A5670` no claro, `#AEB8C6` no escuro).
+- Versão em curvas: `bowie-lockup-vertical-tagline.svg` e `bowie-lockup-vertical-tagline-negative.svg`, geradas por `scripts/make-splash.py`.
+- Dentro do app, use o widget `BowieLogo(tagline: true)`, que escreve a tagline como texto (acessível e com a escala de fonte do sistema).
+- Aparece na abertura do app, no login e no desbloqueio. Não use a tagline sozinha, sem o logo.
 
 ## Área de proteção
 

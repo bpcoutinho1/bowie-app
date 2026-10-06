@@ -67,12 +67,15 @@ flutter_launcher_icons:
   # The foreground already keeps the face inside the adaptive safe zone.
   adaptive_icon_foreground_inset: 0
 
+# Splash images come from scripts/make-splash.py (lockup with the tagline).
 flutter_native_splash:
   color: "#F4F6F8"
-  image: "design/brand/app-icon/splash-icon-1024.png"
+  image: "design/brand/app-icon/splash-lockup.png"
   android_12:
     color: "#F4F6F8"
-    # Android 12+ crops the splash icon to a circle; the adaptive
-    # foreground already keeps the face inside that safe zone.
+    # Android 12+ only shows an icon, cropped to a circle; the adaptive
+    # foreground keeps the face inside that safe zone. "bowie" and the
+    # tagline go in the branding area at the bottom.
     image: "design/brand/app-icon/adaptive-foreground-1024.png"
+    branding: "design/brand/app-icon/splash-branding-android12.png"
   web: false
