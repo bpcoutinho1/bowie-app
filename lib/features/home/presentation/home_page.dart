@@ -15,6 +15,8 @@ import 'package:bowie/features/diary/presentation/diary_providers.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
+import 'package:bowie/features/pets/domain/birthday.dart';
+import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_photo.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
@@ -76,7 +78,9 @@ class HomePage extends ConsumerWidget {
                   below: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _Birthday(pet: pet),
                       _NextVaccine(petId: pet.id),
+                      _TodayDoses(petId: pet.id),
                       _NextAppointment(petId: pet.id),
                     ],
                   ),
@@ -88,6 +92,85 @@ class HomePage extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// "Faltam 30 dias para o aniversário do Bowie", from 30 days before.
+class _Birthday extends StatelessWidget {
+  const _Birthday({required this.pet});
+
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context) {
+    final notice = birthdayNotice(pet, DateTime.now());
+    if (notice == null) return const SizedBox.shrink();
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BowieSpacing.s2),
+      child: Row(
+        children: [
+          Icon(LucideIcons.cake, size: 18, color: BrandColors.smile),
+          const SizedBox(width: BowieSpacing.s2),
+          Flexible(
+            child: Text(
+              notice,
+              style: BowieType.callout.copyWith(
+                color: colors.text,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Remédios de hoje: 2 de 5 dados".
+class _TodayDoses extends ConsumerWidget {
+  const _TodayDoses({required this.petId});
+
+  final String petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final slots = ref.watch(todayDosesProvider(petId)).asData?.value;
+    if (slots == null || slots.isEmpty) return const SizedBox.shrink();
+    final colors = context.colors;
+    final given = slots.where((slot) => slot.given != null).length;
+    final pending = slots.where((slot) => slot.given == null).toList();
+    final next = pending.firstOrNull;
+    final text = pending.isEmpty
+        ? 'Remédios de hoje: todos dados'
+        : [
+            'Remédios de hoje: $given de ${slots.length} dados',
+            if (next != null)
+              'próximo: ${next.medication.name}'
+                  '${next.time == null ? '' : ' às ${next.time!.time}'}',
+          ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      child: Row(
+        children: [
+          Icon(
+            pending.isEmpty ? LucideIcons.circleCheck : LucideIcons.pill,
+            size: 16,
+            color: pending.isEmpty ? colors.success : colors.textMuted,
+          ),
+          const SizedBox(width: BowieSpacing.s1),
+          Flexible(
+            child: Text(
+              text,
+              style: BowieType.caption.copyWith(
+                color: colors.text,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

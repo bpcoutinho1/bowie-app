@@ -8,6 +8,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 4. `20261008120000_pet_photo_sex_transfer.sql`: sexo e foto do pet, o bucket `pet-photos` com suas políticas e a função `transfer_pet`. Pode rodar mais de uma vez.
 5. `20261009120000_shopping_items.sql`: lista de compras da casa (tabela `shopping_items` e função `is_house_member`). Pode rodar mais de uma vez.
 6. `20261010120000_diary_and_contacts.sql`: diário (`pet_events`) e contatos da casa (`house_contacts`). Precisa da 5. Pode rodar mais de uma vez.
+7. `20261012120000_medications.sql`: medicações (`pet_medications`) e doses dadas (`pet_medication_doses`). Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -82,6 +83,8 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 **`public.house_contacts`**: contatos de uma casa (veja [contatos](contatos.md)). `category` é um dos tipos fixos, `phone` só dígitos (10 ou 11). RLS igual à de `shopping_items`, com `is_house_member`.
 
 **`public.pet_events`**: registros do diário (veja [diário](diario.md)). `kind` é `symptom`, `vet_visit`, `exam` ou `other`; `occurs_on` é o dia e `occurs_time` o horário opcional. `contact_id` aponta para `house_contacts` (vira vazio se o contato for apagado de vez). RLS igual à de `pet_vaccines`: tutores `accepted` do pet, com `updated_by` do próprio usuário.
+
+**`public.pet_medications`** e **`public.pet_medication_doses`**: remédios e doses dadas (veja [saúde](saude.md#medicações)). RLS como em `pet_vaccines`; numa dose nova, `given_by` precisa ser o próprio usuário.
 
 ## Fotos dos pets (Storage)
 

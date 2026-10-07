@@ -1,4 +1,4 @@
-# Saúde: vacinas e vermífugos
+# Saúde: vacinas, vermífugos e medicações
 
 O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/saude.md`](../produto/saude.md).
 
@@ -70,11 +70,37 @@ A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-
 
 Nada é salvo sem passar pela revisão. As fotos não são guardadas: ficam só na memória enquanto a tela está aberta.
 
+## Medicações
+
+**`Medication`** (`lib/features/health/domain/medication.dart`):
+
+| Campo | Descrição |
+| --- | --- |
+| `name`, `strength` | Nome (1 a 80) e concentração opcional ("75 mg"). |
+| `amount`, `unit` | Quantidade por dose (0,01 a 100) e unidade (`DoseUnit`: comprimido, tablete, cápsula, gota, ml, sachê, pipeta, aplicação, coleira, unidade). `doseText` mostra "2 comprimidos · 75 mg". |
+| `frequency`, `interval_count` | `daily`, `weekly`, `monthly`, `every_days` ou `every_months`; o intervalo vale para os dois últimos. |
+| `times` | Só para diários: períodos (`morning`, `afternoon`, `night`) com horário, em JSON (`[{"period":"morning","time":"07:00"}]`). |
+| `start_on`, `end_on` | Início e fim. Sem fim é uso contínuo. |
+
+`isDueOn(dia)` diz se há dose no dia: diário todo dia; semanal a cada 7 dias desde o início; mensal e "a cada X meses" no mesmo dia do mês do início (o dia 31 cai no último dia dos meses mais curtos); "a cada X dias" a cada X dias. `nextDueOn` acha a próxima data dos não diários.
+
+**`MedDose`**: uma dose marcada como dada, com quem deu (`given_by`, `given_by_email`) e quando. O id é um UUID v5 de remédio + dia + período (`MedicationRepository.doseId`), então dois tutores que marcam a mesma dose gravam o mesmo registro. Desmarcar grava `deleted_at` e mantém quem tinha dado.
+
+`dosesOn(dia, ...)` monta as doses do dia (`DoseSlot`), uma por período dos diários e uma por remédio não diário, em ordem de horário.
+
+Telas:
+
+- Aba Saúde: dois botões, "Registrar medicação" e "Registrar vacina". Com remédios, aparecem "Remédios de hoje" (cada dose com horário, quantidade, um círculo para marcar como dada e "Dada por você às 07:05") e "Medicações do Bowie" (remédios em uso; os encerrados ficam recolhidos).
+- `/saude/medicacoes/nova?pet=` e `/saude/medicacoes/:id` (`MedicationFormPage`): nome, concentração, quantidade e unidade, frequência, períodos com horário (padrão 07:00, 13:00 e 19:00) ou intervalo, início, "Uso contínuo" ou fim, observações. Editando, há "Excluir este remédio".
+- Início: em cada pet, "Remédios de hoje: 2 de 5 dados · próximo: Pregabalina às 19:00".
+
 ## Permissões
 
-Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir doses (`HealthRepository`, e no servidor as políticas de `pet_vaccines`).
+Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir vacinas e remédios e marcar doses (`HealthRepository`, `MedicationRepository`, e no servidor as políticas de `pet_vaccines`, `pet_medications` e `pet_medication_doses`). No servidor, quem marca uma dose só pode se registrar como quem deu.
 
 ## Ainda não existe
+
+- Lembrete por push no horário de cada dose e a repetição em 30 minutos.
 
 - Lembrete por push 7 dias antes do vencimento.
 - Guardar a foto da página como comprovante da dose.

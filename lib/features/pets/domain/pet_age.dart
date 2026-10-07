@@ -40,3 +40,17 @@ int ageInYears(DateTime birthDate, DateTime today) {
   }
   return years < 0 ? 0 : years;
 }
+
+/// The next birthday on or after [today]. 29 February falls on the 28th in
+/// years without it.
+DateTime nextBirthday(DateTime birthDate, DateTime today) {
+  DateTime inYear(int year) {
+    final lastDay = DateTime(year, birthDate.month + 1, 0).day;
+    final day = birthDate.day > lastDay ? lastDay : birthDate.day;
+    return DateTime(year, birthDate.month, day);
+  }
+
+  final day = DateTime(today.year, today.month, today.day);
+  final thisYear = inYear(today.year);
+  return thisYear.isBefore(day) ? inYear(today.year + 1) : thisYear;
+}

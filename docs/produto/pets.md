@@ -14,7 +14,17 @@
 
 A foto aparece translúcida no fundo dos cards em que se escolhe o pet (abas Início e Pets), atrás do nome e do resumo ("Cão · Macho · Border Collie · 5 anos"). Assim, quem tem mais de um pet reconhece cada um pela foto. No seletor de pets da aba Saúde, ela aparece pequena e redonda ao lado do nome.
 
-Guardar a data de nascimento, e não a idade, mantém a idade sempre certa e permite lembrar o aniversário do pet no futuro.
+Guardar a data de nascimento, e não a idade, mantém a idade sempre certa e permite lembrar o aniversário do pet.
+
+### Aniversário
+
+Decisão do fundador (12 de outubro de 2026): o app avisa o aniversário do pet **30 dias** e **7 dias** antes, e no próprio dia.
+
+- Texto: "Faltam 30 dias para o aniversário do Bowie", "Faltam 7 dias para o aniversário da Mia", "Amanhã é o aniversário do Bowie", "Hoje é o aniversário do Bowie: 6 anos".
+- O artigo segue o sexo do pet: "do" para macho, "da" para fêmea. Sem sexo informado, "de".
+- Pets com idade aproximada (sem a data exata) não têm aviso, porque a data é uma estimativa.
+- 29 de fevereiro vira 28 de fevereiro nos anos sem esse dia.
+- O aniversário usa a cor Sorriso (`smile`), a de uso raro para afeto.
 
 ### Peso
 

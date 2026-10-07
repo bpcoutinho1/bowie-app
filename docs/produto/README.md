@@ -29,7 +29,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | 2 | Cadastro do pet (nome, nascimento, tipo, sexo, raça, peso, foto) | Parcial: nome, tipo, sexo, raça com sugestões, nascimento (ou idade aproximada), peso atual, foto (câmera ou galeria, translúcida nos cards de escolha do pet) e exclusão pelo tutor principal. Falta o histórico de peso. |
 | 2a | Tutores (convite, remoção, transferência) | Parcial: convite, aceite e transferência ("Transformar em tutor principal"). Falta remoção e saída. |
 | 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Falta o lembrete por push, guardar a foto como comprovante e o histórico de peso. |
-| 4 | Medicamentos | Não iniciado. |
+| 4 | Medicamentos | Parcial: cadastro (quantidade e unidade, concentração, frequência, períodos com horário, início, fim ou uso contínuo), "Remédios de hoje" com marcação de dose dada (quem e quando) e resumo no Início. Falta o lembrete por push e a repetição em 30 minutos. |
 | 5 | Diário (antes "histórico de incidentes") | Parcial: sintomas, consultas, exames e outros, com calendário, agendamentos, contato ligado ao registro e o próximo agendamento no Início. Falta foto nos registros, lembrete por push e aviso na central. |
 | 5b | Contatos | Concluído: agenda por casa, por tipo, com ligar, WhatsApp, email e mapa. |
 | 5a | Central de notificações | Não iniciado. Necessária para os convites de quem já tem conta. |

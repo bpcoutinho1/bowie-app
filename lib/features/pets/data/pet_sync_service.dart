@@ -146,6 +146,10 @@ class PetSyncService {
             await remote.upsertContact(item.payload);
           case 'pet_events':
             await remote.upsertEvent(item.payload);
+          case 'pet_medications':
+            await remote.upsertMedication(item.payload);
+          case 'pet_medication_doses':
+            await remote.upsertMedDose(item.payload);
           case photoEntity:
             await _pushPhoto(remote, item);
           default:
@@ -177,7 +181,11 @@ class PetSyncService {
     final shopping = await remote.pullShoppingItems();
     final contacts = await remote.pullContacts();
     final events = await remote.pullEvents();
+    final medications = await remote.pullMedications();
+    final medDoses = await remote.pullMedDoses();
     await store.applyRemote(
+      medications: medications,
+      medDoses: medDoses,
       pets: pets,
       tutors: tutors,
       doses: doses,
@@ -197,7 +205,10 @@ class PetSyncService {
       // Contacts before the diary entries that point to them.
       'house_contacts' => 5,
       'pet_events' => 6,
-      _ => 7,
+      // Medications before the dose marks that point to them.
+      'pet_medications' => 7,
+      'pet_medication_doses' => 8,
+      _ => 9,
     };
   }
 }
