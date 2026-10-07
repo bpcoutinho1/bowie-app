@@ -370,10 +370,14 @@ void main() {
     final old = await openDatabase(
       path,
       version: 6,
-      onCreate: (db, _) => db.execute(
-        'CREATE TABLE pets (id TEXT PRIMARY KEY, name TEXT NOT NULL, '
-        'updated_at TEXT NOT NULL)',
-      ),
+      onCreate: (db, _) async {
+        await db.execute(
+          'CREATE TABLE pets (id TEXT PRIMARY KEY, name TEXT NOT NULL, '
+          'updated_at TEXT NOT NULL)',
+        );
+        // Version 6 already had the diary.
+        await db.execute('CREATE TABLE pet_events (id TEXT PRIMARY KEY)');
+      },
     );
     await old.close();
     final upgraded = await PetLocalStore.open(databasePath: path);

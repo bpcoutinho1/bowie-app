@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:uuid/uuid.dart';
 
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
 /// What a person fills in on the diary form.
@@ -17,6 +21,8 @@ class EventInput {
     this.time,
     this.notes,
     this.contactId,
+    this.keptPhotos = const [],
+    this.newPhotos = const [],
   });
 
   final String petId;
@@ -26,14 +32,27 @@ class EventInput {
   final String? time;
   final String? notes;
   final String? contactId;
+
+  /// Photos the entry already had and still keeps.
+  final List<String> keptPhotos;
+
+  /// Photos taken or chosen now (JPEG, PNG or WebP).
+  final List<Uint8List> newPhotos;
 }
 
 class DiaryRepository {
-  DiaryRepository(this._store, {Uuid? ids, DateTime Function()? now})
-    : _ids = ids ?? const Uuid(),
-      _now = now ?? DateTime.now;
+  DiaryRepository(
+    this._store, {
+    this.photos,
+    Uuid? ids,
+    DateTime Function()? now,
+  }) : _ids = ids ?? const Uuid(),
+       _now = now ?? DateTime.now;
 
   final PetLocalStore _store;
+
+  /// Where photos are kept on the phone. Without it, entries take no photos.
+  final PetPhotoStore? photos;
   final Uuid _ids;
   final DateTime Function() _now;
 
@@ -82,6 +101,40 @@ class DiaryRepository {
       }
     }
 
+    final previous = id == null ? null : await _store.getEvent(id);
+    final kept = [
+      for (final path in input.keptPhotos)
+        if (previous?.photoPaths.contains(path) ?? false) path,
+    ];
+    if (kept.length + input.newPhotos.length > maxEventPhotos) {
+      throw const AppFailure('Use no máximo $maxEventPhotos fotos.');
+    }
+    final store = photos;
+    if (input.newPhotos.isNotEmpty && store == null) {
+      throw const AppFailure('Não foi possível guardar fotos neste celular.');
+    }
+    final added = <String>[];
+    for (final photo in input.newPhotos) {
+      final type = photoMediaType(photo);
+      if (type == null) {
+        throw const AppFailure(
+          'Formato de foto não aceito. Tente tirar a foto pela câmera.',
+        );
+      }
+      if (photo.length > 5 * 1024 * 1024) {
+        throw const AppFailure('Uma das fotos é grande demais.');
+      }
+    }
+    for (final photo in input.newPhotos) {
+      final path = store!.newPath(input.petId, photoMediaType(photo)!);
+      await store.write(path, photo);
+      added.add(path);
+    }
+    final removed = [
+      for (final path in previous?.photoPaths ?? const <String>[])
+        if (!kept.contains(path)) path,
+    ];
+
     final event = PetEvent(
       id: id ?? _ids.v4(),
       petId: input.petId,
@@ -91,10 +144,14 @@ class DiaryRepository {
       time: time == null || time.isEmpty ? null : time,
       notes: notes.isEmpty ? null : notes,
       contactId: contactId,
+      photoPaths: [...kept, ...added],
       updatedBy: byUser.id,
       updatedAt: _now().toUtc(),
     );
-    await _store.saveEvent(event);
+    await _store.saveEvent(event, upload: added, remove: removed);
+    for (final path in removed) {
+      await photos?.delete(path);
+    }
     return event;
   }
 
@@ -108,9 +165,14 @@ class DiaryRepository {
     }
     await _requireMember(event.petId, byUser);
     final now = _now().toUtc();
+    // The photos go too, from the phone and from the server.
     await _store.saveEvent(
       event.copyWith(deletedAt: now, updatedAt: now, updatedBy: byUser.id),
+      remove: event.photoPaths,
     );
+    for (final path in event.photoPaths) {
+      await photos?.delete(path);
+    }
   }
 
   Future<void> _requireMember(String petId, AppUser user) async {

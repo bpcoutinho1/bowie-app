@@ -22,7 +22,7 @@ Arquivo `bowie.db`, criado por `PetLocalStore` (`lib/features/pets/data/pet_loca
 
 - `pets` e `pet_tutors`: espelho das tabelas do servidor.
 
-O banco tem versão: a 1 criou as tabelas, a 2 acrescentou o perfil do pet, a 3 a tabela `pet_vaccines`, a 4 o sexo e a foto do pet, a 5 a lista de compras (`shopping_items`), a 6 o diário (`pet_events`) e os contatos (`house_contacts`), a 7 as medicações (`pet_medications`) e as doses dadas (`pet_medication_doses`). Quem atualiza o app tem o banco migrado ao abrir (`onUpgrade` em `PetLocalStore.open`), sem perder dados.
+O banco tem versão: a 1 criou as tabelas, a 2 acrescentou o perfil do pet, a 3 a tabela `pet_vaccines`, a 4 o sexo e a foto do pet, a 5 a lista de compras (`shopping_items`), a 6 o diário (`pet_events`) e os contatos (`house_contacts`), a 7 as medicações (`pet_medications`) e as doses dadas (`pet_medication_doses`), a 8 as fotos dos registros do diário (`pet_events.photo_paths`). Quem atualiza o app tem o banco migrado ao abrir (`onUpgrade` em `PetLocalStore.open`), sem perder dados.
 - `sync_outbox`: alterações que ainda não subiram. Colunas `entity` (`pets`, `pet_tutors`, `pet_vaccines` ou `pet_photos`), `entity_id`, `payload` (o registro em JSON) e `created_at`. Em `pet_photos`, o `entity_id` é o caminho da foto e o `payload` diz se é para enviar (`upload`) ou remover (`remove`) o arquivo.
 
 As fotos dos pets ficam em arquivos, fora do banco: pasta `pet_photos` nos documentos do app (`PetPhotoStore`).

@@ -9,6 +9,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 5. `20261009120000_shopping_items.sql`: lista de compras da casa (tabela `shopping_items` e função `is_house_member`). Pode rodar mais de uma vez.
 6. `20261010120000_diary_and_contacts.sql`: diário (`pet_events`) e contatos da casa (`house_contacts`). Precisa da 5. Pode rodar mais de uma vez.
 7. `20261012120000_medications.sql`: medicações (`pet_medications`) e doses dadas (`pet_medication_doses`). Pode rodar mais de uma vez.
+8. `20261013120000_diary_photos.sql`: coluna `photo_paths` em `pet_events`. Os arquivos vão para o bucket `pet-photos`, na pasta do pet. Pode rodar mais de uma vez.
 
 ## Configuração do app
 

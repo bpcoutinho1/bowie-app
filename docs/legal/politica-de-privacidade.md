@@ -16,7 +16,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 **Dos seus pets**
 - Cadastro: nome, tipo (cão ou gato), sexo, raça, data de nascimento (ou idade aproximada), peso e foto.
 - Saúde: vacinas e vermífugos (datas, produto, lote e veterinário).
-- Diário: sintomas, consultas, exames e agendamentos, com as observações que você escrever.
+- Diário: sintomas, consultas, exames e agendamentos, com as observações e as fotos que você registrar.
 - Quem cuida do pet: o email das pessoas que você convida como tutoras.
 
 **Da sua casa**
@@ -36,7 +36,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 ## Com quem os dados são compartilhados
 
 - **Outros tutores do pet:** as pessoas que você convidar, e que aceitaram, veem e editam os dados daquele pet. As pessoas da sua casa veem a lista de compras e os contatos da casa.
-- **Supabase:** provedor que hospeda o banco de dados, a autenticação e as fotos dos pets. As fotos ficam em armazenamento privado, sem links públicos, e o acesso é restrito aos tutores do pet. Os servidores podem ficar fora do Brasil; a transferência segue o art. 33 da LGPD.
+- **Supabase:** provedor que hospeda o banco de dados, a autenticação e as fotos (do pet e do diário). As fotos ficam em armazenamento privado, sem links públicos, e o acesso é restrito aos tutores do pet. Os servidores podem ficar fora do Brasil; a transferência segue o art. 33 da LGPD.
 - **Anthropic:** quando você usa "Ler carteirinha", as fotos da carteirinha são enviadas, com segurança, a um serviço de inteligência artificial da Anthropic, que devolve as datas e as vacinas para você conferir. O Bowie não guarda essas fotos. Pelos termos comerciais da Anthropic, os dados enviados pela API não são usados para treinar os modelos dela e ficam retidos só pelo prazo limitado previsto nesses termos. O app pede o seu consentimento antes do primeiro envio.
 - **Apple (TestFlight):** durante os testes, a Apple pode coletar dados de uso e de falhas do app, conforme a política de privacidade da Apple. Os comentários e prints que você envia pelo TestFlight chegam ao Bowie.
 
