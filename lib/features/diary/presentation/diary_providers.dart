@@ -5,7 +5,10 @@ import 'package:bowie/features/diary/data/diary_repository.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
 
 final diaryRepositoryProvider = Provider<DiaryRepository>((ref) {
-  return DiaryRepository(ref.watch(petLocalStoreProvider));
+  return DiaryRepository(
+    ref.watch(petLocalStoreProvider),
+    photos: ref.watch(petPhotoStoreProvider),
+  );
 });
 
 final petEventsProvider = FutureProvider.autoDispose

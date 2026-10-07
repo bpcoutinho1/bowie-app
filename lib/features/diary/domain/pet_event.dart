@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bowie/core/dates.dart';
 
 /// What kind of diary entry it is (docs/produto/diario.md).
@@ -29,6 +31,7 @@ class PetEvent {
     this.time,
     this.notes,
     this.contactId,
+    this.photoPaths = const [],
     this.updatedBy,
     this.deletedAt,
   });
@@ -49,6 +52,10 @@ class PetEvent {
 
   /// A contact of the pet's house: the vet, the lab.
   final String? contactId;
+
+  /// Photos in the private bucket `pet-photos`, `<pet id>/<photo id>.jpg`,
+  /// kept on the phone too (PetPhotoStore). Up to [maxEventPhotos].
+  final List<String> photoPaths;
   final String? updatedBy;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -70,6 +77,7 @@ class PetEvent {
       time: time,
       notes: notes,
       contactId: contactId,
+      photoPaths: photoPaths,
       updatedBy: updatedBy ?? this.updatedBy,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -86,6 +94,7 @@ class PetEvent {
       'occurs_time': time,
       'notes': notes,
       'contact_id': contactId,
+      'photo_paths': jsonEncode(photoPaths),
       'updated_by': updatedBy,
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'deleted_at': deletedAt?.toUtc().toIso8601String(),
@@ -95,6 +104,8 @@ class PetEvent {
   static PetEvent fromRow(Map<String, Object?> row) {
     final deleted = row['deleted_at'] as String?;
     final time = row['occurs_time'] as String?;
+    final rawPhotos = row['photo_paths'];
+    final photos = rawPhotos is String ? jsonDecode(rawPhotos) : rawPhotos;
     return PetEvent(
       id: row['id']! as String,
       petId: row['pet_id']! as String,
@@ -105,12 +116,19 @@ class PetEvent {
       time: time == null || time.length < 5 ? null : time.substring(0, 5),
       notes: row['notes'] as String?,
       contactId: row['contact_id'] as String?,
+      photoPaths: [
+        for (final path in (photos as List?) ?? const [])
+          if (path is String) path,
+      ],
       updatedBy: row['updated_by'] as String?,
       updatedAt: DateTime.parse(row['updated_at']! as String).toUtc(),
       deletedAt: deleted == null ? null : DateTime.parse(deleted).toUtc(),
     );
   }
 }
+
+/// Photos per diary entry.
+const maxEventPhotos = 4;
 
 /// Titles offered while typing, by kind. Free text is always allowed.
 List<String> eventSuggestions(EventKind kind) => switch (kind) {

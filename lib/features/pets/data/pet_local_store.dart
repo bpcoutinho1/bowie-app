@@ -60,7 +60,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 7,
+      version: 8,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -71,6 +71,7 @@ class PetLocalStore {
         if (from < 5) await _addShopping(db);
         if (from < 6) await _addDiaryAndContacts(db);
         if (from < 7) await _addMedications(db);
+        if (from < 8) await _addEventPhotos(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -87,6 +88,7 @@ class PetLocalStore {
         await _addShopping(db);
         await _addDiaryAndContacts(db);
         await _addMedications(db);
+        await _addEventPhotos(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -121,6 +123,13 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 8: photos in diary entries.
+  static Future<void> _addEventPhotos(DatabaseExecutor db) async {
+    await db.execute(
+      "ALTER TABLE pet_events ADD COLUMN photo_paths TEXT NOT NULL DEFAULT '[]'",
+    );
   }
 
   /// Version 7: medications and the doses marked as given.
@@ -544,10 +553,22 @@ class PetLocalStore {
     return PetEvent.fromRow(rows.single);
   }
 
-  Future<void> saveEvent(PetEvent event) async {
+  /// Saves a diary entry and queues its photo files to send to or remove
+  /// from the server, all at once.
+  Future<void> saveEvent(
+    PetEvent event, {
+    List<String> upload = const [],
+    List<String> remove = const [],
+  }) async {
     await _db.transaction((txn) async {
       await _upsert(txn, 'pet_events', event.toRow());
       await _enqueue(txn, 'pet_events', event.id, event.toRow());
+      for (final photo in upload) {
+        await _enqueue(txn, photoEntity, photo, {'op': 'upload'});
+      }
+      for (final photo in remove) {
+        await _enqueue(txn, photoEntity, photo, {'op': 'remove'});
+      }
     });
     _emit(ChangeReason.local);
   }

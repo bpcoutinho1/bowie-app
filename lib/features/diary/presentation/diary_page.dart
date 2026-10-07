@@ -14,6 +14,7 @@ import 'package:bowie/features/contacts/presentation/contacts_providers.dart';
 import 'package:bowie/features/diary/data/diary_repository.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/diary/presentation/diary_providers.dart';
+import 'package:bowie/features/diary/presentation/event_photos.dart';
 import 'package:bowie/features/diary/presentation/month_calendar.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
@@ -267,6 +268,10 @@ class EventCard extends ConsumerWidget {
                       contact.name,
                       style: BowieType.callout.copyWith(color: colors.text),
                     ),
+                  if (event.photoPaths.isNotEmpty) ...[
+                    const SizedBox(height: BowieSpacing.s2),
+                    EventPhotoStrip(paths: event.photoPaths, size: 56),
+                  ],
                   if (event.notes != null) ...[
                     const SizedBox(height: BowieSpacing.s1),
                     Text(
