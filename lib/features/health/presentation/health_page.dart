@@ -211,6 +211,8 @@ class _GroupCard extends StatelessWidget {
                     status: group.statusOn(today),
                     text: describeDue(latest.nextDueOn, today),
                   ),
+                  const SizedBox(height: BowieSpacing.s1),
+                  ProofBadge(hasProof: latest.hasProof),
                 ],
               ),
             ),

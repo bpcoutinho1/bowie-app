@@ -164,25 +164,32 @@ class EventPhotosField extends ConsumerWidget {
     required this.photos,
     required this.onChanged,
     required this.onError,
+    this.title = 'Fotos',
+    this.helper =
+        'Ajudam a comparar depois e a mostrar ao veterinário. Só os tutores '
+        'do pet veem.',
+    this.max = maxEventPhotos,
   });
 
   final List<EventPhoto> photos;
   final ValueChanged<List<EventPhoto>> onChanged;
   final ValueChanged<String> onError;
+  final String title;
+  final String helper;
+  final int max;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     const size = 88.0;
-    final room = maxEventPhotos - photos.length;
+    final room = max - photos.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Fotos', style: BowieType.bodyStrong.copyWith(color: colors.text)),
+        Text(title, style: BowieType.bodyStrong.copyWith(color: colors.text)),
         const SizedBox(height: BowieSpacing.s1),
         Text(
-          'Ajudam a comparar depois e a mostrar ao veterinário. Só os tutores '
-          'do pet veem.',
+          helper,
           style: BowieType.caption.copyWith(color: colors.textMuted),
         ),
         const SizedBox(height: BowieSpacing.s3),

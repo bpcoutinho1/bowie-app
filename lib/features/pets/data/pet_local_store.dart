@@ -61,7 +61,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 9,
+      version: 10,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -74,6 +74,7 @@ class PetLocalStore {
         if (from < 7) await _addMedications(db);
         if (from < 8) await _addEventPhotos(db);
         if (from < 9) await _addHealthNotes(db);
+        if (from < 10) await _addVaccineProofs(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -92,6 +93,7 @@ class PetLocalStore {
         await _addMedications(db);
         await _addEventPhotos(db);
         await _addHealthNotes(db);
+        await _addVaccineProofs(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -126,6 +128,23 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 10: photos proving a vaccine was given.
+  static Future<void> _addVaccineProofs(DatabaseExecutor db) async {
+    if (!await _hasTable(db, 'pet_vaccines')) return;
+    await db.execute(
+      "ALTER TABLE pet_vaccines ADD COLUMN proof_paths TEXT NOT NULL DEFAULT '[]'",
+    );
+  }
+
+  static Future<bool> _hasTable(DatabaseExecutor db, String name) async {
+    final rows = await db.query(
+      'sqlite_master',
+      where: 'type = ? AND name = ?',
+      whereArgs: ['table', name],
+    );
+    return rows.isNotEmpty;
   }
 
   /// Version 9: allergies, diet and special care.
@@ -436,12 +455,36 @@ class PetLocalStore {
     return VaccineDose.fromRow(rows.single);
   }
 
-  Future<void> saveDose(VaccineDose dose) async {
+  /// Saves a dose and queues its proof photos to send to or remove from the
+  /// server, all at once.
+  Future<void> saveDose(
+    VaccineDose dose, {
+    List<String> upload = const [],
+    List<String> remove = const [],
+  }) async {
     await _db.transaction((txn) async {
       await _upsertDose(txn, dose);
       await _enqueue(txn, 'pet_vaccines', dose.id, dose.toRow());
+      for (final photo in upload) {
+        await _enqueue(txn, photoEntity, photo, {'op': 'upload'});
+      }
+      for (final photo in remove) {
+        await _enqueue(txn, photoEntity, photo, {'op': 'remove'});
+      }
     });
     _emit(ChangeReason.local);
+  }
+
+  /// Whether another dose that was not deleted still shows [path] as proof.
+  Future<bool> isProofInUse(String path, {required String exceptDoseId}) async {
+    final rows = await _db.query(
+      'pet_vaccines',
+      columns: ['id'],
+      where: 'id != ? AND deleted_at IS NULL AND proof_paths LIKE ?',
+      whereArgs: [exceptDoseId, '%"$path"%'],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 
   /// The houses a person belongs to: one per main tutor of the pets they

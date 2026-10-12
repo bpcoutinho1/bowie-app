@@ -1,8 +1,22 @@
 # Saúde
 
-Duas áreas: vacinas e vermífugos, e medicamentos. Os incidentes (sintomas, consultas, exames) ficam no [diário](diario.md). Todos os tutores do pet podem registrar e editar tudo.
+Três áreas: o que é importante saber sobre o pet (cuidados especiais, alergias e alimentação), vacinas e vermífugos, e medicamentos. Os incidentes (sintomas, consultas, exames) ficam no [diário](diario.md). Todos os tutores do pet podem registrar e editar tudo.
 
 O app registra informações e **não faz diagnóstico**. Em incidentes, o texto é neutro e prático. Para sintomas graves, o app orienta procurar um veterinário.
+
+A aba tem **um só botão, "Registrar"**, que pergunta o que registrar: medicação, vacina ou vermífugo, alergia, alimentação ou cuidado especial.
+
+## Importante sobre o pet
+
+O que quem cuida do pet precisa saber antes de tudo. Aparece no topo da Saúde, como "Importante sobre o Bowie", e entra na ficha compartilhada com hotéis, creches e veterinários.
+
+| Tipo | Exemplos |
+| --- | --- |
+| Cuidado especial | Problema na coluna: evitar arranques, corridas e pulos. Medo de fogos. |
+| Alergia | Frango, dipirona, picada de pulga. |
+| Alimentação | Ração Golden light, 150 g duas vezes ao dia. |
+
+Cada registro tem um título (obrigatório, com sugestões) e detalhes (opcionais). A ordem é: cuidados especiais, alergias, alimentação.
 
 ## Vacinas e vermífugos
 
@@ -22,6 +36,9 @@ Cada dose registrada tem:
 | Lote | Não | "Part." na etiqueta do frasco. |
 | Veterinário | Não | Nome e CRMV. |
 | Observações | Não | Clínica e outras anotações. |
+| Comprovante | Não, mas recomendado | Até 2 fotos: a etiqueta do frasco e o carimbo do veterinário. |
+
+**Comprovante.** Hotéis e creches costumam pedir prova da vacinação. A foto não é obrigatória, mas cada dose mostra um selo, "Com comprovante" ou "Sem comprovante", para lembrar a pessoa de fotografar.
 
 Duas formas de registrar:
 
@@ -29,7 +46,7 @@ Duas formas de registrar:
 2. **Foto da carteirinha de vacinação:** a pessoa fotografa a carteirinha e o app **lê a imagem e preenche os campos sozinho**. Uma página pode ter várias doses, então a leitura pode gerar vários registros de uma vez.
    - Antes de salvar, o app mostra o que leu para a pessoa conferir e corrigir. Nada é gravado sem essa revisão, porque um vencimento lido errado gera um lembrete errado.
    - Campos que o app não conseguiu ler ficam vazios e marcados para a pessoa preencher.
-   - A foto fica guardada junto dos registros, como comprovante.
+   - A página fotografada vira o comprovante das doses que estão nela.
    - Como ler cada parte da carteirinha, as armadilhas e o resultado esperado com a carteirinha do Bowie estão em [leitura da carteirinha](carteirinha-de-vacinacao.md).
 
 ### Status

@@ -1,4 +1,4 @@
-# Saúde: vacinas, vermífugos e medicações
+# Saúde: cuidados, vacinas, vermífugos e medicações
 
 O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/saude.md`](../produto/saude.md).
 
@@ -14,6 +14,7 @@ O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/s
 | `applied_on` | Dia da aplicação. Não pode ser no futuro. |
 | `next_due_on` | "Revacinar em" na carteirinha. Precisa ser depois da aplicação. Define o status. |
 | `product`, `lot`, `veterinarian`, `notes` | Opcionais: produto e fabricante, lote, veterinário (nome e CRMV), observações. |
+| `proof_paths` | Fotos do comprovante, até 2 (`maxProofPhotos`), em JSON (`["<petId>/<uuid>.jpg"]`). `hasProof` diz se há alguma. |
 | `updated_by` | Quem salvou a última versão (inclusive a exclusão). |
 | `updated_at`, `deleted_at` | Como nos pets. Excluir marca `deleted_at`. |
 
@@ -34,6 +35,18 @@ O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/s
 - A lista mostra as vencidas primeiro, depois as que vencem em breve, depois as em dia; dentro de cada uma, a data mais próxima primeiro.
 - O status sempre aparece com ícone, texto e cor juntos (`StatusBadge`).
 
+## Comprovante
+
+As fotos ficam no celular (`PetPhotoStore`) e sobem para o bucket `pet-photos` pela mesma fila das fotos do pet (`pet_photos` na outbox), depois da dose. `HealthRepository.saveDose` aceita fotos novas (`DoseInput.newProofs`) e caminhos já no celular (`keptProofs`): os da própria dose, ou arquivos do mesmo pet que já estão no aparelho (as páginas da carteirinha). Caminhos de outro pet são ignorados. Uma foto tirada da dose é apagada do celular e do servidor, a menos que outra dose ainda use o mesmo arquivo (`PetLocalStore.isProofInUse`): uma página da carteirinha pode ser o comprovante de várias doses.
+
+No formulário, "Comprovante" fica antes do botão Salvar, com a explicação de que hotéis e creches costumam pedir. A aba Saúde e o histórico mostram o selo `ProofBadge` ("Com comprovante", ícone de selo verde, ou "Sem comprovante", em cinza), sempre com texto. O histórico mostra as fotos em miniatura; tocar abre com zoom.
+
+## Importante sobre o pet
+
+**`HealthNote`** (`lib/features/health/domain/health_note.dart`): `kind` (`special_care`, `allergy` ou `diet`), `title` (1 a 80) e `details` (até 500). `HealthNoteRepository` lista na ordem cuidados especiais, alergias e alimentação, e só tutores do pet salvam ou excluem (`requirePetMember`). Excluir marca `deleted_at`.
+
+No topo da aba Saúde, "Importante sobre Bowie" lista os registros com ícone (alerta para cuidados e alergias, talheres para alimentação). Tocar abre a edição.
+
 ## Telas e rotas
 
 | Rota | Tela |
@@ -43,6 +56,10 @@ O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/s
 | `/saude/doses/nova?pet=&tipo=&nome=` | `DoseFormPage`: registrar. `tipo` e `nome` são preenchidos quando se registra uma nova dose a partir do histórico. |
 | `/saude/doses/:id` | `DoseHistoryPage`: todas as doses daquela vacina, a mais nova primeiro, e o botão "Registrar nova dose". |
 | `/saude/doses/:id/editar` | `DoseFormPage`: editar ou excluir um registro. |
+| `/saude/notas/nova?pet=&tipo=` | `HealthNoteFormPage`: cuidado especial, alergia ou alimentação (`tipo` = `special_care`, `allergy` ou `diet`). Título com sugestões e detalhes. |
+| `/saude/notas/:id` | `HealthNoteFormPage`: editar ou excluir. |
+
+O botão "Registrar" da aba abre `showHealthAddSheet`: "O que você quer registrar?", com Medicação, Vacina ou vermífugo, Alergia, Alimentação e Cuidado especial.
 
 No formulário:
 
@@ -68,7 +85,7 @@ A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-
    - Se a leitura achou peso, um item oferece atualizar o peso do perfil. Vem marcado quando o perfil não tem peso ou quando a medição é dos últimos 90 dias e diferente da atual.
    - "Salvar N registros" grava tudo de uma vez (`HealthRepository.saveDoses`: se um registro for inválido, nada é salvo) e o peso (`PetRepository.updateWeight`). Sair com algo lido e não salvo pede confirmação.
 
-Nada é salvo sem passar pela revisão. As fotos não são guardadas: ficam só na memória enquanto a tela está aberta.
+Nada é salvo sem passar pela revisão. Ao salvar, cada página que tem uma dose escolhida é guardada no celular e vira o comprovante dessas doses: a Edge Function diz em que foto está cada dose (`photo`, a partir de 1). Sem essa informação, só uma leitura de uma foto só tem comprovante. Páginas sem dose escolhida não são guardadas, e se nada for salvo as páginas são apagadas.
 
 ## Medicações
 
@@ -90,18 +107,17 @@ Nada é salvo sem passar pela revisão. As fotos não são guardadas: ficam só 
 
 Telas:
 
-- Aba Saúde: dois botões, "Registrar medicação" e "Registrar vacina". Com remédios, aparecem "Remédios de hoje" (cada dose com horário, quantidade, um círculo para marcar como dada e "Dada por você às 07:05") e "Medicações do Bowie" (remédios em uso; os encerrados ficam recolhidos).
+- Aba Saúde: o botão "Registrar" abre a escolha do que registrar. Com remédios, aparecem "Remédios de hoje" (cada dose com horário, quantidade, um círculo para marcar como dada e "Dada por você às 07:05") e "Medicações do Bowie" (remédios em uso; os encerrados ficam recolhidos).
 - `/saude/medicacoes/nova?pet=` e `/saude/medicacoes/:id` (`MedicationFormPage`): nome, concentração, quantidade e unidade, frequência, períodos com horário (padrão 07:00, 13:00 e 19:00) ou intervalo, início, "Uso contínuo" ou fim, observações. Editando, há "Excluir este remédio".
 - Início: em cada pet, "Remédios de hoje: 2 de 5 dados · próximo: Pregabalina às 19:00".
 
 ## Permissões
 
-Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir vacinas e remédios e marcar doses (`HealthRepository`, `MedicationRepository`, e no servidor as políticas de `pet_vaccines`, `pet_medications` e `pet_medication_doses`). No servidor, quem marca uma dose só pode se registrar como quem deu.
+Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir vacinas, remédios e cuidados e marcar doses (`HealthRepository`, `MedicationRepository`, e no servidor as políticas de `pet_vaccines`, `pet_medications`, `pet_medication_doses` e `pet_health_notes`). No servidor, quem marca uma dose só pode se registrar como quem deu.
 
 ## Ainda não existe
 
 - Lembrete por push no horário de cada dose e a repetição em 30 minutos.
 
 - Lembrete por push 7 dias antes do vencimento.
-- Guardar a foto da página como comprovante da dose.
 - Histórico de peso: a leitura só atualiza o peso atual do perfil.

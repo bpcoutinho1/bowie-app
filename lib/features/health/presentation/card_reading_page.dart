@@ -455,13 +455,40 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
       _saving = true;
       _error = null;
     });
+    final store = ref.read(petPhotoStoreProvider);
+    final pages = <int, String>{};
+    var dosesSaved = false;
     try {
+      // The card pages become the proof of the doses on them. Only pages a
+      // chosen dose uses are kept, each once, even when several doses show it.
+      int? pageOf(ReadDose dose) {
+        final index = dose.photo;
+        if (index != null && index >= 1 && index <= _photos.length) {
+          return index - 1;
+        }
+        // Without the page number, one photo is still clearly the proof.
+        return _photos.length == 1 ? 0 : null;
+      }
+
+      for (final page in {...chosen.map((item) => pageOf(item.dose))}) {
+        if (page == null) continue;
+        final photo = _photos[page];
+        final path = store.newPath(
+          widget.petId,
+          photoMediaType(photo) ?? 'image/jpeg',
+        );
+        await store.write(path, photo);
+        pages[page] = path;
+      }
+      List<String> proofOf(ReadDose dose) => [?pages[pageOf(dose)]];
+
       await ref
           .read(healthRepositoryProvider)
           .saveDoses(
             inputs: [
               for (final item in chosen)
                 DoseInput(
+                  keptProofs: proofOf(item.dose),
                   petId: widget.petId,
                   kind: item.dose.kind,
                   name: item.dose.name,
@@ -474,6 +501,7 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
             ],
             byUser: user,
           );
+      dosesSaved = true;
       if (weight != null) {
         await ref
             .read(petRepositoryProvider)
@@ -496,6 +524,12 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
       // Navigator.pop skips the PopScope that guards unsaved readings.
       Navigator.of(context).pop();
     } on AppFailure catch (error) {
+      // No dose was saved, so the pages kept as proof go too.
+      if (!dosesSaved) {
+        for (final path in pages.values) {
+          await store.delete(path);
+        }
+      }
       if (mounted) setState(() => _error = error.message);
     } finally {
       if (mounted) setState(() => _saving = false);

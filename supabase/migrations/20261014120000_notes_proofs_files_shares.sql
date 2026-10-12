@@ -55,3 +55,14 @@ with check (public.is_accepted_member(pet_id) and updated_by = auth.uid());
 revoke all on table public.pet_health_notes from anon;
 grant select, insert, update on table public.pet_health_notes to authenticated;
 revoke all on function public.protect_pet_health_note_identity() from public;
+
+-- Vaccine proofs ---------------------------------------------------------------
+-- Photos of the vial label and the vet's stamp, as a JSON list of paths in the
+-- pet-photos bucket, like pet_events.photo_paths.
+
+alter table public.pet_vaccines
+  add column if not exists proof_paths text not null default '[]';
+
+alter table public.pet_vaccines drop constraint if exists pet_vaccines_proof_paths_check;
+alter table public.pet_vaccines
+  add constraint pet_vaccines_proof_paths_check check (char_length(proof_paths) <= 1000);

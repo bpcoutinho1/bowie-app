@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/presentation/card_reading_page.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 
@@ -45,6 +47,7 @@ Map<String, dynamic> v10PageJson() => <String, dynamic>{
       'product': 'Vanguard Plus (Zoetis)',
       'lot': '002/24',
       'veterinarian': '',
+      'photo': 1,
       'uncertain_fields': ['lot'],
     },
     {
@@ -108,6 +111,8 @@ void main() {
       expect(reading.isVaccineCard, isTrue);
       expect(reading.doses, hasLength(3));
       expect(reading.doses[1].uncertain, {ReadField.lot});
+      expect(reading.doses[1].photo, 1);
+      expect(reading.doses[0].photo, isNull);
       expect(reading.doses[2].nextDueOn, isNull);
       expect(reading.doses[0].veterinarian, isNull);
       expect(reading.issues, isNull);
@@ -254,8 +259,10 @@ void main() {
     addTearDown(tester.view.reset);
 
     late PetLocalStore store;
+    late Directory dir;
     late String petId;
     await tester.runAsync(() async {
+      dir = await Directory.systemTemp.createTemp('card_proofs');
       store = await PetLocalStore.open(databasePath: inMemoryDatabasePath);
       petId = (await PetRepository(store, now: () => today).createPet(
         profile: PetProfile(
@@ -267,7 +274,13 @@ void main() {
         owner: owner,
       )).id;
     });
-    addTearDown(() => tester.runAsync(store.close));
+    addTearDown(
+      () => tester.runAsync(() async {
+        await store.close();
+        await dir.delete(recursive: true);
+      }),
+    );
+    final photos = PetPhotoStore(dir);
 
     final reader = FakeReader(() async => CardReading.fromJson(v10PageJson()));
     final consent = MemoryReadingConsent();
@@ -276,8 +289,9 @@ void main() {
       ProviderScope(
         overrides: [
           petLocalStoreProvider.overrideWithValue(store),
+          petPhotoStoreProvider.overrideWithValue(photos),
           healthRepositoryProvider.overrideWithValue(
-            HealthRepository(store, now: () => today),
+            HealthRepository(store, photos: photos, now: () => today),
           ),
           petRepositoryProvider.overrideWithValue(
             PetRepository(store, now: () => today),
@@ -305,10 +319,15 @@ void main() {
         ),
       ),
     );
+    // Database calls finish in real time and their callbacks run on pump, so
+    // alternate the two until the chain of reads and writes is done.
     Future<void> settle() async {
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 50)),
-      );
+      for (var i = 0; i < 15; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 30)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       await tester.pumpAndSettle();
     }
 
@@ -356,6 +375,11 @@ void main() {
       final doses = await store.listDoses(petId);
       expect(doses, hasLength(2));
       expect((await store.getPet(petId))!.weightKg, 21.4);
+      // The one page read is the proof of both doses, kept once.
+      final proofs = {for (final dose in doses) ...dose.proofPaths};
+      expect(proofs, hasLength(1));
+      expect(doses.every((dose) => dose.hasProof), isTrue);
+      expect(await photos.read(proofs.single), png);
     });
   });
 }

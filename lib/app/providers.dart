@@ -102,7 +102,10 @@ final petRepositoryProvider = Provider<PetRepository>((ref) {
 });
 
 final healthRepositoryProvider = Provider<HealthRepository>((ref) {
-  return HealthRepository(ref.watch(petLocalStoreProvider));
+  return HealthRepository(
+    ref.watch(petLocalStoreProvider),
+    photos: ref.watch(petPhotoStoreProvider),
+  );
 });
 
 final petRemoteApiProvider = Provider<PetRemoteApi?>((ref) {
