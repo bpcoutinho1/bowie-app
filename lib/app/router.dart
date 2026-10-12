@@ -25,6 +25,7 @@ import 'package:bowie/features/home/presentation/home_page.dart';
 import 'package:bowie/features/notifications/presentation/notifications_page.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
+import 'package:bowie/features/share/presentation/pet_share_page.dart';
 import 'package:bowie/features/shopping/presentation/shopping_page.dart';
 
 /// Where a ready session lands.
@@ -212,6 +213,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) {
                       return PetPage(petId: state.pathParameters['id']);
                     },
+                    routes: [
+                      GoRoute(
+                        path: 'compartilhar',
+                        builder: (context, state) =>
+                            PetSharePage(petId: state.pathParameters['id']!),
+                      ),
+                    ],
                   ),
                 ],
               ),

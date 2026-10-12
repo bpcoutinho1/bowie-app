@@ -39,6 +39,7 @@ lib/
     error/               AppFailure, o erro que a interface mostra
     supabase/            SecureSessionStorage (sessão no armazenamento seguro)
     sync/                NetworkStatus (online/offline)
+    documents.dart       escolher PDFs (file_picker) e abrir no visualizador (open_filex)
     ui/                  componentes compartilhados: BowieLogo, BowieCard, EmptyState, sino
   features/
     auth/                login, cadastro, desbloqueio do aparelho, sign out
@@ -48,11 +49,14 @@ lib/
     diary/               aba Diário: sintomas, consultas, exames e agendamentos (veja diario.md)
     shopping/            aba Compras: lista da casa (veja compras.md)
     contacts/            Contatos da casa, na aba Pets (veja contatos.md)
+    share/               ficha compartilhada: links, QR code (veja ficha-compartilhada.md)
     houses/              a casa (tutor principal e quem cuida dos pets dele), usada por Compras e Contatos
     notifications/       central de notificações (ainda vazia)
 android/                 projeto Android (Gradle)
 ios/                     projeto iOS (Xcode)
 supabase/migrations/     esquema do banco, políticas de RLS
+supabase/functions/      Edge Functions: read-vaccine-card e pet-share
+web-share/               página pública da ficha compartilhada (GitHub Pages)
 test/                    testes de widget e de sincronização
 ```
 
@@ -69,7 +73,7 @@ Todos os providers globais ficam em `lib/app/providers.dart`.
 | | iOS | Android |
 | --- | --- | --- |
 | Identificador | `app.bowie` | `app.bowie` (pacote Kotlin `app.bowie`) |
-| Versão mínima | iOS 13 | Android 7.0 (API 24), exigida por `local_auth` e `flutter_secure_storage` |
+| Versão mínima | iOS 14, exigida por `file_picker` | Android 7.0 (API 24), exigida por `local_auth` e `flutter_secure_storage` |
 | Ícone | `design/brand/app-icon/icon-1024.png` | Adaptativo: `adaptive-foreground-1024.png` sobre `#6FA8DC` |
 | Splash | `splash-lockup.png` (lockup com a tagline) sobre `#F4F6F8` | Igual até o Android 11; no 12+ o rosto do ícone adaptativo no centro e "bowie" com a tagline no rodapé |
 

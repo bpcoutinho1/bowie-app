@@ -1,6 +1,6 @@
 # Backend no Supabase
 
-O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e uma Edge Function para ler a carteirinha de vacinação. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
+O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e duas Edge Functions, uma para ler a carteirinha de vacinação e outra para a ficha compartilhada. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
 
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
@@ -10,7 +10,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 6. `20261010120000_diary_and_contacts.sql`: diário (`pet_events`) e contatos da casa (`house_contacts`). Precisa da 5. Pode rodar mais de uma vez.
 7. `20261012120000_medications.sql`: medicações (`pet_medications`) e doses dadas (`pet_medication_doses`). Pode rodar mais de uma vez.
 8. `20261013120000_diary_photos.sql`: coluna `photo_paths` em `pet_events`. Os arquivos vão para o bucket `pet-photos`, na pasta do pet. Pode rodar mais de uma vez.
-9. `20261014120000_notes_proofs_files_shares.sql`: cuidados, alergias e alimentação (`pet_health_notes`) comprovantes das vacinas (`pet_vaccines.proof_paths`), PDFs do diário (`pet_events.files`; o bucket `pet-photos` passa a aceitar `application/pdf` e até 10 MB). Pode rodar mais de uma vez.
+9. `20261014120000_notes_proofs_files_shares.sql`: cuidados, alergias e alimentação (`pet_health_notes`) comprovantes das vacinas (`pet_vaccines.proof_paths`), PDFs do diário (`pet_events.files`; o bucket `pet-photos` passa a aceitar `application/pdf` e até 10 MB) e links da ficha compartilhada (`pet_shares`). Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -126,6 +126,10 @@ Bucket privado `pet-photos`, até 5 MB por arquivo, só JPEG, PNG e WebP. Cada f
 - **Segredo:** `ANTHROPIC_API_KEY`, guardado em Edge Functions → Secrets. Nunca vai para o app nem para o repositório.
 
 Para publicar ou atualizar, veja o [guia](../guias/publicar-leitura-da-carteirinha.md).
+
+## Edge Function `pet-share`
+
+Pública, devolve a ficha compartilhada de um pet a partir do token do link. Veja [ficha compartilhada](ficha-compartilhada.md); para publicar, o [guia](../guias/ficha-compartilhada.md).
 
 ## Aplicando o esquema
 

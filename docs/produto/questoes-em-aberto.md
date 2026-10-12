@@ -5,6 +5,12 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 ## Saúde
 
 
+## Bowie Biz
+
+- [ ] O que o painel do prestador faz além de receber fichas (agenda, check-in e check-out do hotel, relatório do dia)?
+- [ ] O prestador tem conta própria no Bowie, e como o tutor autoriza o acesso a um pet?
+- [ ] O Bowie Biz é pago? Por quem: prestador, tutor ou os dois?
+
 ## Negócio
 
 - [ ] Quais funções serão pagas no plano freemium, e a partir de quando?

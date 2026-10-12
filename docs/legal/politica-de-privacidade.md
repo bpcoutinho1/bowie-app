@@ -40,6 +40,8 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 - **Anthropic:** quando você usa "Ler carteirinha", as fotos da carteirinha são enviadas, com segurança, a um serviço de inteligência artificial da Anthropic, que devolve as datas e as vacinas para você conferir. O Bowie não guarda essas fotos. Pelos termos comerciais da Anthropic, os dados enviados pela API não são usados para treinar os modelos dela e ficam retidos só pelo prazo limitado previsto nesses termos. O app pede o seu consentimento antes do primeiro envio.
 - **Apple (TestFlight):** durante os testes, a Apple pode coletar dados de uso e de falhas do app, conforme a política de privacidade da Apple. Os comentários e prints que você envia pelo TestFlight chegam ao Bowie.
 
+- **Quem você escolher, pela ficha compartilhada:** quando você cria um link da ficha do pet (para um hotel, uma creche ou um veterinário), quem tiver o link vê os dados daquela ficha: os dados do pet, cuidados, remédios, vacinas com comprovante e o nome e o celular do tutor principal; na ficha do veterinário, também o diário com fotos e arquivos. O link vale 60 dias e você pode cancelar a qualquer momento. A página fica no GitHub Pages (GitHub), que só entrega a página: os dados vêm direto do Supabase.
+
 Os dados não são compartilhados com mais ninguém, exceto por obrigação legal ou ordem judicial.
 
 ## Onde os dados ficam e por quanto tempo

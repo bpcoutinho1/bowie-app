@@ -318,6 +318,18 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(transfer, findsOneWidget);
+    // Sharing the sheet comes before deleting the pet.
+    final share = find.textContaining('Compartilhar ficha');
+    await tester.scrollUntilVisible(
+      find.text('Excluir este pet'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(share, findsOneWidget);
+    expect(
+      tester.getTopLeft(share).dy,
+      lessThan(tester.getTopLeft(find.text('Excluir este pet')).dy),
+    );
 
     // An invited tutor does not see the button.
     await show(sam);
@@ -327,5 +339,12 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Transformar em tutor principal'), findsNothing);
+    // Any tutor can share the sheet; only the main tutor deletes the pet.
+    await tester.scrollUntilVisible(
+      find.textContaining('Compartilhar ficha'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Excluir este pet'), findsNothing);
   });
 }
