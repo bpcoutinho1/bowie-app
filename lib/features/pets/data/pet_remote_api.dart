@@ -8,6 +8,7 @@ import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
 import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
@@ -32,6 +33,10 @@ abstract class PetRemoteApi {
   Future<void> upsertEvent(Map<String, dynamic> row);
 
   Future<void> upsertMedication(Map<String, dynamic> row);
+
+  Future<void> upsertHealthNote(Map<String, dynamic> row);
+
+  Future<List<HealthNote>> pullHealthNotes();
 
   Future<List<Medication>> pullMedications();
 
@@ -105,6 +110,16 @@ class SupabasePetApi implements PetRemoteApi {
   @override
   Future<void> upsertShoppingItem(Map<String, dynamic> row) =>
       _save('shopping_items', row);
+
+  @override
+  Future<void> upsertHealthNote(Map<String, dynamic> row) =>
+      _save('pet_health_notes', row);
+
+  @override
+  Future<List<HealthNote>> pullHealthNotes() async {
+    final rows = await _pull('pet_health_notes');
+    return rows.map(HealthNote.fromRow).toList();
+  }
 
   @override
   Future<void> upsertMedication(Map<String, dynamic> row) =>

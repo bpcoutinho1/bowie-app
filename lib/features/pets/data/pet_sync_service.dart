@@ -146,6 +146,8 @@ class PetSyncService {
             await remote.upsertContact(item.payload);
           case 'pet_events':
             await remote.upsertEvent(item.payload);
+          case 'pet_health_notes':
+            await remote.upsertHealthNote(item.payload);
           case 'pet_medications':
             await remote.upsertMedication(item.payload);
           case 'pet_medication_doses':
@@ -183,9 +185,11 @@ class PetSyncService {
     final events = await remote.pullEvents();
     final medications = await remote.pullMedications();
     final medDoses = await remote.pullMedDoses();
+    final healthNotes = await remote.pullHealthNotes();
     await store.applyRemote(
       medications: medications,
       medDoses: medDoses,
+      healthNotes: healthNotes,
       pets: pets,
       tutors: tutors,
       doses: doses,
@@ -208,7 +212,8 @@ class PetSyncService {
       // Medications before the dose marks that point to them.
       'pet_medications' => 7,
       'pet_medication_doses' => 8,
-      _ => 9,
+      'pet_health_notes' => 9,
+      _ => 10,
     };
   }
 }

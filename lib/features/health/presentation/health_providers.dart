@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/features/health/data/card_reader.dart';
+import 'package:bowie/features/health/data/health_note_repository.dart';
 import 'package:bowie/features/health/data/medication_repository.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
 import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/data/reading_consent.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
@@ -75,4 +77,24 @@ final todayDosesProvider = FutureProvider.autoDispose
       final changes = repository.changes.listen((_) => ref.invalidateSelf());
       ref.onDispose(changes.cancel);
       return repository.dosesOnDay(petId, repository.today);
+    });
+
+final healthNoteRepositoryProvider = Provider<HealthNoteRepository>((ref) {
+  return HealthNoteRepository(ref.watch(petLocalStoreProvider));
+});
+
+final healthNotesProvider = FutureProvider.autoDispose
+    .family<List<HealthNote>, String>((ref, petId) async {
+      final repository = ref.watch(healthNoteRepositoryProvider);
+      final changes = repository.changes.listen((_) => ref.invalidateSelf());
+      ref.onDispose(changes.cancel);
+      return repository.listNotes(petId);
+    });
+
+final healthNoteProvider = FutureProvider.autoDispose
+    .family<HealthNote?, String>((ref, id) async {
+      final repository = ref.watch(healthNoteRepositoryProvider);
+      final changes = repository.changes.listen((_) => ref.invalidateSelf());
+      ref.onDispose(changes.cancel);
+      return repository.getNote(id);
     });

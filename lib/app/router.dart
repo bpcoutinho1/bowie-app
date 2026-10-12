@@ -16,6 +16,8 @@ import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/presentation/card_reading_page.dart';
 import 'package:bowie/features/health/presentation/dose_form_page.dart';
 import 'package:bowie/features/health/presentation/dose_history_page.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
+import 'package:bowie/features/health/presentation/health_note_form_page.dart';
 import 'package:bowie/features/health/presentation/health_page.dart';
 import 'package:bowie/features/health/presentation/medication_form_page.dart';
 import 'package:bowie/features/home/presentation/home_page.dart';
@@ -83,6 +85,23 @@ final routerProvider = Provider<GoRouter>((ref) {
                           ? const HealthPage()
                           : CardReadingPage(petId: petId);
                     },
+                  ),
+                  GoRoute(
+                    path: 'notas/nova',
+                    builder: (context, state) {
+                      final query = state.uri.queryParameters;
+                      return HealthNoteFormPage(
+                        petId: query['pet'],
+                        kind: HealthNoteKind.values
+                            .where((k) => k.wire == query['tipo'])
+                            .firstOrNull,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'notas/:id',
+                    builder: (context, state) =>
+                        HealthNoteFormPage(noteId: state.pathParameters['id']),
                   ),
                   GoRoute(
                     path: 'medicacoes/nova',

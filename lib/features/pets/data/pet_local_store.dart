@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
 import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
@@ -60,7 +61,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 8,
+      version: 9,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -72,6 +73,7 @@ class PetLocalStore {
         if (from < 6) await _addDiaryAndContacts(db);
         if (from < 7) await _addMedications(db);
         if (from < 8) await _addEventPhotos(db);
+        if (from < 9) await _addHealthNotes(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -89,6 +91,7 @@ class PetLocalStore {
         await _addDiaryAndContacts(db);
         await _addMedications(db);
         await _addEventPhotos(db);
+        await _addHealthNotes(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -123,6 +126,25 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 9: allergies, diet and special care.
+  static Future<void> _addHealthNotes(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE pet_health_notes (
+        id TEXT PRIMARY KEY,
+        pet_id TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        title TEXT NOT NULL,
+        details TEXT,
+        updated_by TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX pet_health_notes_pet_idx ON pet_health_notes(pet_id)',
+    );
   }
 
   /// Version 8: photos in diary entries.
@@ -485,6 +507,35 @@ class PetLocalStore {
     _emit(ChangeReason.local);
   }
 
+  /// Allergies, diet and special care of a pet, any order.
+  Future<List<HealthNote>> listHealthNotes(String petId) async {
+    final rows = await _db.query(
+      'pet_health_notes',
+      where: 'pet_id = ? AND deleted_at IS NULL',
+      whereArgs: [petId],
+    );
+    return rows.map(HealthNote.fromRow).toList();
+  }
+
+  Future<HealthNote?> getHealthNote(String id) async {
+    final rows = await _db.query(
+      'pet_health_notes',
+      where: 'id = ? AND deleted_at IS NULL',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return HealthNote.fromRow(rows.single);
+  }
+
+  Future<void> saveHealthNote(HealthNote note) async {
+    await _db.transaction((txn) async {
+      await _upsert(txn, 'pet_health_notes', note.toRow());
+      await _enqueue(txn, 'pet_health_notes', note.id, note.toRow());
+    });
+    _emit(ChangeReason.local);
+  }
+
   /// Medications of a pet that were not deleted, any order.
   Future<List<Medication>> listMedications(String petId) async {
     final rows = await _db.query(
@@ -641,6 +692,7 @@ class PetLocalStore {
     List<Contact> contacts = const [],
     List<Medication> medications = const [],
     List<MedDose> medDoses = const [],
+    List<HealthNote> healthNotes = const [],
   }) async {
     await _db.transaction((txn) async {
       final pendingKeys = await _pendingKeys(txn);
@@ -667,6 +719,11 @@ class PetLocalStore {
       for (final contact in contacts) {
         if (pendingKeys.contains('house_contacts:${contact.id}')) continue;
         await _upsert(txn, 'house_contacts', contact.toRow());
+      }
+      for (final note in healthNotes) {
+        if (pendingKeys.contains('pet_health_notes:${note.id}')) continue;
+        if (!knownPets.contains(note.petId)) continue;
+        await _upsert(txn, 'pet_health_notes', note.toRow());
       }
       for (final medication in medications) {
         if (pendingKeys.contains('pet_medications:${medication.id}')) continue;
