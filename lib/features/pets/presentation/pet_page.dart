@@ -296,6 +296,23 @@ class _PetPageState extends ConsumerState<PetPage> {
               onPressed: _inviting ? null : () => _invite(details),
               child: Text(_inviting ? 'Convidando' : 'Convidar'),
             ),
+          ],
+          const SizedBox(height: BowieSpacing.s8),
+          Text('Ficha do pet', style: theme.textTheme.titleMedium),
+          const SizedBox(height: BowieSpacing.s1),
+          Text(
+            'Um link com QR code para hotéis, creches e veterinários verem '
+            'vacinas, remédios e cuidados, sempre atualizados.',
+            style: BowieType.callout.copyWith(color: colors.textMuted),
+          ),
+          const SizedBox(height: BowieSpacing.s3),
+          OutlinedButton.icon(
+            onPressed: () =>
+                context.push('/pets/${details.pet.id}/compartilhar'),
+            icon: const Icon(LucideIcons.qrCode),
+            label: Text('Compartilhar ficha ${ofPet(details.pet)}'),
+          ),
+          if (owner) ...[
             const SizedBox(height: BowieSpacing.s8),
             TextButton.icon(
               onPressed: _deleting ? null : () => _delete(details),

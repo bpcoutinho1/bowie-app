@@ -35,7 +35,8 @@ Regras:
 8. product: nome comercial e fabricante, como "Vanguard Plus (Zoetis)". lot: o "Part.". veterinarian: nome e CRMV do carimbo, como "Josiane Borges Viana · CRMV-SP 43507". Use "" para o que não houver.
 9. Inclua em uncertain_fields todo campo que você leu com dúvida (letra ruim, assinatura por cima, foto cortada ou desfocada).
 10. Se a foto não for de uma carteirinha de vacinação, responda is_vaccine_card = false e listas vazias.
-11. Em issues, escreva em português, em uma frase curta, qualquer problema da foto que a pessoa deva saber (por exemplo, "A parte de baixo da página está cortada."). Use "" se não houver.`;
+11. Em issues, escreva em português, em uma frase curta, qualquer problema da foto que a pessoa deva saber (por exemplo, "A parte de baixo da página está cortada."). Use "" se não houver.
+12. photo: o número da foto (1, 2, 3...) em que a dose aparece, na ordem em que as fotos foram enviadas.`;
 
 const DOSE_FIELDS = [
   "kind",
@@ -60,7 +61,7 @@ const OUTPUT_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: [...DOSE_FIELDS, "uncertain_fields"],
+        required: [...DOSE_FIELDS, "photo", "uncertain_fields"],
         properties: {
           kind: { type: "string", enum: ["vaccine", "dewormer"] },
           name: { type: "string" },
@@ -69,6 +70,7 @@ const OUTPUT_SCHEMA = {
           product: { type: "string" },
           lot: { type: "string" },
           veterinarian: { type: "string" },
+          photo: { type: "integer", description: "Número da foto, a partir de 1" },
           uncertain_fields: {
             type: "array",
             items: { type: "string", enum: [...DOSE_FIELDS] },
@@ -100,6 +102,7 @@ const Dose = z.object({
   product: z.string(),
   lot: z.string(),
   veterinarian: z.string(),
+  photo: z.number().int().optional(),
   uncertain_fields: z.array(z.enum(DOSE_FIELDS)),
 });
 
@@ -134,7 +137,7 @@ function cleanDay(value: string): string {
 }
 
 /** Drops unreadable dates and flags them, so the app asks the person. */
-function normalize(reading: z.infer<typeof Reading>) {
+function normalize(reading: z.infer<typeof Reading>, photoCount: number) {
   const doses = reading.doses
     .map((dose) => {
       const uncertain = new Set(dose.uncertain_fields);
@@ -151,6 +154,10 @@ function normalize(reading: z.infer<typeof Reading>) {
         product: dose.product.trim(),
         lot: dose.lot.trim(),
         veterinarian: dose.veterinarian.trim(),
+        // The page the dose is on, kept in the app as its proof.
+        photo: dose.photo && dose.photo >= 1 && dose.photo <= photoCount
+          ? dose.photo
+          : null,
         uncertain_fields: [...uncertain],
       };
     })
@@ -225,14 +232,17 @@ Deno.serve(async (req) => {
         {
           role: "user",
           content: [
-            ...body.images.map((image) => ({
-              type: "image" as const,
-              source: {
-                type: "base64" as const,
-                media_type: image.media_type,
-                data: image.data,
+            ...body.images.flatMap((image, index) => [
+              { type: "text" as const, text: `Foto ${index + 1}:` },
+              {
+                type: "image" as const,
+                source: {
+                  type: "base64" as const,
+                  media_type: image.media_type,
+                  data: image.data,
+                },
               },
-            })),
+            ]),
             {
               type: "text" as const,
               text: "Transcreva as doses e os pesos destas fotos da carteirinha.",
@@ -280,5 +290,5 @@ Deno.serve(async (req) => {
     `read-vaccine-card user=${auth.user.id} images=${body.images.length} ` +
       `doses=${reading.doses.length} weights=${reading.weights.length}`,
   );
-  return json(200, normalize(reading));
+  return json(200, normalize(reading, body.images.length));
 });

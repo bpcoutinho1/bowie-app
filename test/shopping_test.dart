@@ -16,7 +16,6 @@ import 'package:bowie/features/shopping/data/shopping_repository.dart';
 import 'package:bowie/features/shopping/domain/shopping_catalog.dart';
 import 'package:bowie/features/shopping/domain/shopping_item.dart';
 import 'package:bowie/features/shopping/presentation/shopping_page.dart';
-import 'package:bowie/features/houses/houses.dart';
 import 'package:bowie/features/houses/houses_providers.dart';
 import 'package:bowie/features/shopping/presentation/shopping_providers.dart';
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bowie/core/dates.dart';
 
 enum DoseKind {
@@ -23,6 +25,7 @@ class VaccineDose {
     this.lot,
     this.veterinarian,
     this.notes,
+    this.proofPaths = const [],
     this.updatedBy,
     this.deletedAt,
   });
@@ -41,6 +44,13 @@ class VaccineDose {
   final String? lot;
   final String? veterinarian;
   final String? notes;
+
+  /// Photos proving the dose was given (the vial sticker and the vet's
+  /// stamp), in the private bucket `pet-photos`. Several doses may share a
+  /// photo of the same card page. Recommended, not required.
+  final List<String> proofPaths;
+
+  bool get hasProof => proofPaths.isNotEmpty;
 
   /// The user who saved this version, so tutors can see who changed it.
   final String? updatedBy;
@@ -63,9 +73,29 @@ class VaccineDose {
       lot: lot,
       veterinarian: veterinarian,
       notes: notes,
+      proofPaths: proofPaths,
       updatedBy: updatedBy ?? this.updatedBy,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+    );
+  }
+
+  VaccineDose copyWithProofs(List<String> paths) {
+    return VaccineDose(
+      id: id,
+      petId: petId,
+      kind: kind,
+      name: name,
+      appliedOn: appliedOn,
+      nextDueOn: nextDueOn,
+      product: product,
+      lot: lot,
+      veterinarian: veterinarian,
+      notes: notes,
+      proofPaths: paths,
+      updatedBy: updatedBy,
+      updatedAt: updatedAt,
+      deletedAt: deletedAt,
     );
   }
 
@@ -81,6 +111,7 @@ class VaccineDose {
       'lot': lot,
       'veterinarian': veterinarian,
       'notes': notes,
+      'proof_paths': jsonEncode(proofPaths),
       'updated_by': updatedBy,
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'deleted_at': deletedAt?.toUtc().toIso8601String(),
@@ -89,6 +120,8 @@ class VaccineDose {
 
   static VaccineDose fromRow(Map<String, Object?> row) {
     final deleted = row['deleted_at'] as String?;
+    final rawProofs = row['proof_paths'];
+    final proofs = rawProofs is String ? jsonDecode(rawProofs) : rawProofs;
     return VaccineDose(
       id: row['id']! as String,
       petId: row['pet_id']! as String,
@@ -100,6 +133,10 @@ class VaccineDose {
       lot: row['lot'] as String?,
       veterinarian: row['veterinarian'] as String?,
       notes: row['notes'] as String?,
+      proofPaths: [
+        for (final path in (proofs as List?) ?? const [])
+          if (path is String) path,
+      ],
       updatedBy: row['updated_by'] as String?,
       updatedAt: DateTime.parse(row['updated_at']! as String).toUtc(),
       deletedAt: deleted == null ? null : DateTime.parse(deleted).toUtc(),

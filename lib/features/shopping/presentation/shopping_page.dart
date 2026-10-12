@@ -10,7 +10,6 @@ import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/text.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
-import 'package:bowie/features/shopping/data/shopping_repository.dart';
 import 'package:bowie/features/shopping/domain/shopping_catalog.dart';
 import 'package:bowie/features/shopping/domain/shopping_item.dart';
 import 'package:bowie/features/houses/houses.dart';

@@ -10,7 +10,6 @@ import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
-import 'package:bowie/features/auth/presentation/sign_out.dart';
 import 'package:bowie/features/pets/data/pet_sync_controller.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
@@ -62,7 +61,11 @@ class PetsPage extends ConsumerWidget {
                   )
                 : const Icon(LucideIcons.refreshCw),
           ),
-          TextButton(onPressed: () => signOut(ref), child: const Text('Sair')),
+          IconButton(
+            tooltip: 'Minha conta',
+            onPressed: () => context.push('/conta'),
+            icon: const Icon(LucideIcons.circleUser),
+          ),
           const NotificationsButton(),
         ],
       ),

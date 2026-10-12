@@ -47,8 +47,14 @@ void main() {
     await tester.tap(toggle);
     await tester.pump();
 
+    expect(find.widgetWithText(TextField, 'Nome'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Celular'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Já tem conta? Entrar'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.widgetWithText(FilledButton, 'Criar conta'), findsOneWidget);
-    expect(find.text('Já tem conta? Entrar'), findsOneWidget);
   });
 
   test('both themes expose the brand tokens', () {

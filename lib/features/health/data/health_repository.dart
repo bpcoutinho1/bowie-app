@@ -1,11 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:uuid/uuid.dart';
 
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
 /// What a person fills in on the dose form.
@@ -20,6 +24,8 @@ class DoseInput {
     this.lot,
     this.veterinarian,
     this.notes,
+    this.keptProofs = const [],
+    this.newProofs = const [],
   });
 
   final String petId;
@@ -31,14 +37,31 @@ class DoseInput {
   final String? lot;
   final String? veterinarian;
   final String? notes;
+
+  /// Proof photos already on the phone: the dose's own, or card pages saved
+  /// by the card reading.
+  final List<String> keptProofs;
+
+  /// Proof photos taken or chosen now.
+  final List<Uint8List> newProofs;
 }
 
+/// Proof photos per dose: the vial sticker and the stamp.
+const maxProofPhotos = 2;
+
 class HealthRepository {
-  HealthRepository(this._store, {Uuid? ids, DateTime Function()? now})
-    : _ids = ids ?? const Uuid(),
-      _now = now ?? DateTime.now;
+  HealthRepository(
+    this._store, {
+    this.photos,
+    Uuid? ids,
+    DateTime Function()? now,
+  }) : _ids = ids ?? const Uuid(),
+       _now = now ?? DateTime.now;
 
   final PetLocalStore _store;
+
+  /// Where proof photos are kept on the phone.
+  final PetPhotoStore? photos;
   final Uuid _ids;
   final DateTime Function() _now;
 
@@ -62,8 +85,20 @@ class HealthRepository {
     required AppUser byUser,
   }) async {
     await _requireMember(input.petId, byUser);
-    final dose = _build(id, input, byUser);
-    await _store.saveDose(dose);
+    final previous = id == null ? null : await _store.getDose(id);
+    final draft = _build(id, input, byUser);
+    final proofs = await _proofs(input, previous);
+    final dose = draft.copyWithProofs(proofs.paths);
+    final removed = <String>[];
+    for (final path in previous?.proofPaths ?? const <String>[]) {
+      if (proofs.paths.contains(path)) continue;
+      if (await _store.isProofInUse(path, exceptDoseId: dose.id)) continue;
+      removed.add(path);
+    }
+    await _store.saveDose(dose, upload: proofs.added, remove: removed);
+    for (final path in removed) {
+      await photos?.delete(path);
+    }
     return dose;
   }
 
@@ -76,11 +111,57 @@ class HealthRepository {
     for (final petId in {for (final input in inputs) input.petId}) {
       await _requireMember(petId, byUser);
     }
-    final doses = [for (final input in inputs) _build(null, input, byUser)];
-    for (final dose in doses) {
-      await _store.saveDose(dose);
+    final drafts = [for (final input in inputs) _build(null, input, byUser)];
+    final saved = <VaccineDose>[];
+    for (var i = 0; i < drafts.length; i++) {
+      final proofs = await _proofs(inputs[i], null);
+      final dose = drafts[i].copyWithProofs(proofs.paths);
+      await _store.saveDose(dose, upload: proofs.added);
+      saved.add(dose);
     }
-    return doses;
+    return saved;
+  }
+
+  /// Checks the proof photos, writes the new ones to the phone and returns
+  /// all the paths, plus the ones to upload.
+  Future<({List<String> paths, List<String> added})> _proofs(
+    DoseInput input,
+    VaccineDose? previous,
+  ) async {
+    final kept = <String>[];
+    for (final path in input.keptProofs) {
+      final own = previous?.proofPaths.contains(path) ?? false;
+      final onPhone =
+          path.startsWith('${input.petId}/') &&
+          await photos?.local(path) != null;
+      if ((own || onPhone) && !kept.contains(path)) kept.add(path);
+    }
+    if (kept.length + input.newProofs.length > maxProofPhotos) {
+      throw const AppFailure('Use no máximo $maxProofPhotos fotos.');
+    }
+    final store = photos;
+    if (input.newProofs.isNotEmpty && store == null) {
+      throw const AppFailure('Não foi possível guardar fotos neste celular.');
+    }
+    for (final photo in input.newProofs) {
+      if (photoMediaType(photo) == null) {
+        throw const AppFailure(
+          'Formato de foto não aceito. Tente tirar a foto pela câmera.',
+        );
+      }
+    }
+    final added = [
+      for (final path in kept)
+        if (!(previous?.proofPaths.contains(path) ?? false)) path,
+    ];
+    final paths = [...kept];
+    for (final photo in input.newProofs) {
+      final path = store!.newPath(input.petId, photoMediaType(photo)!);
+      await store.write(path, photo);
+      paths.add(path);
+      added.add(path);
+    }
+    return (paths: paths, added: added);
   }
 
   VaccineDose _build(String? id, DoseInput input, AppUser byUser) {
@@ -130,9 +211,20 @@ class HealthRepository {
     }
     await _requireMember(dose.petId, byUser);
     final now = _now().toUtc();
+    // Proof photos go too, unless another dose shows the same card page.
+    final removed = <String>[];
+    for (final path in dose.proofPaths) {
+      if (!await _store.isProofInUse(path, exceptDoseId: dose.id)) {
+        removed.add(path);
+      }
+    }
     await _store.saveDose(
       dose.copyWith(deletedAt: now, updatedAt: now, updatedBy: byUser.id),
+      remove: removed,
     );
+    for (final path in removed) {
+      await photos?.delete(path);
+    }
   }
 
   Future<void> _requireMember(String petId, AppUser user) async {

@@ -27,6 +27,7 @@ class ReadDose {
     this.lot,
     this.veterinarian,
     this.uncertain = const {},
+    this.photo,
   });
 
   factory ReadDose.fromJson(Map<String, dynamic> json) {
@@ -38,6 +39,7 @@ class ReadDose {
       product: _text(json['product']),
       lot: _text(json['lot']),
       veterinarian: _text(json['veterinarian']),
+      photo: (json['photo'] as num?)?.toInt(),
       uncertain: {
         for (final field in (json['uncertain_fields'] as List?) ?? const [])
           ?_wireFields[field],
@@ -53,6 +55,9 @@ class ReadDose {
   final String? lot;
   final String? veterinarian;
   final Set<ReadField> uncertain;
+
+  /// Which photo of the reading the dose is on, from 1. Null when unknown.
+  final int? photo;
 
   /// What still stops this dose from being saved, or null when it can be.
   String? problemOn(DateTime today) {
@@ -85,6 +90,7 @@ class ReadDose {
       lot: lot ?? this.lot,
       veterinarian: veterinarian ?? this.veterinarian,
       uncertain: uncertain ?? this.uncertain,
+      photo: photo,
     );
   }
 }

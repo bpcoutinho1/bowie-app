@@ -10,9 +10,11 @@ import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
 import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
+import 'package:bowie/features/health/presentation/health_notes_section.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/medications_section.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
@@ -46,26 +48,10 @@ class HealthPage extends ConsumerWidget {
       ),
       floatingActionButton: pet == null
           ? null
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                FloatingActionButton.extended(
-                  heroTag: 'medication',
-                  onPressed: () =>
-                      context.push('/saude/medicacoes/nova?pet=${pet.id}'),
-                  icon: const Icon(LucideIcons.plus),
-                  label: const Text('Registrar medicação'),
-                ),
-                const SizedBox(height: BowieSpacing.s3),
-                FloatingActionButton.extended(
-                  heroTag: 'vaccine',
-                  onPressed: () =>
-                      context.push('/saude/doses/nova?pet=${pet.id}'),
-                  icon: const Icon(LucideIcons.plus),
-                  label: const Text('Registrar vacina'),
-                ),
-              ],
+          : FloatingActionButton.extended(
+              onPressed: () => showHealthAddSheet(context, pet.id),
+              icon: const Icon(LucideIcons.plus),
+              label: const Text('Registrar'),
             ),
       body: switch (home) {
         AsyncLoading() => const Center(child: CircularProgressIndicator()),
@@ -109,6 +95,9 @@ class _Vaccines extends ConsumerWidget {
     final medications =
         ref.watch(medicationsProvider(pet.id)).asData?.value ??
         const <Medication>[];
+    final notes =
+        ref.watch(healthNotesProvider(pet.id)).asData?.value ??
+        const <HealthNote>[];
     final today = ref.watch(healthRepositoryProvider).today;
     final colors = context.colors;
 
@@ -118,7 +107,7 @@ class _Vaccines extends ConsumerWidget {
         child: Text('Não foi possível ler as vacinas salvas no celular.'),
       ),
       data: (groups) {
-        if (groups.isEmpty && medications.isEmpty) {
+        if (groups.isEmpty && medications.isEmpty && notes.isEmpty) {
           return EmptyState(
             icon: LucideIcons.syringe,
             title: 'Nenhuma vacina registrada ainda',
@@ -148,9 +137,13 @@ class _Vaccines extends ConsumerWidget {
             BowieSpacing.s4,
             BowieSpacing.s2,
             BowieSpacing.s4,
-            176,
+            96,
           ),
           children: [
+            if (notes.isNotEmpty) ...[
+              HealthNotesSection(pet: pet, notes: notes),
+              const SizedBox(height: BowieSpacing.s6),
+            ],
             if (medications.isNotEmpty) ...[
               MedicationsSection(pet: pet, medications: medications),
               const SizedBox(height: BowieSpacing.s6),
@@ -218,6 +211,8 @@ class _GroupCard extends StatelessWidget {
                     status: group.statusOn(today),
                     text: describeDue(latest.nextDueOn, today),
                   ),
+                  const SizedBox(height: BowieSpacing.s1),
+                  ProofBadge(hasProof: latest.hasProof),
                 ],
               ),
             ),

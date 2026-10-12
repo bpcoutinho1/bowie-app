@@ -12,6 +12,7 @@ import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_names.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
+import 'package:bowie/features/diary/presentation/event_photos.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 
@@ -86,6 +87,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
   final _lot = TextEditingController();
   final _veterinarian = TextEditingController();
   final _notes = TextEditingController();
+  var _proofs = <EventPhoto>[];
   late DoseKind _kind;
   late DateTime _appliedOn;
   DateTime? _nextDueOn;
@@ -109,6 +111,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
       _lot.text = dose.lot ?? '';
       _veterinarian.text = dose.veterinarian ?? '';
       _notes.text = dose.notes ?? '';
+      _proofs = [for (final path in dose.proofPaths) EventPhoto.saved(path)];
       _details = [
         dose.product,
         dose.lot,
@@ -335,6 +338,20 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
               decoration: const InputDecoration(labelText: 'Observações'),
             ),
           ],
+          const SizedBox(height: BowieSpacing.s6),
+          EventPhotosField(
+            title: 'Comprovante',
+            helper:
+                'Recomendado. Fotografe a etiqueta do frasco e o carimbo do '
+                'veterinário: hotéis e creches costumam pedir essa prova.',
+            max: maxProofPhotos,
+            photos: _proofs,
+            onChanged: (photos) => setState(() {
+              _proofs = photos;
+              _error = null;
+            }),
+            onError: (message) => setState(() => _error = message),
+          ),
           if (_error != null) ...[
             const SizedBox(height: BowieSpacing.s3),
             Text(
@@ -400,6 +417,8 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
               lot: _lot.text,
               veterinarian: _veterinarian.text,
               notes: _notes.text,
+              keptProofs: [for (final photo in _proofs) ?photo.path],
+              newProofs: [for (final photo in _proofs) ?photo.bytes],
             ),
             byUser: user,
           );

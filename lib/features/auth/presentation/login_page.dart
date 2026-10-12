@@ -15,6 +15,8 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  final _name = TextEditingController();
+  final _phone = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   var _creating = false;
@@ -24,6 +26,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   void dispose() {
+    _name.dispose();
+    _phone.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
@@ -55,7 +59,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const SizedBox(height: BowieSpacing.s2),
             Text(
               _creating
-                  ? 'Use o email que você quer usar no Bowie.'
+                  ? 'O seu nome e o celular aparecem para quem cuida do pet '
+                        'com você.'
                   : 'Use o email e a senha da sua conta.',
               style: BowieType.body.copyWith(color: colors.textMuted),
             ),
@@ -70,6 +75,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             AutofillGroup(
               child: Column(
                 children: [
+                  if (_creating) ...[
+                    TextField(
+                      controller: _name,
+                      enabled: configured && !_busy,
+                      keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
+                      autofillHints: const [AutofillHints.name],
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(labelText: 'Nome'),
+                    ),
+                    const SizedBox(height: BowieSpacing.s3),
+                    TextField(
+                      controller: _phone,
+                      enabled: configured && !_busy,
+                      keyboardType: TextInputType.phone,
+                      autofillHints: const [AutofillHints.telephoneNumber],
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(
+                        labelText: 'Celular',
+                        hintText: '(11) 98765-4321',
+                      ),
+                    ),
+                    const SizedBox(height: BowieSpacing.s3),
+                  ],
                   TextField(
                     controller: _email,
                     enabled: configured && !_busy,
@@ -146,6 +175,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     try {
       if (_creating) {
         final needsConfirmation = await auth.signUp(
+          name: _name.text,
+          phone: _phone.text,
           email: _email.text,
           password: _password.text,
         );

@@ -17,6 +17,8 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 7. [Lista de compras](compras.md): a lista compartilhada, no estilo do app Bring.
 8. [Leitura da carteirinha](carteirinha-de-vacinacao.md): como o app lê a foto da carteirinha, com o exemplo do Bowie.
 9. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
+9a. [Ficha compartilhada](ficha-compartilhada.md): link e QR code com a ficha do pet para hotéis, creches e veterinários.
+9b. [Bowie Biz](bowie-biz.md): a parte para os prestadores, começando por um painel web.
 10. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
 11. [Questões em aberto](questoes-em-aberto.md): o que ainda precisa de decisão.
 
@@ -25,14 +27,15 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | # | Área | Situação no código |
 | --- | --- | --- |
 | 0 | Base: Android, tema e marca, textos em português | Concluído: Android, ícone e splash, tema claro e escuro a partir dos tokens, Figtree, textos em português e as quatro abas com o sino. Falta testar num aparelho Android. |
-| 1 | Cadastro do usuário (nome, email, celular) | Parcial: só email e senha. |
+| 1 | Cadastro do usuário (nome, email, celular) | Concluído: nome, celular (validado como celular com DDD), email e senha, e "Minha conta" para editar. Contas antigas veem "Complete o seu cadastro" no Início. |
 | 2 | Cadastro do pet (nome, nascimento, tipo, sexo, raça, peso, foto) | Parcial: nome, tipo, sexo, raça com sugestões, nascimento (ou idade aproximada), peso atual, foto (câmera ou galeria, translúcida nos cards de escolha do pet) e exclusão pelo tutor principal. Falta o histórico de peso. |
 | 2a | Tutores (convite, remoção, transferência) | Parcial: convite, aceite e transferência ("Transformar em tutor principal"). Falta remoção e saída. |
-| 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Falta o lembrete por push, guardar a foto como comprovante e o histórico de peso. |
+| 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Inclui o comprovante (até 2 fotos, recomendado, com selo "Com comprovante"/"Sem comprovante"; a leitura da carteirinha guarda a página como comprovante) e "Importante sobre o pet" (cuidados especiais, alergias e alimentação). Falta o lembrete por push e o histórico de peso. |
 | 4 | Medicamentos | Parcial: cadastro (quantidade e unidade, concentração, frequência, períodos com horário, início, fim ou uso contínuo), "Remédios de hoje" com marcação de dose dada (quem e quando) e resumo no Início. Falta o lembrete por push e a repetição em 30 minutos. |
-| 5 | Diário (antes "histórico de incidentes") | Parcial: sintomas, consultas, exames e outros, com calendário, agendamentos, contato ligado ao registro e o próximo agendamento no Início. Inclui fotos nos registros (até 4, com miniatura e tela cheia). Falta lembrete por push e aviso na central. |
+| 5 | Diário (antes "histórico de incidentes") | Parcial: sintomas, consultas, exames e outros, com calendário, agendamentos, contato ligado ao registro e o próximo agendamento no Início. Inclui fotos nos registros (até 4, com miniatura e tela cheia) e PDFs (até 5, abrem no celular). Falta lembrete por push e aviso na central. |
 | 5b | Contatos | Concluído: agenda por casa, por tipo, com ligar, WhatsApp, email e mapa. |
 | 5a | Central de notificações | Não iniciado. Necessária para os convites de quem já tem conta. |
+| 5c | Ficha compartilhada | Concluído: link e QR code por pet, para hotel ou creche e para veterinário (com o diário e os PDFs), válido por 60 dias, cancelável, com os dados sempre atuais. Página no GitHub Pages enquanto não há domínio. |
 | 6 | Lista de compras | Parcial: lista por casa com "A comprar" e "Itens frequentes", catálogo com ícones, seletor de casa e sincronização. Feita antes de medicamentos e incidentes, por decisão do fundador (9 de outubro de 2026). Falta o aviso na central de notificações e a atualização em tempo real. |
 
 Atualize a coluna "Situação no código" sempre que uma área avançar.

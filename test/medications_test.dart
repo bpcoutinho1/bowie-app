@@ -317,7 +317,7 @@ void main() {
     );
   });
 
-  testWidgets('Saúde offers both buttons and marks a dose as given', (
+  testWidgets('Saúde offers one button for everything and marks a dose', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1170, 2532);
@@ -352,8 +352,20 @@ void main() {
     }
 
     await settle();
-    expect(find.text('Registrar medicação'), findsOneWidget);
-    expect(find.text('Registrar vacina'), findsOneWidget);
+    // One button, and a choice of what to register.
+    await tester.tap(find.text('Registrar'));
+    await settle();
+    for (final option in [
+      'Medicação',
+      'Vacina ou vermífugo',
+      'Alergia',
+      'Alimentação',
+      'Cuidado especial',
+    ]) {
+      expect(find.text(option), findsOneWidget);
+    }
+    Navigator.of(tester.element(find.text('Medicação'))).pop();
+    await settle();
     expect(find.text('Remédios de hoje'), findsOneWidget);
     expect(find.text('0 de 5 doses dadas'), findsOneWidget);
 

@@ -1,0 +1,53 @@
+# Publishes the shared pet sheet (web-share/) on GitHub Pages:
+# https://bpcoutinho1.github.io/bowie-app/ficha/#<token>
+#
+# One-time setup (docs/guias/ficha-compartilhada.md):
+# - Settings → Pages → Source: GitHub Actions.
+# - Settings → Secrets and variables → Actions → Variables: SUPABASE_URL
+#   (and, optionally, SUPABASE_ANON_KEY).
+name: Ficha compartilhada (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - web-share/**
+      - design/tokens/tokens.css
+      - design/brand/logo/**
+      - scripts/build-web-share.sh
+      - .github/workflows/ficha-pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::Defina a variável SUPABASE_URL em Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+          scripts/build-web-share.sh _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

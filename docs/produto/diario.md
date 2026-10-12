@@ -22,6 +22,7 @@ O app registra informações e **não faz diagnóstico**. Para sintomas, o texto
 | Profissional ou local | Não | Um dos [contatos](contatos.md) da casa do pet, como o veterinário ou o laboratório. |
 | Observações | Não | Campo aberto. |
 | Fotos | Não | Até 4, da câmera ou da galeria. Ex.: fotografar fezes com sangue ou uma diarreia diferente, para comparar depois e mostrar ao veterinário. |
+| Arquivos | Não | Até 5 PDFs de até 10 MB cada, em qualquer tipo de registro. Ex.: o resultado do hemograma, uma receita, o laudo de um raio X. Entram automaticamente na ficha compartilhada com o veterinário. |
 
 ## Passado e futuro
 
@@ -35,7 +36,8 @@ O app registra informações e **não faz diagnóstico**. Para sintomas, o texto
 - Abaixo: **Próximos agendamentos** e **Registros recentes**.
 - Quando o registro tem um contato com telefone, um botão liga direto para ele.
 - As fotos aparecem pequenas em cada registro. Tocar abre a foto grande, com zoom, e dá para passar para a próxima.
-- As fotos podem ser sensíveis: ficam num armazenamento privado e só os tutores do pet veem. Excluir o registro apaga as fotos dele.
+- Cada PDF aparece com o nome no registro. Tocar abre o arquivo no celular.
+- As fotos e os arquivos podem ser sensíveis: ficam num armazenamento privado e só os tutores do pet veem. Excluir o registro apaga as fotos dele.
 - A aba **Início** mostra, em cada pet, o próximo agendamento (ou um horário marcado para hoje).
 
 ## Quem pode

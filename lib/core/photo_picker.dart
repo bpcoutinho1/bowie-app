@@ -34,6 +34,18 @@ String? photoMediaType(Uint8List bytes) {
   return null;
 }
 
+/// A PDF starts with "%PDF".
+bool isPdf(Uint8List bytes) =>
+    bytes.length >= 4 &&
+    bytes[0] == 0x25 &&
+    bytes[1] == 0x50 &&
+    bytes[2] == 0x44 &&
+    bytes[3] == 0x46;
+
+/// The media type of a photo or a PDF, from its first bytes.
+String? fileMediaType(Uint8List bytes) =>
+    photoMediaType(bytes) ?? (isPdf(bytes) ? 'application/pdf' : null);
+
 class ImagePickerPhotos implements PhotoPicker {
   ImagePickerPhotos([ImagePicker? picker]) : _picker = picker ?? ImagePicker();
 

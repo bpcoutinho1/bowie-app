@@ -1,6 +1,6 @@
 # Backend no Supabase
 
-O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e uma Edge Function para ler a carteirinha de vacinação. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
+O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e duas Edge Functions, uma para ler a carteirinha de vacinação e outra para a ficha compartilhada. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
 
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
@@ -10,6 +10,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 6. `20261010120000_diary_and_contacts.sql`: diário (`pet_events`) e contatos da casa (`house_contacts`). Precisa da 5. Pode rodar mais de uma vez.
 7. `20261012120000_medications.sql`: medicações (`pet_medications`) e doses dadas (`pet_medication_doses`). Pode rodar mais de uma vez.
 8. `20261013120000_diary_photos.sql`: coluna `photo_paths` em `pet_events`. Os arquivos vão para o bucket `pet-photos`, na pasta do pet. Pode rodar mais de uma vez.
+9. `20261014120000_notes_proofs_files_shares.sql`: cuidados, alergias e alimentação (`pet_health_notes`) comprovantes das vacinas (`pet_vaccines.proof_paths`), PDFs do diário (`pet_events.files`; o bucket `pet-photos` passa a aceitar `application/pdf` e até 10 MB) e links da ficha compartilhada (`pet_shares`). Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -87,6 +88,10 @@ Comparações de email usam `lower(...)` dos dois lados, com o email vindo de `a
 
 **`public.pet_medications`** e **`public.pet_medication_doses`**: remédios e doses dadas (veja [saúde](saude.md#medicações)). RLS como em `pet_vaccines`; numa dose nova, `given_by` precisa ser o próprio usuário.
 
+**`public.pet_health_notes`**: cuidados especiais, alergias e alimentação (veja [saúde](saude.md#importante-sobre-o-pet)). `kind` é `special_care`, `allergy` ou `diet`. RLS como em `pet_vaccines`.
+
+`pet_vaccines.proof_paths` guarda as fotos do comprovante em JSON, como `pet_events.photo_paths`.
+
 ## Fotos dos pets (Storage)
 
 Bucket privado `pet-photos`, até 5 MB por arquivo, só JPEG, PNG e WebP. Cada foto fica em `<id do pet>/<id da foto>.<extensão>`. A função `pet_of_photo(name)` tira o id do pet do caminho, e as políticas de `storage.objects` deixam ver, enviar, substituir e apagar só quem é tutor `accepted` daquele pet. Não há links públicos.
@@ -107,7 +112,7 @@ Bucket privado `pet-photos`, até 5 MB por arquivo, só JPEG, PNG e WebP. Cada f
 {
   "is_vaccine_card": true,
   "doses": [{"kind": "vaccine", "name": "V10", "applied_on": "2026-05-04", "next_due_on": "2027-05-04",
-             "product": "Vanguard Plus (Zoetis)", "lot": "003/25", "veterinarian": "…", "uncertain_fields": []}],
+             "product": "Vanguard Plus (Zoetis)", "lot": "003/25", "veterinarian": "…", "photo": 1, "uncertain_fields": []}],
   "weights": [{"measured_on": "2026-05-04", "weight_kg": 21.4}],
   "issues": ""
 }
@@ -115,12 +120,16 @@ Bucket privado `pet-photos`, até 5 MB por arquivo, só JPEG, PNG e WebP. Cada f
 
 - **Quem pode chamar:** só usuários logados. A função confere o token com `auth.getUser()` e responde 401 sem ele.
 - **IA:** chama a API da Anthropic (modelo `claude-opus-5-5`, esforço alto) com saída estruturada por JSON Schema, para a resposta sempre ter esse formato. Com o modelo sobrecarregado, a API usa um modelo reserva automaticamente (`fallbacks: "default"`). As regras de leitura (o "Revacinar em" e não o "Venc." da etiqueta, anos com dois dígitos, linhas vazias) estão no prompt e vêm de [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md).
-- **Conferência:** a resposta é validada com zod. Datas impossíveis viram `""` e entram em `uncertain_fields`; uma próxima dose antes da aplicação também. Pesos fora de 0 a 150 kg são descartados.
+- **Conferência:** a resposta é validada com zod. Datas impossíveis viram `""` e entram em `uncertain_fields`; uma próxima dose antes da aplicação também. Pesos fora de 0 a 150 kg são descartados. `photo` é a foto em que está a dose (a partir de 1, na ordem enviada; cada imagem vai precedida de "Foto N:"), ou `null` se vier fora do intervalo. O app usa esse número para guardar a página certa como comprovante.
 - **Erros:** sempre `{error, message}`, com `message` em português para o app mostrar. 400 (pedido inválido), 401, 422 (foto ilegível ou recusada), 502 (falha da IA), 503 (sem chave configurada ou limite de uso).
 - **Privacidade:** as fotos não são gravadas. O log só tem o id do usuário e contagens (fotos, doses, pesos).
 - **Segredo:** `ANTHROPIC_API_KEY`, guardado em Edge Functions → Secrets. Nunca vai para o app nem para o repositório.
 
 Para publicar ou atualizar, veja o [guia](../guias/publicar-leitura-da-carteirinha.md).
+
+## Edge Function `pet-share`
+
+Pública, devolve a ficha compartilhada de um pet a partir do token do link. Veja [ficha compartilhada](ficha-compartilhada.md); para publicar, o [guia](../guias/ficha-compartilhada.md).
 
 ## Aplicando o esquema
 

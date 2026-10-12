@@ -24,14 +24,37 @@ class AuthRepository {
   }
 
   /// Returns true when the account still needs an email confirmation.
-  Future<bool> signUp({required String email, required String password}) async {
+  Future<bool> signUp({
+    required String name,
+    required String phone,
+    required String email,
+    required String password,
+  }) async {
+    final profile = checkProfile(name: name, phone: phone);
     _validate(email: email, password: password);
     try {
       final response = await _require().auth.signUp(
         email: normalizeEmail(email),
         password: password,
+        data: {'name': profile.name, 'phone': profile.phone},
       );
       return response.session == null;
+    } on AuthException catch (error) {
+      throw AppFailure(authMessage(error));
+    }
+  }
+
+  /// Saves the name and cell phone in the account. The session updates, so
+  /// the new values reach the app by itself.
+  Future<void> updateProfile({
+    required String name,
+    required String phone,
+  }) async {
+    final profile = checkProfile(name: name, phone: phone);
+    try {
+      await _require().auth.updateUser(
+        UserAttributes(data: {'name': profile.name, 'phone': profile.phone}),
+      );
     } on AuthException catch (error) {
       throw AppFailure(authMessage(error));
     }

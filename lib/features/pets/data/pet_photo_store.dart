@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-/// Keeps pet profile photos on the phone, so they show offline and upload
+/// Keeps pet photos (and the PDFs of the diary) on the phone, so they show offline and upload
 /// later. Each photo has a server path `<pet id>/<photo id>.<jpg|png|webp>`; the local
 /// file is the same path under the app's documents folder.
 class PetPhotoStore {
@@ -26,6 +26,7 @@ class PetPhotoStore {
     final extension = switch (mediaType) {
       'image/png' => 'png',
       'image/webp' => 'webp',
+      'application/pdf' => 'pdf',
       _ => 'jpg',
     };
     return '$petId/${_ids.v4()}.$extension';

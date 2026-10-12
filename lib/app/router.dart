@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
+import 'package:bowie/features/auth/presentation/account_page.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
 import 'package:bowie/core/dates.dart';
@@ -16,12 +17,15 @@ import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/presentation/card_reading_page.dart';
 import 'package:bowie/features/health/presentation/dose_form_page.dart';
 import 'package:bowie/features/health/presentation/dose_history_page.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
+import 'package:bowie/features/health/presentation/health_note_form_page.dart';
 import 'package:bowie/features/health/presentation/health_page.dart';
 import 'package:bowie/features/health/presentation/medication_form_page.dart';
 import 'package:bowie/features/home/presentation/home_page.dart';
 import 'package:bowie/features/notifications/presentation/notifications_page.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
+import 'package:bowie/features/share/presentation/pet_share_page.dart';
 import 'package:bowie/features/shopping/presentation/shopping_page.dart';
 
 /// Where a ready session lands.
@@ -83,6 +87,23 @@ final routerProvider = Provider<GoRouter>((ref) {
                           ? const HealthPage()
                           : CardReadingPage(petId: petId);
                     },
+                  ),
+                  GoRoute(
+                    path: 'notas/nova',
+                    builder: (context, state) {
+                      final query = state.uri.queryParameters;
+                      return HealthNoteFormPage(
+                        petId: query['pet'],
+                        kind: HealthNoteKind.values
+                            .where((k) => k.wire == query['tipo'])
+                            .firstOrNull,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'notas/:id',
+                    builder: (context, state) =>
+                        HealthNoteFormPage(noteId: state.pathParameters['id']),
                   ),
                   GoRoute(
                     path: 'medicacoes/nova',
@@ -192,6 +213,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) {
                       return PetPage(petId: state.pathParameters['id']);
                     },
+                    routes: [
+                      GoRoute(
+                        path: 'compartilhar',
+                        builder: (context, state) =>
+                            PetSharePage(petId: state.pathParameters['id']!),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -199,6 +227,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      GoRoute(path: '/conta', builder: (context, state) => const AccountPage()),
       GoRoute(
         path: '/notificacoes',
         builder: (context, state) => const NotificationsPage(),

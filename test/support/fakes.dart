@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
+import 'package:bowie/features/health/domain/health_note.dart';
 import 'package:bowie/features/health/domain/medication.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/pets/data/pet_remote_api.dart';
@@ -70,6 +71,19 @@ class FakeRemote implements PetRemoteApi {
 
   @override
   Future<List<ShoppingItem>> pullShoppingItems() async => List.of(shopping);
+
+  final healthNotes = <HealthNote>[];
+
+  @override
+  Future<void> upsertHealthNote(Map<String, dynamic> row) async {
+    calls.add('pet_health_notes');
+    final note = HealthNote.fromRow(Map<String, Object?>.from(row));
+    healthNotes.removeWhere((other) => other.id == note.id);
+    healthNotes.add(note);
+  }
+
+  @override
+  Future<List<HealthNote>> pullHealthNotes() async => List.of(healthNotes);
 
   final medications = <Medication>[];
 

@@ -83,6 +83,8 @@ Depois da transferência:
 ## Diferenças em relação ao código atual
 
 - O código chama o tutor principal de `owner`. Na interface e na documentação, use "tutor principal".
-- Ainda não existem nome e celular no cadastro, email de convite, remoção e saída de tutor.
+- Nome e celular ficam na conta do Supabase (`user_metadata`), e por enquanto só a própria pessoa os vê: a lista de tutores do pet ainda mostra o email. A ficha compartilhada usa o nome e o celular do tutor principal.
+- Contas criadas antes do nome e do celular veem "Complete o seu cadastro" no Início até preencher em "Minha conta".
+- Ainda não existem email de convite, remoção e saída de tutor.
 - Hoje o convidado precisa tocar em "Accept" no app para aceitar. Pela regra acima, o cadastro com o email do convite já basta.
 - No banco atual não há política de exclusão (`delete`). O papel (`role`) de um vínculo só muda pela função `transfer_pet` (veja [backend](../funcionamento/backend-supabase.md#transferência-do-pet)).

@@ -11,6 +11,7 @@ import 'package:bowie/core/ui/bowie_card.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
+import 'package:bowie/features/diary/presentation/event_photos.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
 
 /// Every dose of the same vaccine as [doseId], newest first.
@@ -145,6 +146,12 @@ class _DoseCard extends StatelessWidget {
                         color: colors.textMuted,
                       ),
                     ),
+                  ],
+                  const SizedBox(height: BowieSpacing.s2),
+                  ProofBadge(hasProof: dose.hasProof),
+                  if (dose.hasProof) ...[
+                    const SizedBox(height: BowieSpacing.s2),
+                    EventPhotoStrip(paths: dose.proofPaths, size: 56),
                   ],
                   const SizedBox(height: BowieSpacing.s2),
                   StatusBadge(

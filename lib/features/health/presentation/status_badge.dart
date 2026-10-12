@@ -63,3 +63,33 @@ class StatusBadge extends StatelessWidget {
     );
   }
 }
+
+/// "Com comprovante" or "Sem comprovante": whether a photo proves the dose.
+class ProofBadge extends StatelessWidget {
+  const ProofBadge({super.key, required this.hasProof});
+
+  final bool hasProof;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          hasProof ? LucideIcons.badgeCheck : LucideIcons.badge,
+          size: 16,
+          color: hasProof ? c.success : c.textMuted,
+        ),
+        const SizedBox(width: BowieSpacing.s1),
+        Text(
+          hasProof ? 'Com comprovante' : 'Sem comprovante',
+          style: BowieType.caption.copyWith(
+            color: hasProof ? c.success : c.textMuted,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}

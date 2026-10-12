@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/config/app_config.dart';
+import 'package:bowie/core/documents.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
@@ -29,6 +30,14 @@ final petPhotoStoreProvider = Provider<PetPhotoStore>((ref) {
 });
 
 final photoPickerProvider = Provider<PhotoPicker>((ref) => ImagePickerPhotos());
+
+final documentPickerProvider = Provider<DocumentPicker>(
+  (ref) => const FilePickerDocuments(),
+);
+
+final documentOpenerProvider = Provider<DocumentOpener>(
+  (ref) => const OpenFilexOpener(),
+);
 
 final networkStatusProvider = Provider<NetworkStatus>(
   (ref) => PluginNetworkStatus(),
@@ -69,7 +78,18 @@ AppUser? userFromSession(Session? session) {
   final user = session?.user;
   final email = user?.email;
   if (user == null || email == null || email.isEmpty) return null;
-  return AppUser(id: user.id, email: normalizeEmail(email));
+  final data = user.userMetadata ?? const <String, dynamic>{};
+  String? text(String key) {
+    final value = data[key];
+    return value is String && value.trim().isNotEmpty ? value.trim() : null;
+  }
+
+  return AppUser(
+    id: user.id,
+    email: normalizeEmail(email),
+    name: text('name'),
+    phone: text('phone'),
+  );
 }
 
 final deviceSupportedProvider = FutureProvider<bool>((ref) {
@@ -102,7 +122,10 @@ final petRepositoryProvider = Provider<PetRepository>((ref) {
 });
 
 final healthRepositoryProvider = Provider<HealthRepository>((ref) {
-  return HealthRepository(ref.watch(petLocalStoreProvider));
+  return HealthRepository(
+    ref.watch(petLocalStoreProvider),
+    photos: ref.watch(petPhotoStoreProvider),
+  );
 });
 
 final petRemoteApiProvider = Provider<PetRemoteApi?>((ref) {
