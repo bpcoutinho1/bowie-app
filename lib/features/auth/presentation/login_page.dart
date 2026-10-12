@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
@@ -142,6 +143,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     )
                   : Text(_creating ? 'Criar conta' : 'Entrar'),
             ),
+            if (!_creating)
+              TextButton(
+                onPressed: _busy || !configured
+                    ? null
+                    : () => context.go(
+                        Uri(
+                          path: '/recuperar-senha',
+                          queryParameters: {
+                            if (_email.text.trim().isNotEmpty)
+                              'email': _email.text.trim(),
+                          },
+                        ).toString(),
+                      ),
+                child: const Text('Esqueci minha senha'),
+              ),
             const SizedBox(height: BowieSpacing.s2),
             TextButton(
               onPressed: _busy

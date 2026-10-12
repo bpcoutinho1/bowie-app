@@ -28,6 +28,12 @@ void main() {
     expect(find.bySemanticsLabel('Bowie'), findsOneWidget);
     expect(find.text('Quem ama, lembra.'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Entrar'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Esqueci minha senha'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Esqueci minha senha'), findsOneWidget);
     expect(
       find.textContaining('não está conectada ao servidor'),
       findsOneWidget,

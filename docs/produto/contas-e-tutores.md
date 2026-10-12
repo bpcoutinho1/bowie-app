@@ -12,7 +12,7 @@ O login é **só por email e senha** no MVP, sem "Entrar com Google" ou "Entrar 
 
 ### Para que serve o celular
 
-1. **Recuperação de senha.** No MVP, a recuperação é **por email**. A recuperação por WhatsApp vem depois: integrar o WhatsApp tem custo por mensagem e exige aprovação da Meta. O número só passa a ser confirmado com um código quando o WhatsApp for ativado; até lá, o cadastro não pede confirmação.
+1. **Recuperação de senha.** No MVP, a recuperação é **por email**: "Esqueci minha senha", no login, envia um código de 6 números, que a pessoa digita no app junto com a senha nova. Logado, "Minha conta" tem "Trocar a senha". A recuperação por WhatsApp vem depois: integrar o WhatsApp tem custo por mensagem e exige aprovação da Meta. O número só passa a ser confirmado com um código quando o WhatsApp for ativado; até lá, o cadastro não pede confirmação.
 2. **SMS comerciais, no futuro.** Mensagens de marketing só vão para quem aceitou recebê-las, em uma opção separada, desmarcada por padrão e que pode ser desligada a qualquer momento. Aceitar os termos do app não vale como esse consentimento.
 
 Celular e nome são dados pessoais. Seguem as regras de [dados e privacidade](dados-e-privacidade.md).
