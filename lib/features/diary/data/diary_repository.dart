@@ -23,6 +23,8 @@ class EventInput {
     this.contactId,
     this.keptPhotos = const [],
     this.newPhotos = const [],
+    this.keptFiles = const [],
+    this.newFiles = const [],
   });
 
   final String petId;
@@ -38,6 +40,33 @@ class EventInput {
 
   /// Photos taken or chosen now (JPEG, PNG or WebP).
   final List<Uint8List> newPhotos;
+
+  /// PDFs the entry already had and still keeps.
+  final List<EventFile> keptFiles;
+
+  /// PDFs chosen now.
+  final List<NewEventFile> newFiles;
+}
+
+/// A PDF chosen on the form, not saved yet.
+class NewEventFile {
+  const NewEventFile({required this.name, required this.bytes});
+
+  final String name;
+  final Uint8List bytes;
+}
+
+/// "Hemograma.pdf": without folders or odd characters, up to 80 characters,
+/// always ending in ".pdf".
+String cleanFileName(String name) {
+  var base = name.split(RegExp(r'[/\\]')).last;
+  base = base.replaceAll(RegExp(r'[\x00-\x1F"<>|:*?]'), '').trim();
+  if (base.toLowerCase().endsWith('.pdf')) {
+    base = base.substring(0, base.length - 4).trim();
+  }
+  if (base.isEmpty) base = 'Arquivo';
+  if (base.length > 76) base = base.substring(0, 76).trim();
+  return '$base.pdf';
 }
 
 class DiaryRepository {
@@ -125,14 +154,46 @@ class DiaryRepository {
         throw const AppFailure('Uma das fotos é grande demais.');
       }
     }
+    final keptFiles = [
+      for (final file in input.keptFiles)
+        if (previous?.files.any((f) => f.path == file.path) ?? false)
+          EventFile(path: file.path, name: cleanFileName(file.name)),
+    ];
+    if (keptFiles.length + input.newFiles.length > maxEventFiles) {
+      throw const AppFailure('Use no máximo $maxEventFiles arquivos.');
+    }
+    if (input.newFiles.isNotEmpty && store == null) {
+      throw const AppFailure(
+        'Não foi possível guardar arquivos neste celular.',
+      );
+    }
+    for (final file in input.newFiles) {
+      if (!isPdf(file.bytes)) {
+        throw const AppFailure('Por enquanto, só arquivos PDF.');
+      }
+      if (file.bytes.length > maxEventFileBytes) {
+        throw AppFailure(
+          '${cleanFileName(file.name)} passa de 10 MB. '
+          'Escolha um arquivo menor.',
+        );
+      }
+    }
     for (final photo in input.newPhotos) {
       final path = store!.newPath(input.petId, photoMediaType(photo)!);
       await store.write(path, photo);
       added.add(path);
     }
+    final addedFiles = <EventFile>[];
+    for (final file in input.newFiles) {
+      final path = store!.newPath(input.petId, 'application/pdf');
+      await store.write(path, file.bytes);
+      addedFiles.add(EventFile(path: path, name: cleanFileName(file.name)));
+    }
     final removed = [
       for (final path in previous?.photoPaths ?? const <String>[])
         if (!kept.contains(path)) path,
+      for (final file in previous?.files ?? const <EventFile>[])
+        if (!keptFiles.any((f) => f.path == file.path)) file.path,
     ];
 
     final event = PetEvent(
@@ -145,10 +206,15 @@ class DiaryRepository {
       notes: notes.isEmpty ? null : notes,
       contactId: contactId,
       photoPaths: [...kept, ...added],
+      files: [...keptFiles, ...addedFiles],
       updatedBy: byUser.id,
       updatedAt: _now().toUtc(),
     );
-    await _store.saveEvent(event, upload: added, remove: removed);
+    await _store.saveEvent(
+      event,
+      upload: [...added, for (final file in addedFiles) file.path],
+      remove: removed,
+    );
     for (final path in removed) {
       await photos?.delete(path);
     }
@@ -165,12 +231,13 @@ class DiaryRepository {
     }
     await _requireMember(event.petId, byUser);
     final now = _now().toUtc();
-    // The photos go too, from the phone and from the server.
+    // The photos and files go too, from the phone and from the server.
+    final paths = [...event.photoPaths, for (final f in event.files) f.path];
     await _store.saveEvent(
       event.copyWith(deletedAt: now, updatedAt: now, updatedBy: byUser.id),
-      remove: event.photoPaths,
+      remove: paths,
     );
-    for (final path in event.photoPaths) {
+    for (final path in paths) {
       await photos?.delete(path);
     }
   }

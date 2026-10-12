@@ -66,3 +66,19 @@ alter table public.pet_vaccines
 alter table public.pet_vaccines drop constraint if exists pet_vaccines_proof_paths_check;
 alter table public.pet_vaccines
   add constraint pet_vaccines_proof_paths_check check (char_length(proof_paths) <= 1000);
+
+-- Files in the diary ------------------------------------------------------------
+-- PDFs (exam results, prescriptions) as a JSON list of {path, name}, in the
+-- same bucket as the photos. The bucket now takes PDFs up to 10 MB.
+
+alter table public.pet_events
+  add column if not exists files text not null default '[]';
+
+alter table public.pet_events drop constraint if exists pet_events_files_check;
+alter table public.pet_events
+  add constraint pet_events_files_check check (char_length(files) <= 3000);
+
+update storage.buckets
+set file_size_limit = 10485760,
+    allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+where id = 'pet-photos';

@@ -182,7 +182,7 @@ class SupabasePetApi implements PetRemoteApi {
             path,
             photo,
             fileOptions: FileOptions(
-              contentType: photoMediaType(photo) ?? 'image/jpeg',
+              contentType: fileMediaType(photo) ?? 'image/jpeg',
               upsert: true,
             ),
           ),

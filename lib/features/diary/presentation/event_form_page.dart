@@ -14,6 +14,7 @@ import 'package:bowie/features/contacts/presentation/contacts_providers.dart';
 import 'package:bowie/features/diary/data/diary_repository.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/diary/presentation/diary_providers.dart';
+import 'package:bowie/features/diary/presentation/event_files.dart';
 import 'package:bowie/features/diary/presentation/event_photos.dart';
 
 /// Records or schedules a diary entry, or edits one when [eventId] is given.
@@ -76,6 +77,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
   final _titleFocus = FocusNode();
   final _notes = TextEditingController();
   var _photos = <EventPhoto>[];
+  var _files = <EventFileItem>[];
   late EventKind _kind;
   late DateTime _day;
   TimeOfDay? _time;
@@ -97,6 +99,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
       _notes.text = event.notes ?? '';
       _contactId = event.contactId;
       _photos = [for (final path in event.photoPaths) EventPhoto.saved(path)];
+      _files = [for (final file in event.files) EventFileItem.saved(file)];
       final time = event.time;
       if (time != null) {
         _time = TimeOfDay(
@@ -305,6 +308,15 @@ class _EventFormState extends ConsumerState<_EventForm> {
             }),
             onError: (message) => setState(() => _error = message),
           ),
+          gap,
+          EventFilesField(
+            files: _files,
+            onChanged: (files) => setState(() {
+              _files = files;
+              _error = null;
+            }),
+            onError: (message) => setState(() => _error = message),
+          ),
           if (_error != null) ...[
             const SizedBox(height: BowieSpacing.s3),
             Text(
@@ -382,6 +394,8 @@ class _EventFormState extends ConsumerState<_EventForm> {
               notes: _notes.text,
               keptPhotos: [for (final photo in _photos) ?photo.path],
               newPhotos: [for (final photo in _photos) ?photo.bytes],
+              keptFiles: [for (final file in _files) ?file.saved],
+              newFiles: [for (final file in _files) ?file.fresh],
               contactId: _contactId,
             ),
             byUser: user,

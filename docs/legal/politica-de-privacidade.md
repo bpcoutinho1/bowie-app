@@ -16,7 +16,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 **Dos seus pets**
 - Cadastro: nome, tipo (cão ou gato), sexo, raça, data de nascimento (ou idade aproximada), peso e foto.
 - Saúde: vacinas e vermífugos (datas, produto, lote e veterinário).
-- Diário: sintomas, consultas, exames e agendamentos, com as observações e as fotos que você registrar.
+- Diário: sintomas, consultas, exames e agendamentos, com as observações, as fotos e os arquivos PDF que você registrar.
 - Quem cuida do pet: o email das pessoas que você convida como tutoras.
 
 **Da sua casa**

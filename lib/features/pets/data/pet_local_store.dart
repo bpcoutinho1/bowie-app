@@ -61,7 +61,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 10,
+      version: 11,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -75,6 +75,7 @@ class PetLocalStore {
         if (from < 8) await _addEventPhotos(db);
         if (from < 9) await _addHealthNotes(db);
         if (from < 10) await _addVaccineProofs(db);
+        if (from < 11) await _addEventFiles(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -94,6 +95,7 @@ class PetLocalStore {
         await _addEventPhotos(db);
         await _addHealthNotes(db);
         await _addVaccineProofs(db);
+        await _addEventFiles(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -128,6 +130,14 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 11: PDFs in diary entries.
+  static Future<void> _addEventFiles(DatabaseExecutor db) async {
+    if (!await _hasTable(db, 'pet_events')) return;
+    await db.execute(
+      "ALTER TABLE pet_events ADD COLUMN files TEXT NOT NULL DEFAULT '[]'",
+    );
   }
 
   /// Version 10: photos proving a vaccine was given.

@@ -15,6 +15,7 @@ O que a aba **Diário** faz hoje. As regras de produto estão em [`docs/produto/
 | `occurs_time` | Horário opcional, `HH:MM`. |
 | `notes` | Até 1000 caracteres. |
 | `photo_paths` | Até 4 fotos (`maxEventPhotos`), em JSON: caminhos `<id do pet>/<id da foto>.jpg` no bucket privado `pet-photos`, os mesmos da foto do pet. |
+| `files` | Até 5 PDFs (`maxEventFiles`), em JSON: `[{"path": "<id do pet>/<id>.pdf", "name": "Hemograma.pdf"}]`, no mesmo bucket. |
 | `contact_id` | Um contato da casa do pet (veja [contatos](contatos.md)). O repositório recusa contato de outra casa. |
 | `updated_by`, `updated_at`, `deleted_at` | Como nas vacinas. Excluir marca `deleted_at`. |
 
@@ -37,6 +38,13 @@ Fotos (`lib/features/diary/presentation/event_photos.dart`):
 - No formulário, "Fotos" mostra miniaturas com um botão para remover e um bloco "Adicionar" (tirar foto ou escolher da galeria, até 1600 px).
 - `DiaryRepository.saveEvent` grava as fotos novas no celular (`PetPhotoStore`) e, na mesma transação do registro, enfileira o envio delas e a remoção das que saíram. As que saíram também saem do celular. Excluir o registro apaga todas as fotos dele.
 - Nos registros do diário, as fotos aparecem em miniatura (`EventPhotoStrip`). Tocar abre a galeria em tela cheia, com zoom e deslizar entre as fotos. Fotos tiradas por outro tutor são baixadas uma vez e guardadas.
+
+Arquivos (`lib/features/diary/presentation/event_files.dart`), em qualquer tipo de registro:
+
+- No formulário, "Arquivos" lista os PDFs com um botão para remover e "Adicionar PDF", que abre o seletor de arquivos do celular (`DocumentPicker`, com `file_picker`; no iOS, o app Arquivos). Arquivos acima de 10 MB são recusados antes de serem lidos.
+- `DiaryRepository.saveEvent` confere que é PDF pelos primeiros bytes (`%PDF`), o limite de 10 MB (`maxEventFileBytes`) e de 5 arquivos, e limpa o nome (`cleanFileName`: sem pastas nem caracteres estranhos, até 80 caracteres, sempre `.pdf`). Envio e remoção seguem a mesma fila das fotos; o tipo do arquivo no Storage vem dos primeiros bytes (`fileMediaType`).
+- Nos registros, cada PDF vira um botão com o nome. Tocar abre no visualizador do celular (`DocumentOpener`, com `open_filex`), a partir de uma cópia temporária com o nome original. Arquivos de outro tutor são baixados uma vez e guardados.
+- Os PDFs entram na ficha compartilhada com o veterinário.
 
 A aba **Início** mostra, em cada pet, um horário marcado para hoje ou o próximo agendamento (`_NextAppointment`).
 

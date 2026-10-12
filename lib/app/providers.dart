@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/config/app_config.dart';
+import 'package:bowie/core/documents.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
@@ -29,6 +30,14 @@ final petPhotoStoreProvider = Provider<PetPhotoStore>((ref) {
 });
 
 final photoPickerProvider = Provider<PhotoPicker>((ref) => ImagePickerPhotos());
+
+final documentPickerProvider = Provider<DocumentPicker>(
+  (ref) => const FilePickerDocuments(),
+);
+
+final documentOpenerProvider = Provider<DocumentOpener>(
+  (ref) => const OpenFilexOpener(),
+);
 
 final networkStatusProvider = Provider<NetworkStatus>(
   (ref) => PluginNetworkStatus(),
