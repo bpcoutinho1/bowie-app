@@ -25,10 +25,10 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 | # | Área | Situação no código |
 | --- | --- | --- |
 | 0 | Base: Android, tema e marca, textos em português | Concluído: Android, ícone e splash, tema claro e escuro a partir dos tokens, Figtree, textos em português e as quatro abas com o sino. Falta testar num aparelho Android. |
-| 1 | Cadastro do usuário (nome, email, celular) | Parcial: só email e senha. |
+| 1 | Cadastro do usuário (nome, email, celular) | Concluído: nome, celular (validado como celular com DDD), email e senha, e "Minha conta" para editar. Contas antigas veem "Complete o seu cadastro" no Início. |
 | 2 | Cadastro do pet (nome, nascimento, tipo, sexo, raça, peso, foto) | Parcial: nome, tipo, sexo, raça com sugestões, nascimento (ou idade aproximada), peso atual, foto (câmera ou galeria, translúcida nos cards de escolha do pet) e exclusão pelo tutor principal. Falta o histórico de peso. |
 | 2a | Tutores (convite, remoção, transferência) | Parcial: convite, aceite e transferência ("Transformar em tutor principal"). Falta remoção e saída. |
-| 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Falta o lembrete por push, guardar a foto como comprovante e o histórico de peso. |
+| 3 | Vacinas e vermífugos | Parcial: registro manual, histórico, status, edição/exclusão e leitura da carteirinha por foto (IA na nuvem, com revisão antes de salvar). Inclui o comprovante (até 2 fotos, recomendado, com selo "Com comprovante"/"Sem comprovante"; a leitura da carteirinha guarda a página como comprovante) e "Importante sobre o pet" (cuidados especiais, alergias e alimentação). Falta o lembrete por push e o histórico de peso. |
 | 4 | Medicamentos | Parcial: cadastro (quantidade e unidade, concentração, frequência, períodos com horário, início, fim ou uso contínuo), "Remédios de hoje" com marcação de dose dada (quem e quando) e resumo no Início. Falta o lembrete por push e a repetição em 30 minutos. |
 | 5 | Diário (antes "histórico de incidentes") | Parcial: sintomas, consultas, exames e outros, com calendário, agendamentos, contato ligado ao registro e o próximo agendamento no Início. Inclui fotos nos registros (até 4, com miniatura e tela cheia). Falta lembrete por push e aviso na central. |
 | 5b | Contatos | Concluído: agenda por casa, por tipo, com ligar, WhatsApp, email e mapa. |

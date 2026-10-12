@@ -69,7 +69,18 @@ AppUser? userFromSession(Session? session) {
   final user = session?.user;
   final email = user?.email;
   if (user == null || email == null || email.isEmpty) return null;
-  return AppUser(id: user.id, email: normalizeEmail(email));
+  final data = user.userMetadata ?? const <String, dynamic>{};
+  String? text(String key) {
+    final value = data[key];
+    return value is String && value.trim().isNotEmpty ? value.trim() : null;
+  }
+
+  return AppUser(
+    id: user.id,
+    email: normalizeEmail(email),
+    name: text('name'),
+    phone: text('phone'),
+  );
 }
 
 final deviceSupportedProvider = FutureProvider<bool>((ref) {

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
+import 'package:bowie/features/auth/presentation/account_page.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
 import 'package:bowie/core/dates.dart';
@@ -218,6 +219,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      GoRoute(path: '/conta', builder: (context, state) => const AccountPage()),
       GoRoute(
         path: '/notificacoes',
         builder: (context, state) => const NotificationsPage(),

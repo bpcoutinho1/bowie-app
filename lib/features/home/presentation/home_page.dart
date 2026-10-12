@@ -29,6 +29,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final home = ref.watch(petsHomeProvider);
     final colors = context.colors;
+    final user = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,6 +57,24 @@ class HomePage extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(BowieSpacing.s4),
             children: [
+              if (user != null && !user.profileComplete) ...[
+                BowieCard(
+                  onTap: () => context.push('/conta'),
+                  child: ListTile(
+                    leading: Icon(LucideIcons.circleUser, color: colors.info),
+                    title: Text(
+                      'Complete o seu cadastro',
+                      style: BowieType.bodyStrong,
+                    ),
+                    subtitle: const Text(
+                      'Adicione o seu nome e celular para quem cuida do pet '
+                      'com você.',
+                    ),
+                    trailing: const Icon(LucideIcons.chevronRight),
+                  ),
+                ),
+                const SizedBox(height: BowieSpacing.s3),
+              ],
               for (final invite in data.invites) ...[
                 BowieCard(
                   onTap: () => context.go('/pets'),

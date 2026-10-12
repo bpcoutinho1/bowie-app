@@ -2,7 +2,7 @@
 
 O acesso ao app tem duas etapas:
 
-1. **Conta no Supabase**: email e senha, feito uma vez. A sessão fica salva no armazenamento seguro do aparelho.
+1. **Conta no Supabase**: nome, celular, email e senha, feito uma vez. A sessão fica salva no armazenamento seguro do aparelho.
 2. **Desbloqueio do aparelho**: Face ID, Touch ID, impressão digital, reconhecimento facial ou código do aparelho, a cada vez que o app é aberto.
 
 ## O portão de autenticação (`AuthGate`)
@@ -51,9 +51,14 @@ Definidas em `lib/app/router.dart`. A função `redirectFor` leva o usuário par
 | `/pets` | `PetsPage` (aba Pets) | `AuthGate.ready` |
 | `/pets/new` | `PetPage` sem id (novo pet) | `AuthGate.ready` |
 | `/pets/:id` | `PetPage` com id (detalhes) | `AuthGate.ready` |
+| `/conta` | `AccountPage` ("Minha conta", pelo ícone de pessoa na aba Pets): nome, celular, email e "Sair da conta" | `AuthGate.ready` |
 | `/notificacoes` | `NotificationsPage` (aberta pelo sino, ainda vazia) | `AuthGate.ready` |
 
 Em `ready`, quem estiver em `/login`, `/unlock` ou `/loading` é levado para `/inicio` (`homeLocation`). Nos outros estados, qualquer rota leva para a tela do estado.
+
+## Nome e celular
+
+O cadastro pede nome e celular, além de email e senha. `checkProfile` (`lib/features/auth/domain/app_user.dart`) limpa os espaços do nome (2 a 80 caracteres) e aceita só celular com DDD (11 dígitos, começando com 9 depois do DDD; um +55 na frente é ignorado). Os dois vão para o `user_metadata` da conta (`signUp(data: ...)`, e `updateUser` em "Minha conta") como `name` e `phone` (só dígitos). `userFromSession` lê esses campos para o `AppUser`; `profileComplete` é falso nas contas antigas, e o Início mostra "Complete o seu cadastro" até a pessoa preencher.
 
 ## Abas
 
