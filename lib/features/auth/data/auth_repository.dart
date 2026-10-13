@@ -44,6 +44,55 @@ class AuthRepository {
     }
   }
 
+  /// Emails a code to create a new password. The server answers the same
+  /// whether or not the email has an account, so nobody learns who uses
+  /// the app.
+  Future<void> sendPasswordCode(String email) async {
+    if (!emailLooksValid(email)) {
+      throw const AppFailure('Digite um email válido.');
+    }
+    try {
+      await _require().auth.resetPasswordForEmail(normalizeEmail(email));
+    } on AuthException catch (error) {
+      throw AppFailure(authMessage(error));
+    }
+  }
+
+  /// Checks the emailed code, which signs the person in, and saves the new
+  /// password right away.
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final digits = code.replaceAll(RegExp(r'\s'), '');
+    if (!RegExp(r'^\d{6,10}$').hasMatch(digits)) {
+      throw const AppFailure('Digite o código de 6 números que enviamos.');
+    }
+    _checkPassword(newPassword);
+    final client = _require();
+    try {
+      await client.auth.verifyOTP(
+        email: normalizeEmail(email),
+        token: digits,
+        type: OtpType.recovery,
+      );
+      await client.auth.updateUser(UserAttributes(password: newPassword));
+    } on AuthException catch (error) {
+      throw AppFailure(authMessage(error));
+    }
+  }
+
+  /// A new password for the account already signed in.
+  Future<void> changePassword(String newPassword) async {
+    _checkPassword(newPassword);
+    try {
+      await _require().auth.updateUser(UserAttributes(password: newPassword));
+    } on AuthException catch (error) {
+      throw AppFailure(authMessage(error));
+    }
+  }
+
   /// Saves the name and cell phone in the account. The session updates, so
   /// the new values reach the app by itself.
   Future<void> updateProfile({
@@ -76,6 +125,10 @@ class AuthRepository {
     if (!emailLooksValid(email)) {
       throw const AppFailure('Digite um email válido.');
     }
+    _checkPassword(password);
+  }
+
+  void _checkPassword(String password) {
     if (password.length < 6) {
       throw const AppFailure('A senha precisa ter pelo menos 6 caracteres.');
     }
@@ -109,6 +162,9 @@ String authMessage(AuthException error) {
     'email_not_confirmed' =>
       'Confirme o seu email pelo link que enviamos e tente de novo.',
     'weak_password' => 'Escolha uma senha mais forte.',
+    'otp_expired' ||
+    'otp_disabled' => 'Código inválido ou vencido. Peça um novo código.',
+    'same_password' => 'Escolha uma senha diferente da anterior.',
     'email_address_invalid' => 'Digite um email válido.',
     'email_address_not_authorized' =>
       'O servidor não pode enviar emails para este endereço. Tente outro email.',

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/account_page.dart';
+import 'package:bowie/features/auth/presentation/forgot_password_page.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
 import 'package:bowie/core/dates.dart';
@@ -31,13 +32,19 @@ import 'package:bowie/features/shopping/presentation/shopping_page.dart';
 /// Where a ready session lands.
 const homeLocation = '/inicio';
 
+/// Signed-out screens: entering and recovering the password.
+const _signedOutLocations = {'/login', '/recuperar-senha'};
+
 String? redirectFor(AuthGate gate, String location) {
   return switch (gate) {
     AuthGate.loading => location == '/loading' ? null : '/loading',
-    AuthGate.signedOut => location == '/login' ? null : '/login',
+    AuthGate.signedOut =>
+      _signedOutLocations.contains(location) ? null : '/login',
     AuthGate.locked => location == '/unlock' ? null : '/unlock',
     AuthGate.ready =>
-      location == '/login' || location == '/unlock' || location == '/loading'
+      _signedOutLocations.contains(location) ||
+              location == '/unlock' ||
+              location == '/loading'
           ? homeLocation
           : null,
   };
@@ -61,6 +68,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoadingPage(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/recuperar-senha',
+        builder: (context, state) =>
+            ForgotPasswordPage(email: state.uri.queryParameters['email']),
+      ),
       GoRoute(path: '/unlock', builder: (context, state) => const UnlockPage()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),

@@ -110,6 +110,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           ),
           const SizedBox(height: BowieSpacing.s8),
           OutlinedButton.icon(
+            onPressed: _saving ? null : _changePassword,
+            icon: const Icon(LucideIcons.keyRound),
+            label: const Text('Trocar a senha'),
+          ),
+          const SizedBox(height: BowieSpacing.s3),
+          OutlinedButton.icon(
             onPressed: _saving ? null : () => signOut(ref),
             icon: const Icon(LucideIcons.logOut),
             label: const Text('Sair da conta'),
@@ -117,6 +123,18 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _changePassword() async {
+    final changed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const _PasswordDialog(),
+    );
+    if (changed == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Senha trocada')));
+    }
   }
 
   Future<void> _save() async {
@@ -137,6 +155,71 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       if (mounted) setState(() => _error = error.message);
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+}
+
+class _PasswordDialog extends ConsumerStatefulWidget {
+  const _PasswordDialog();
+
+  @override
+  ConsumerState<_PasswordDialog> createState() => _PasswordDialogState();
+}
+
+class _PasswordDialogState extends ConsumerState<_PasswordDialog> {
+  final _password = TextEditingController();
+  var _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Trocar a senha'),
+      content: TextField(
+        controller: _password,
+        enabled: !_busy,
+        autofocus: true,
+        obscureText: true,
+        autofillHints: const [AutofillHints.newPassword],
+        onSubmitted: (_) => _save(),
+        decoration: InputDecoration(
+          labelText: 'Senha nova',
+          helperText: 'Pelo menos 6 caracteres.',
+          errorText: _error,
+          errorMaxLines: 3,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.of(context).pop(false),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: _busy ? null : _save,
+          child: Text(_busy ? 'Salvando' : 'Salvar'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _save() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(authRepositoryProvider).changePassword(_password.text);
+      if (mounted) Navigator.of(context).pop(true);
+    } on AppFailure catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 }

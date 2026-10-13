@@ -44,6 +44,7 @@ Definidas em `lib/app/router.dart`. A função `redirectFor` leva o usuário par
 | --- | --- | --- |
 | `/loading` | `LoadingPage` (spinner) | `AuthGate.loading` |
 | `/login` | `LoginPage` | `AuthGate.signedOut` |
+| `/recuperar-senha?email=` | `ForgotPasswordPage` ("Esqueci minha senha", no login) | `AuthGate.signedOut` |
 | `/unlock` | `UnlockPage` | `AuthGate.locked` |
 | `/inicio` | `HomePage` (aba Início) | `AuthGate.ready` |
 | `/saude` | `HealthPage` (aba Saúde) e as rotas de doses em [saúde](saude.md) | `AuthGate.ready` |
@@ -54,11 +55,24 @@ Definidas em `lib/app/router.dart`. A função `redirectFor` leva o usuário par
 | `/conta` | `AccountPage` ("Minha conta", pelo ícone de pessoa na aba Pets): nome, celular, email e "Sair da conta" | `AuthGate.ready` |
 | `/notificacoes` | `NotificationsPage` (aberta pelo sino, ainda vazia) | `AuthGate.ready` |
 
-Em `ready`, quem estiver em `/login`, `/unlock` ou `/loading` é levado para `/inicio` (`homeLocation`). Nos outros estados, qualquer rota leva para a tela do estado.
+Em `ready`, quem estiver em `/login`, `/recuperar-senha`, `/unlock` ou `/loading` é levado para `/inicio` (`homeLocation`). Nos outros estados, qualquer rota leva para a tela do estado.
 
 ## Nome e celular
 
 O cadastro pede nome e celular, além de email e senha. `checkProfile` (`lib/features/auth/domain/app_user.dart`) limpa os espaços do nome (2 a 80 caracteres) e aceita só celular com DDD (11 dígitos, começando com 9 depois do DDD; um +55 na frente é ignorado). Os dois vão para o `user_metadata` da conta (`signUp(data: ...)`, e `updateUser` em "Minha conta") como `name` e `phone` (só dígitos). `userFromSession` lê esses campos para o `AppUser`; `profileComplete` é falso nas contas antigas, e o Início mostra "Complete o seu cadastro" até a pessoa preencher.
+
+## Recuperar a senha
+
+Por código de 6 números enviado por email, sem link: funciona sem domínio e sem abrir o app por um link.
+
+1. "Esqueci minha senha", no login, abre `/recuperar-senha` com o email já digitado.
+2. "Enviar código" chama `AuthRepository.sendPasswordCode` (`resetPasswordForEmail`). A tela diz "Se houver uma conta com…", porque o servidor responde igual com ou sem conta. "Reenviar o código" fica bloqueado por 60 s.
+3. A pessoa digita o código e a senha nova. `resetPassword` confere o formato (6 a 10 números, senha com 6 ou mais caracteres), valida o código (`verifyOTP`, tipo `recovery`), o que já entra na conta, e grava a senha nova (`updateUser`) em seguida. Com a sessão, o `AuthGate` leva ao desbloqueio do aparelho e ao app.
+4. Código errado ou vencido mostra "Código inválido ou vencido. Peça um novo código."
+
+O email precisa do modelo com `{{ .Token }}` no Supabase: veja [ativar a recuperação de senha](../guias/recuperacao-de-senha.md).
+
+Logado, "Minha conta" tem "Trocar a senha" (`changePassword`).
 
 ## Abas
 

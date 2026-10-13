@@ -13,6 +13,7 @@ void main() {
   test('signed out users can only see login', () {
     expect(redirectFor(AuthGate.signedOut, '/login'), isNull);
     expect(redirectFor(AuthGate.signedOut, '/pets/new'), '/login');
+    expect(redirectFor(AuthGate.signedOut, '/recuperar-senha'), isNull);
   });
 
   test('a saved session stays locked until the device is unlocked', () {
@@ -24,6 +25,8 @@ void main() {
     expect(redirectFor(AuthGate.ready, '/login'), homeLocation);
     expect(redirectFor(AuthGate.ready, '/unlock'), homeLocation);
     expect(redirectFor(AuthGate.ready, '/loading'), homeLocation);
+    // Recovering the password signs in: then the app opens.
+    expect(redirectFor(AuthGate.ready, '/recuperar-senha'), homeLocation);
     expect(redirectFor(AuthGate.ready, homeLocation), isNull);
     expect(redirectFor(AuthGate.ready, '/pets'), isNull);
     expect(redirectFor(AuthGate.ready, '/pets/new'), isNull);
