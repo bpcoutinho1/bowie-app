@@ -20,6 +20,7 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 
 - **O plano é do tutor principal**: quem cria a conta e cadastra os pets. Os tutores convidados usam os pets dele sem pagar e sem contar no limite.
 - **A mesma conta pode ter os dois papéis** (decisão de 18 de outubro de 2026): ser tutor principal dos próprios pets e tutor convidado nos pets de outra casa. Só os pets em que a pessoa é tutor principal contam no plano dela.
+- **Os limites do plano grátis valem para sempre** (decisão de 18 de outubro de 2026): não se renovam a cada mês. Usadas as 3 fotos lidas por IA ou os 10 arquivos do diário, mais só no Premium. É o convite para assinar.
 - **O limite de leitura conta fotos, não leituras.** Uma leitura com 2 páginas gasta 2 das 3 fotos do plano grátis.
 - **O limite de 10 arquivos vale para o diário.** Os comprovantes de vacina não contam: ficam sempre no plano grátis.
 - **30 dias de Premium grátis** para toda conta nova, **sem cartão**. Ao fim, a conta volta para o grátis; quem quiser continuar com o Premium (por exemplo, por ter mais de um pet) assina.

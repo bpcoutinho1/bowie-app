@@ -13,7 +13,7 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Planos
 
-- [ ] Os limites do plano grátis (3 fotos lidas por IA e 10 arquivos no diário) valem para sempre ou se renovam todo mês?
+- [ ] Apagar uma foto ou PDF do diário libera espaço no limite de 10 arquivos do plano grátis?
 
 ## Negócio
 
