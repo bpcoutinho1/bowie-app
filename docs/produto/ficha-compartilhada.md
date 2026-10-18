@@ -33,7 +33,7 @@ Os PDFs do diário entram automaticamente na ficha do veterinário.
 
 ## Endereço
 
-Enquanto o Bowie não tem domínio próprio, a ficha fica no GitHub Pages: `https://bpcoutinho1.github.io/bowie-app/ficha/`. Quando houver domínio, o endereço muda numa configuração do app (`SHARE_BASE_URL`), e os links antigos continuam funcionando enquanto a página antiga existir.
+A ficha fica em `https://ficha.bowieapp.pet/`, no GitHub Pages com o domínio do Bowie. O link é o endereço seguido do código: `https://ficha.bowieapp.pet/#código`. Os links criados antes do domínio (`bpcoutinho1.github.io/bowie-app/ficha/`) continuam abrindo.
 
 ## Depois
 

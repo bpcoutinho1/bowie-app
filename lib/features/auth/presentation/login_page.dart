@@ -6,6 +6,7 @@ import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/features/auth/data/auth_repository.dart';
 import 'package:bowie/core/ui/bowie_logo.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -181,6 +182,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
+  void _confirm({required bool justSent}) {
+    context.go(
+      Uri(
+        path: '/confirmar-email',
+        queryParameters: {
+          'email': _email.text.trim(),
+          if (justSent) 'enviado': '1',
+        },
+      ).toString(),
+    );
+  }
+
   Future<void> _submit() async {
     setState(() {
       _busy = true;
@@ -197,15 +210,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           password: _password.text,
         );
         if (needsConfirmation && mounted) {
-          setState(() {
-            _creating = false;
-            _notice =
-                'Enviamos um link para o seu email. Confirme a conta e depois entre.';
-          });
+          _confirm(justSent: true);
         }
       } else {
         await auth.signIn(email: _email.text, password: _password.text);
       }
+    } on EmailNotConfirmed {
+      if (mounted) _confirm(justSent: false);
     } on AppFailure catch (error) {
       if (mounted) setState(() => _error = error.message);
     } finally {

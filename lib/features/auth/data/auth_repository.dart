@@ -4,6 +4,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 
+/// Sign in refused because the email was never confirmed: the app offers
+/// the code screen.
+class EmailNotConfirmed extends AppFailure {
+  const EmailNotConfirmed()
+    : super('Confirme o seu email com o código que enviamos e tente de novo.');
+}
+
 class AuthRepository {
   const AuthRepository(this._client);
 
@@ -19,6 +26,7 @@ class AuthRepository {
         password: password,
       );
     } on AuthException catch (error) {
+      if (error.code == 'email_not_confirmed') throw const EmailNotConfirmed();
       throw AppFailure(authMessage(error));
     }
   }
@@ -44,6 +52,48 @@ class AuthRepository {
     }
   }
 
+  /// Checks the code emailed at sign up, which confirms the account and
+  /// signs the person in.
+  Future<void> confirmEmail({
+    required String email,
+    required String code,
+  }) async {
+    final digits = _code(code);
+    try {
+      await _require().auth.verifyOTP(
+        email: normalizeEmail(email),
+        token: digits,
+        type: OtpType.email,
+      );
+    } on AuthException catch (error) {
+      throw AppFailure(authMessage(error));
+    }
+  }
+
+  /// Sends the sign-up code again.
+  Future<void> resendConfirmation(String email) async {
+    if (!emailLooksValid(email)) {
+      throw const AppFailure('Digite um email válido.');
+    }
+    try {
+      await _require().auth.resend(
+        type: OtpType.signup,
+        email: normalizeEmail(email),
+      );
+    } on AuthException catch (error) {
+      throw AppFailure(authMessage(error));
+    }
+  }
+
+  /// The digits of an emailed code, or an [AppFailure].
+  String _code(String code) {
+    final digits = code.replaceAll(RegExp(r'\s'), '');
+    if (!RegExp(r'^\d{6,10}$').hasMatch(digits)) {
+      throw const AppFailure('Digite o código de 6 números que enviamos.');
+    }
+    return digits;
+  }
+
   /// Emails a code to create a new password. The server answers the same
   /// whether or not the email has an account, so nobody learns who uses
   /// the app.
@@ -65,10 +115,7 @@ class AuthRepository {
     required String code,
     required String newPassword,
   }) async {
-    final digits = code.replaceAll(RegExp(r'\s'), '');
-    if (!RegExp(r'^\d{6,10}$').hasMatch(digits)) {
-      throw const AppFailure('Digite o código de 6 números que enviamos.');
-    }
+    final digits = _code(code);
     _checkPassword(newPassword);
     final client = _require();
     try {
@@ -160,7 +207,7 @@ String authMessage(AuthException error) {
     'user_already_exists' ||
     'email_exists' => 'Já existe uma conta com este email. Tente entrar.',
     'email_not_confirmed' =>
-      'Confirme o seu email pelo link que enviamos e tente de novo.',
+      'Confirme o seu email com o código que enviamos e tente de novo.',
     'weak_password' => 'Escolha uma senha mais forte.',
     'otp_expired' ||
     'otp_disabled' => 'Código inválido ou vencido. Peça um novo código.',

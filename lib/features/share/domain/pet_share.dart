@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:math';
 
-/// Where the shared sheet is published (web-share/, on GitHub Pages). The
-/// token goes after the "#", so it never reaches that server.
+/// Where the shared sheet is published (web-share/, on GitHub Pages, under
+/// the Bowie domain). The token goes after the "#", so it never reaches that
+/// server. The root forwards to the sheet page, which keeps links short.
 const shareBaseUrl = String.fromEnvironment(
   'SHARE_BASE_URL',
-  defaultValue: 'https://bpcoutinho1.github.io/bowie-app/ficha/',
+  defaultValue: 'https://ficha.bowieapp.pet/',
 );
 
 /// How long a link works (docs/produto/ficha-compartilhada.md).

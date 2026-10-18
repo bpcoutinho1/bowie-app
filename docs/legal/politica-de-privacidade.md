@@ -6,7 +6,7 @@ O Bowie é um app para registrar a vida do seu cão ou gato e dividir o cuidado 
 
 ## Quem é o responsável pelos dados
 
-O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie. Contato para qualquer assunto de privacidade: **[EMAIL DE CONTATO]**.
+O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie. Contato para qualquer assunto de privacidade: **contato@bowieapp.pet**.
 
 ## Quais dados o Bowie guarda
 
@@ -62,7 +62,7 @@ Pela LGPD (art. 18), você pode pedir, a qualquer momento:
 - informação sobre com quem os dados são compartilhados;
 - revogação do consentimento para a leitura da carteirinha. Basta não usar mais a função; as fotos já enviadas não ficam guardadas pelo Bowie.
 
-Nesta versão de teste, os pedidos de cópia e de exclusão são feitos pelo email **[EMAIL DE CONTATO]** e atendidos em até 15 dias. A exclusão de conta dentro do app está em desenvolvimento.
+Nesta versão de teste, os pedidos de cópia e de exclusão são feitos pelo email **contato@bowieapp.pet** e atendidos em até 15 dias. A exclusão de conta dentro do app está em desenvolvimento.
 
 Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).
 
