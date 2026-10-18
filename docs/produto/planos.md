@@ -31,4 +31,4 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 ## Antes de cobrar
 
 - Guardar no banco o plano de cada tutor principal (grátis, teste ou Premium, e até quando), para não precisar migrar dados depois.
-- Contar as leituras por IA de cada conta no servidor (a Edge Function `read-vaccine-card`).
+- Contar no servidor, por conta, as fotos lidas por IA (a Edge Function `read-vaccine-card`) e os envios de arquivos do diário. Os contadores nunca diminuem: apagar não devolve.
