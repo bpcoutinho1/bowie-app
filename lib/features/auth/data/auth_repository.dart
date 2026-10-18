@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/features/auth/data/social_sign_in.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 
 /// Sign in refused because the email was never confirmed: the app offers
@@ -27,6 +28,32 @@ class AuthRepository {
       );
     } on AuthException catch (error) {
       if (error.code == 'email_not_confirmed') throw const EmailNotConfirmed();
+      throw AppFailure(authMessage(error));
+    }
+  }
+
+  /// Signs in (or creates the account) with what Google or Apple returned.
+  /// An existing account with the same email is the same account.
+  Future<void> signInWithToken(SocialToken token) async {
+    final client = _require();
+    try {
+      final response = await client.auth.signInWithIdToken(
+        provider: switch (token.provider) {
+          SocialProvider.google => OAuthProvider.google,
+          SocialProvider.apple => OAuthProvider.apple,
+        },
+        idToken: token.idToken,
+        nonce: token.nonce,
+      );
+      // Google fills in the name; Apple sends it only the first time, and
+      // only to the app. Keep it, unless the account already has one.
+      final name = token.name;
+      final current = response.user?.userMetadata?['name'];
+      final hasName = current is String && current.trim().isNotEmpty;
+      if (name != null && !hasName) {
+        await client.auth.updateUser(UserAttributes(data: {'name': name}));
+      }
+    } on AuthException catch (error) {
       throw AppFailure(authMessage(error));
     }
   }

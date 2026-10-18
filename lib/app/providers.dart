@@ -8,6 +8,7 @@ import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
 import 'package:bowie/features/auth/data/device_lock.dart';
+import 'package:bowie/features/auth/data/social_sign_in.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
@@ -60,6 +61,14 @@ class UnlockedController extends Notifier<bool> {
 
   void lock() => state = false;
 }
+
+final socialConfigProvider = Provider<SocialConfig>(
+  (ref) => SocialConfig.fromEnvironment(),
+);
+
+final socialSignInProvider = Provider<SocialSignIn>(
+  (ref) => NativeSocialSignIn(ref.watch(socialConfigProvider)),
+);
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ref.watch(supabaseClientProvider));
