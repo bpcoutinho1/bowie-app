@@ -11,7 +11,11 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 - [ ] O prestador tem conta própria no Bowie, e como o tutor autoriza o acesso a um pet?
 - [ ] O Bowie Biz é pago? Por quem: prestador, tutor ou os dois?
 
+## Planos
+
+- [ ] Limite de fotos e PDFs do diário no plano grátis: 20 arquivos foi só um exemplo.
+- [ ] Quem já é tutor convidado e quer cadastrar um pet próprio precisa de outra conta, com outro email? Ou a mesma conta pode ser tutor principal dos próprios pets e convidada nos de outra casa (como o app faz hoje)?
+
 ## Negócio
 
-- [ ] Quais funções serão pagas no plano freemium, e a partir de quando?
 - [ ] Quando o app passa a usar links de afiliado, e com quais lojas?

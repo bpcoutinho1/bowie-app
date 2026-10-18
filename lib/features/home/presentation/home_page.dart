@@ -7,7 +7,6 @@ import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
-import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/features/diary/data/diary_repository.dart';
@@ -15,7 +14,10 @@ import 'package:bowie/features/diary/presentation/diary_providers.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
+import 'package:bowie/features/onboarding/domain/pet_checklist.dart';
+import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/pets/domain/birthday.dart';
+import 'package:bowie/features/reminders/presentation/reminder_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_photo.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
@@ -42,17 +44,9 @@ class HomePage extends ConsumerWidget {
           child: Text('Não foi possível ler os pets salvos no celular.'),
         ),
         data: (data) {
+          // A new account starts the first-use path from here.
           if (data.pets.isEmpty && data.invites.isEmpty) {
-            return EmptyState(
-              icon: LucideIcons.pawPrint,
-              title: 'Boas-vindas ao Bowie',
-              message:
-                  'Comece cadastrando o seu pet. Depois, convide quem cuida dele com você.',
-              action: FilledButton(
-                onPressed: () => context.push('/pets/new'),
-                child: const Text('Cadastrar pet'),
-              ),
-            );
+            return const WelcomeView();
           }
           return ListView(
             padding: const EdgeInsets.all(BowieSpacing.s4),
@@ -106,7 +100,9 @@ class HomePage extends ConsumerWidget {
                   onTap: () => context.push('/pets/${pet.id}'),
                 ),
                 const SizedBox(height: BowieSpacing.s3),
+                _SheetProgress(pet: pet),
               ],
+              if (data.pets.isNotEmpty) const _RemindersTip(),
               const _AddPetCard(),
             ],
           );
@@ -306,6 +302,104 @@ class _NextVaccine extends ConsumerWidget {
     return StatusBadge(
       status: next.statusOn(today),
       text: '${next.name}: ${describeDue(next.latest.nextDueOn, today)}',
+    );
+  }
+}
+
+/// "Ficha do Bowie: 2 de 4", with what is missing. Gone once complete.
+class _SheetProgress extends ConsumerWidget {
+  const _SheetProgress({required this.pet});
+
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final groups = ref.watch(vaccineGroupsProvider(pet.id));
+    if (groups is! AsyncData<List<VaccineGroup>>) {
+      return const SizedBox.shrink();
+    }
+    final items = petChecklist(pet, hasVaccines: groups.value.isNotEmpty);
+    final done = items.where((item) => item.done).length;
+    if (done == items.length) return const SizedBox.shrink();
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BowieSpacing.s3),
+      child: BowieCard(
+        child: Padding(
+          padding: const EdgeInsets.all(BowieSpacing.s4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Ficha ${ofPet(pet)}: $done de ${items.length}',
+                style: BowieType.bodyStrong.copyWith(color: colors.text),
+              ),
+              const SizedBox(height: BowieSpacing.s2),
+              Semantics(
+                label: '$done de ${items.length} itens preenchidos',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(BowieRadius.full),
+                  child: LinearProgressIndicator(
+                    value: done / items.length,
+                    minHeight: 8,
+                    color: colors.success,
+                    backgroundColor: colors.surfaceMuted,
+                  ),
+                ),
+              ),
+              const SizedBox(height: BowieSpacing.s2),
+              Text(
+                'Complete para ter a ficha pronta para hotéis e veterinários.',
+                style: BowieType.callout.copyWith(color: colors.textMuted),
+              ),
+              const SizedBox(height: BowieSpacing.s2),
+              Wrap(
+                spacing: BowieSpacing.s2,
+                runSpacing: BowieSpacing.s2,
+                children: [
+                  for (final item in items)
+                    if (!item.done)
+                      ActionChip(
+                        avatar: Icon(
+                          LucideIcons.plus,
+                          size: 18,
+                          color: colors.text,
+                        ),
+                        label: Text(item.label),
+                        tooltip: 'Adicionar ${item.label.toLowerCase()}',
+                        onPressed: () => context.push(item.route),
+                      ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+const _remindersTipKey = 'reminders_tip_dismissed_v1';
+
+final _remindersTipDismissedProvider = FutureProvider.autoDispose<bool>(
+  (ref) => ref.watch(flagsProvider).isSet(_remindersTipKey),
+);
+
+/// Asks once to turn on the reminders, for whoever skipped the first-use
+/// path. "Agora não" hides it for good.
+class _RemindersTip extends ConsumerWidget {
+  const _RemindersTip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dismissed = ref.watch(_remindersTipDismissedProvider).asData?.value;
+    final enabled = ref.watch(notificationsEnabledProvider).asData?.value;
+    if (dismissed != false || enabled != false) return const SizedBox.shrink();
+    return NotificationsPrompt(
+      onDismiss: () async {
+        await ref.read(flagsProvider).set(_remindersTipKey);
+        ref.invalidate(_remindersTipDismissedProvider);
+      },
     );
   }
 }

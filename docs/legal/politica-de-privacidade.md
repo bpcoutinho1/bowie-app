@@ -26,6 +26,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 **O que o Bowie não coleta**
 - Não usa publicidade, não vende dados e não usa ferramentas de rastreamento ou de análise de terceiros.
 - Não acessa os seus contatos do celular, a sua localização nem outras fotos além das que você escolher.
+- Os lembretes (vacina perto de vencer, aniversário) são agendados no próprio celular. Nada é enviado a outro serviço para isso.
 - O Face ID (ou a digital) é verificado pelo próprio celular. O Bowie só recebe a resposta "liberado" ou "não liberado".
 
 ## Para que os dados são usados

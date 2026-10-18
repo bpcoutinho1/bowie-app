@@ -63,7 +63,7 @@ O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e íc
 
 ### Lembrete
 
-- Notificação no celular (push) **7 dias antes** do vencimento.
+- Notificação no celular **7 dias antes** do vencimento, às 9h. Já existe como lembrete agendado no celular (veja [notificações](notificacoes.md#lembretes-no-celular)).
 - Vai para todos os tutores do pet. Não dá para desligar, como as demais [notificações](notificacoes.md).
 - O lembrete precisa funcionar mesmo que ninguém abra o app nesses dias.
 
