@@ -21,6 +21,7 @@ Não precisa criar segredo: `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já exi
 2. Em **Settings → Secrets and variables → Actions → aba Variables → New repository variable**: nome `SUPABASE_URL`, valor a URL do projeto (a mesma do `dart_defines.json`, como `https://xxxx.supabase.co`). É uma variável, não um segredo: ela aparece na página publicada.
 3. Em **Actions → Ficha compartilhada (GitHub Pages) → Run workflow**, rode uma vez. Depois disso, cada mudança em `web-share/` na `main` publica sozinha.
 4. Confira `https://bpcoutinho1.github.io/bowie-app/`: deve aparecer o logo do Bowie.
+5. Configure o domínio `ficha.bowieapp.pet`: veja [domínio](dominio.md#ficha-em-fichabowieapppet).
 
 ## 4. Testar
 

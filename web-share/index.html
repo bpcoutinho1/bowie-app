@@ -8,6 +8,13 @@
   <link rel="icon" href="brand/bowie-symbol.svg" type="image/svg+xml">
   <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="ficha/ficha.css">
+  <script>
+    // Links from the app are the root with the token after the "#": open the
+    // sheet. The "#" part is never sent to the server.
+    if (/^#[A-Za-z0-9_-]{32,64}$/.test(location.hash)) {
+      location.replace('ficha/' + location.hash);
+    }
+  </script>
 </head>
 <body>
   <main class="page center">

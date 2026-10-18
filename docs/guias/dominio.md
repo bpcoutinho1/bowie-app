@@ -1,23 +1,40 @@
-# Domínio bowie.app
+# Domínio bowieapp.pet
 
-Plano combinado com o fundador em 12 de outubro de 2026. O domínio não é pré-requisito para testar o app: até ele existir, a ficha compartilhada fica em `bpcoutinho1.github.io/bowie-app/ficha/` (veja [publicar a ficha](ficha-compartilhada.md)).
+O domínio `bowieapp.pet` foi comprado no Hostinger, com o email `contato@bowieapp.pet` (18 de outubro de 2026).
 
 ## Divisão
 
 | Endereço | O que fica lá | Onde é hospedado |
 | --- | --- | --- |
-| `bowie.app` | Landing page | Projeto separado do fundador |
-| `ficha.bowie.app` | Ficha compartilhada (`web-share/`) | GitHub Pages, deste repositório |
+| `bowieapp.pet` | Landing page | Projeto separado do fundador |
+| `ficha.bowieapp.pet` | Ficha compartilhada (`web-share/`) | GitHub Pages, deste repositório |
+| `contato@bowieapp.pet` | Contato e remetente dos emails da conta | Email do Hostinger |
 
 O subdomínio deixa os dois projetos independentes: publicar a landing não quebra as fichas, e vice-versa.
 
-## Passo a passo, quando o domínio estiver registrado
+## Ficha em ficha.bowieapp.pet
 
-1. **DNS da ficha:** no painel de quem vendeu o domínio, crie um registro `CNAME` com nome `ficha` e valor `bpcoutinho1.github.io`.
-2. **GitHub Pages:** em Settings → Pages → Custom domain, coloque `ficha.bowie.app`, salve e marque **Enforce HTTPS** quando o GitHub liberar.
-3. **Esperar o certificado:** todo domínio `.app` só abre com HTTPS. O GitHub gera o certificado sozinho; leva de alguns minutos a uma hora depois do DNS.
-4. **App:** o endereço da ficha (`shareBaseUrl`, em `lib/features/share/domain/pet_share.dart`, ou `--dart-define=SHARE_BASE_URL=...`) passa a ser `https://ficha.bowie.app/`. Os QR codes novos já saem com o domínio. Os links antigos do GitHub Pages param de funcionar quando o domínio próprio é configurado no Pages; quem precisar gera um link novo.
-5. **Emails:** configure um SMTP próprio no Supabase (Authentication → Emails → SMTP Settings), com remetente como `nao-responda@bowie.app`. O remetente padrão do Supabase tem limite baixo de envios por hora e cai no spam com facilidade. Isso afeta a confirmação de conta e a recuperação de senha.
-6. **Textos:** atualize a política de privacidade e os documentos que citam o endereço da ficha.
+Faça na ordem. O app novo já gera links com `ficha.bowieapp.pet`, então configure isto antes de instalar a versão nova no iPhone.
 
-Para os passos 1 e 5, informe onde o domínio foi comprado (Cloudflare, Squarespace, GoDaddy, Registro.br etc.): os nomes dos campos mudam de um painel para outro.
+1. **DNS no Hostinger:** no hPanel, abra **Domínios → bowieapp.pet → DNS / Nameservers** e adicione um registro:
+
+   | Tipo | Nome | Aponta para | TTL |
+   | --- | --- | --- | --- |
+   | CNAME | `ficha` | `bpcoutinho1.github.io` | o padrão |
+
+   Não mexa nos registros de `@` e `www` (são da landing) nem nos de email (MX, SPF, DKIM, DMARC).
+2. **GitHub Pages:** no repositório, **Settings → Pages → Custom domain**, digite `ficha.bowieapp.pet` e clique em **Save**. O GitHub confere o DNS; pode levar de alguns minutos a algumas horas.
+3. **HTTPS:** quando o GitHub liberar, marque **Enforce HTTPS** na mesma tela.
+4. **Verificar o domínio (recomendado):** na sua conta do GitHub (não no repositório), **Settings → Pages → Add a domain**, digite `bowieapp.pet` e crie no Hostinger o registro TXT que o GitHub mostrar. Isso impede que outra conta use um subdomínio seu no GitHub Pages.
+5. **Testar:** abra `https://ficha.bowieapp.pet`. Deve aparecer o logo do Bowie. Depois, crie um link novo no app e abra pelo QR code.
+
+Os links antigos (`bpcoutinho1.github.io/bowie-app/ficha/...`) continuam abrindo: o GitHub os redireciona para o domínio novo.
+
+## Emails
+
+Veja [emails da conta](emails.md): SMTP do Hostinger no Supabase e os modelos em português.
+
+## App
+
+- O endereço da ficha (`shareBaseUrl`, em `lib/features/share/domain/pet_share.dart`) é `https://ficha.bowieapp.pet/`. Dá para trocar sem mudar o código com `--dart-define=SHARE_BASE_URL=...`.
+- O identificador do app nas lojas continua `app.bowie`: ele não precisa ser igual ao domínio.

@@ -7,9 +7,9 @@ O que precisa existir para os primeiros testes com outras pessoas e, depois, par
 | Conta Apple Developer | Pendente | US$ 99 por ano. Necessária para o TestFlight (testes no iPhone) e para a App Store. A aprovação pode levar alguns dias. |
 | Conta Google Play Console | Pendente | US$ 25, pagamento único. Necessária para o teste interno e para o Google Play. |
 | Projeto no Supabase | Criado | Conferir a **região do servidor** (veja abaixo). |
-| Domínio | Pendente | `bowie.app`: landing page no domínio principal e a ficha compartilhada em `ficha.bowie.app`. Passo a passo em [domínio](../guias/dominio.md). |
+| Domínio | Comprado | `bowieapp.pet`, no Hostinger: landing page no domínio principal e a ficha compartilhada em `ficha.bowieapp.pet`. Passo a passo em [domínio](../guias/dominio.md). |
 | Página web | Parcial | A [política de privacidade](../legal/politica-de-privacidade.md) está escrita; o link dela no GitHub serve para o TestFlight. Faltam os termos de uso e a página do link de convite, com os botões das lojas. |
-| Email de envio | Pendente | Depende do domínio. Sem domínio próprio, os emails de convite tendem a cair no spam. |
+| Email de envio | Pronto para configurar | `contato@bowieapp.pet` (Hostinger) como remetente dos emails da conta, pelo SMTP do Supabase. Passo a passo em [emails da conta](../guias/emails.md). |
 
 ## Região do Supabase
 

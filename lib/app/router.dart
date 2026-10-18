@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/account_page.dart';
+import 'package:bowie/features/auth/presentation/confirm_email_page.dart';
 import 'package:bowie/features/auth/presentation/forgot_password_page.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
 import 'package:bowie/features/auth/presentation/unlock_page.dart';
@@ -34,7 +35,7 @@ import 'package:bowie/features/shopping/presentation/shopping_page.dart';
 const homeLocation = '/inicio';
 
 /// Signed-out screens: entering and recovering the password.
-const _signedOutLocations = {'/login', '/recuperar-senha'};
+const _signedOutLocations = {'/login', '/recuperar-senha', '/confirmar-email'};
 
 String? redirectFor(AuthGate gate, String location) {
   return switch (gate) {
@@ -69,6 +70,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoadingPage(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/confirmar-email',
+        builder: (context, state) => ConfirmEmailPage(
+          email: state.uri.queryParameters['email'] ?? '',
+          justSent: state.uri.queryParameters['enviado'] == '1',
+        ),
+      ),
       GoRoute(
         path: '/recuperar-senha',
         builder: (context, state) =>

@@ -1,5 +1,6 @@
 # Publishes the shared pet sheet (web-share/) on GitHub Pages:
-# https://bpcoutinho1.github.io/bowie-app/ficha/#<token>
+# https://ficha.bowieapp.pet/#<token> (custom domain set in Settings → Pages;
+# before that, https://bpcoutinho1.github.io/bowie-app/ficha/#<token>)
 #
 # One-time setup (docs/guias/ficha-compartilhada.md):
 # - Settings → Pages → Source: GitHub Actions.
