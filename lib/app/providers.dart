@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bowie/core/config/app_config.dart';
 import 'package:bowie/core/documents.dart';
+import 'package:bowie/core/flags.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/core/sync/network_status.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
@@ -30,6 +31,8 @@ final petPhotoStoreProvider = Provider<PetPhotoStore>((ref) {
 });
 
 final photoPickerProvider = Provider<PhotoPicker>((ref) => ImagePickerPhotos());
+
+final flagsProvider = Provider<Flags>((ref) => PrefsFlags());
 
 final documentPickerProvider = Provider<DocumentPicker>(
   (ref) => const FilePickerDocuments(),

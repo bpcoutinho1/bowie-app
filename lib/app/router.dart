@@ -23,6 +23,7 @@ import 'package:bowie/features/health/presentation/health_note_form_page.dart';
 import 'package:bowie/features/health/presentation/health_page.dart';
 import 'package:bowie/features/health/presentation/medication_form_page.dart';
 import 'package:bowie/features/home/presentation/home_page.dart';
+import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/notifications/presentation/notifications_page.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
@@ -240,6 +241,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: '/conta', builder: (context, state) => const AccountPage()),
+      ...onboardingRoutes(),
       GoRoute(
         path: '/notificacoes',
         builder: (context, state) => const NotificationsPage(),

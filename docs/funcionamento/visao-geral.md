@@ -39,6 +39,7 @@ lib/
     error/               AppFailure, o erro que a interface mostra
     supabase/            SecureSessionStorage (sessão no armazenamento seguro)
     sync/                NetworkStatus (online/offline)
+    flags.dart           escolhas pequenas guardadas no celular (dicas dispensadas)
     documents.dart       escolher PDFs (file_picker) e abrir no visualizador (open_filex)
     ui/                  componentes compartilhados: BowieLogo, BowieCard, EmptyState, sino
   features/
@@ -50,6 +51,8 @@ lib/
     shopping/            aba Compras: lista da casa (veja compras.md)
     contacts/            Contatos da casa, na aba Pets (veja contatos.md)
     share/               ficha compartilhada: links, QR code (veja ficha-compartilhada.md)
+    onboarding/          primeiro uso: caminho guiado e a ficha no Início (veja primeiro-uso-e-lembretes.md)
+    reminders/           lembretes no celular: vacina e aniversário
     houses/              a casa (tutor principal e quem cuida dos pets dele), usada por Compras e Contatos
     notifications/       central de notificações (ainda vazia)
 android/                 projeto Android (Gradle)

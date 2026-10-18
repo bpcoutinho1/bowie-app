@@ -11,6 +11,7 @@ import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
+import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/breeds.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
@@ -27,9 +28,13 @@ final petDetailsProvider = FutureProvider.autoDispose
     });
 
 class PetPage extends ConsumerStatefulWidget {
-  const PetPage({super.key, this.petId});
+  const PetPage({super.key, this.petId, this.onboarding = false});
 
   final String? petId;
+
+  /// Step 1 of the first-use path: after saving, the path goes on to the
+  /// vaccines instead of opening the pet.
+  final bool onboarding;
 
   @override
   ConsumerState<PetPage> createState() => _PetPageState();
@@ -99,7 +104,15 @@ class _PetPageState extends ConsumerState<PetPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(petId == null ? 'Novo pet' : 'Pet')),
+      appBar: AppBar(
+        title: Text(
+          widget.onboarding
+              ? 'O seu pet'
+              : petId == null
+              ? 'Novo pet'
+              : 'Pet',
+        ),
+      ),
       body: switch (asyncDetails) {
         null => _form(context, details: null),
         AsyncLoading() => const Center(child: CircularProgressIndicator()),
@@ -133,6 +146,13 @@ class _PetPageState extends ConsumerState<PetPage> {
         BowieSpacing.s8,
       ),
       children: [
+        if (widget.onboarding) ...[
+          const OnboardingStep(
+            step: 1,
+            text: 'Comece pelo básico. Dá para completar o resto depois.',
+          ),
+          gap,
+        ],
         _PhotoField(
           saved: _removePhoto ? null : details?.pet,
           picked: _newPhoto,
@@ -374,7 +394,11 @@ class _PetPageState extends ConsumerState<PetPage> {
         final pet = await repository.createPet(profile: profile, owner: user);
         await _savePhoto(pet.id, user);
         if (!mounted) return;
-        context.go('/pets/${pet.id}');
+        context.go(
+          widget.onboarding
+              ? '/boas-vindas/vacinas?pet=${pet.id}'
+              : '/pets/${pet.id}',
+        );
       } else {
         await repository.updatePet(
           petId: details.pet.id,

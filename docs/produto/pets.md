@@ -25,6 +25,7 @@ Decisão do fundador (12 de outubro de 2026): o app avisa o aniversário do pet 
 - Pets com idade aproximada (sem a data exata) não têm aviso, porque a data é uma estimativa.
 - 29 de fevereiro vira 28 de fevereiro nos anos sem esse dia.
 - O aniversário usa a cor Sorriso (`smile`), a de uso raro para afeto.
+- Além do aviso no Início, uma notificação no celular 7 dias antes, às 9h: "Bowie faz aniversário em 7 dias! Faça algo incrível para celebrar este dia!" (decisão de 17 de outubro de 2026).
 
 ### Peso
 

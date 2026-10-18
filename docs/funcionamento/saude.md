@@ -119,5 +119,4 @@ Qualquer tutor do pet (vínculo `accepted`) pode registrar, editar e excluir vac
 
 - Lembrete por push no horário de cada dose e a repetição em 30 minutos.
 
-- Lembrete por push 7 dias antes do vencimento.
 - Histórico de peso: a leitura só atualiza o peso atual do perfil.

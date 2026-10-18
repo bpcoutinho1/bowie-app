@@ -30,6 +30,20 @@ Quem já usa o app recebe o convite **apenas no app**, na central de notificaç�
 
 O convite pendente **expira em 30 dias**. Depois disso, o tutor principal pode reenviá-lo. Isso vale também para quem ainda não tem conta (veja [contas e tutores](contas-e-tutores.md#convite)).
 
+## Lembretes no celular
+
+Decidido com o fundador em 17 de outubro de 2026. Estes já existem, como notificações agendadas no próprio celular: funcionam sem internet e sem abrir o app, e nada sai do aparelho.
+
+| Lembrete | Quando | Texto |
+| --- | --- | --- |
+| Vacina ou vermífugo | 7 dias antes do vencimento da dose mais recente, às 9h | "A vacina V10 do Bowie vence em 7 dias." / "O vermífugo Drontal do Bowie vence em 7 dias." |
+| Aniversário | 7 dias antes, às 9h | "Bowie faz aniversário em 7 dias! Faça algo incrível para celebrar este dia!" |
+
+- Cada tutor recebe no próprio celular, para todos os pets de que cuida.
+- Pets com idade aproximada não têm lembrete de aniversário.
+- Tocar no lembrete abre a Saúde (vacina) ou a página do pet (aniversário).
+- A permissão é pedida no fim do [primeiro uso](primeiro-uso.md), depois de explicar para que serve.
+
 ## Notificação no app e push
 
 Só três eventos viram push no celular, além de aparecer na central:
