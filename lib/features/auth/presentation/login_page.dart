@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
+import 'package:bowie/features/auth/data/social_sign_in.dart';
 import 'package:bowie/core/ui/bowie_logo.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -40,6 +42,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final configProblem = ref.watch(appConfigProvider).problem;
     final configured = configProblem == null;
     final colors = context.colors;
+    final social = ref.watch(socialConfigProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -144,6 +147,52 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     )
                   : Text(_creating ? 'Criar conta' : 'Entrar'),
             ),
+            if (social.apple || social.google) ...[
+              const SizedBox(height: BowieSpacing.s4),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: BowieSpacing.s3,
+                    ),
+                    child: Text(
+                      'ou',
+                      style: BowieType.callout.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: BowieSpacing.s4),
+              if (social.apple) ...[
+                // Apple asks for its own button, black or white.
+                SignInWithAppleButton(
+                  text: 'Continuar com a Apple',
+                  height: 48,
+                  style: Theme.of(context).brightness == Brightness.dark
+                      ? SignInWithAppleButtonStyle.white
+                      : SignInWithAppleButtonStyle.black,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(BowieRadius.md),
+                  ),
+                  onPressed: () {
+                    if (!_busy) _social(SocialProvider.apple);
+                  },
+                ),
+                const SizedBox(height: BowieSpacing.s3),
+              ],
+              if (social.google)
+                OutlinedButton(
+                  onPressed: _busy
+                      ? null
+                      : () => _social(SocialProvider.google),
+                  child: const Text('Continuar com o Google'),
+                ),
+              const SizedBox(height: BowieSpacing.s2),
+            ],
             if (!_creating)
               TextButton(
                 onPressed: _busy || !configured
@@ -180,6 +229,41 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
       ),
     );
+  }
+
+  /// Google or Apple: no password, and the account is made on the first
+  /// time. Name and phone are asked afterwards, in "Complete o seu cadastro".
+  Future<void> _social(SocialProvider provider) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+      _notice = null;
+    });
+    final social = ref.read(socialSignInProvider);
+    final auth = ref.read(authRepositoryProvider);
+    try {
+      final token = switch (provider) {
+        SocialProvider.google => await social.google(),
+        SocialProvider.apple => await social.apple(),
+      };
+      if (token == null) return;
+      await auth.signInWithToken(token);
+    } on AppFailure catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error = switch (provider) {
+            SocialProvider.google =>
+              'Não foi possível entrar com o Google. Tente de novo.',
+            SocialProvider.apple =>
+              'Não foi possível entrar com a Apple. Tente de novo.',
+          },
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   void _confirm({required bool justSent}) {

@@ -11,7 +11,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 ## Quais dados o Bowie guarda
 
 **Da sua conta**
-- Nome, celular, email e senha. O nome e o celular aparecem para quem cuida do pet com você e na ficha que você compartilhar. A senha é guardada pelo serviço de autenticação de forma cifrada: ninguém, nem o Bowie, consegue lê-la.
+- Nome, celular, email e senha. Se você entrar com o Google ou com a Apple, o Bowie recebe deles só o seu nome e o seu email (com a Apple, você pode esconder o email real), e não cria senha. O nome e o celular aparecem para quem cuida do pet com você e na ficha que você compartilhar. A senha é guardada pelo serviço de autenticação de forma cifrada: ninguém, nem o Bowie, consegue lê-la.
 
 **Dos seus pets**
 - Cadastro: nome, tipo (cão ou gato), sexo, raça, data de nascimento (ou idade aproximada), peso e foto.

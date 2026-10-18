@@ -1,0 +1,4 @@
+// Google sign-in on iOS: the iOS client ID of the Google Cloud project,
+// reversed (docs/guias/login-social.md). Not a secret: it ships in the app.
+// Until it is set, the "Continuar com o Google" button stays hidden.
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.CONFIGURE_ME
