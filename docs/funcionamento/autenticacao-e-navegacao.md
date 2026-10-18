@@ -62,17 +62,6 @@ Em `ready`, quem estiver em `/login`, `/confirmar-email`, `/recuperar-senha`, `/
 
 O cadastro pede nome e celular, além de email e senha. `checkProfile` (`lib/features/auth/domain/app_user.dart`) limpa os espaços do nome (2 a 80 caracteres) e aceita só celular com DDD (11 dígitos, começando com 9 depois do DDD; um +55 na frente é ignorado). Os dois vão para o `user_metadata` da conta (`signUp(data: ...)`, e `updateUser` em "Minha conta") como `name` e `phone` (só dígitos). `userFromSession` lê esses campos para o `AppUser`; `profileComplete` é falso nas contas antigas, e o Início mostra "Complete o seu cadastro" até a pessoa preencher.
 
-## Entrar com Google ou Apple
-
-`lib/features/auth/data/social_sign_in.dart`:
-
-- `SocialConfig` decide quais botões aparecem: o do Google com `GOOGLE_WEB_CLIENT_ID` (e, no iPhone, `GOOGLE_IOS_CLIENT_ID`); o da Apple com `SIGN_IN_WITH_APPLE=true`, só no iPhone. Os valores vêm do `dart_defines.json`. Sem eles, o login fica só com email e senha.
-- `NativeSocialSignIn` abre o login nativo: `google_sign_in` (o token é emitido para o cliente Web, que o Supabase confere) ou `sign_in_with_apple`, com um nonce aleatório cujo hash vai para a Apple. Cancelar não mostra erro.
-- `AuthRepository.signInWithToken` entrega o token ao Supabase (`signInWithIdToken`), que cria a conta na primeira vez ou entra na existente com o mesmo email. A Apple manda o nome só na primeira vez; o app o guarda no `user_metadata`, se a conta ainda não tiver nome.
-- O celular não vem do Google nem da Apple: o Início mostra "Complete o seu cadastro".
-
-No iOS, o Google volta ao app pelo esquema de URL `GOOGLE_REVERSED_CLIENT_ID`, definido em `ios/Flutter/Google.xcconfig` e usado no `Info.plist`. O passo a passo está em [entrar com Google e com a Apple](../guias/login-social.md).
-
 ## Confirmar o email
 
 A conta nova é confirmada por um código de 6 números enviado por email, digitado no app (sem link, como na recuperação de senha).

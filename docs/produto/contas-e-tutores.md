@@ -8,7 +8,7 @@
 | Email | Sim | Usado no login e nos convites. |
 | Celular | Sim | Recuperação de senha por WhatsApp e, no futuro, SMS comerciais. Veja abaixo. |
 
-O login é por **email e senha** ou por **"Continuar com a Apple"** e **"Continuar com o Google"** (decisão de 18 de outubro de 2026, para facilitar a criação da conta). Quem entra pelo Google ou pela Apple não cria senha, e o nome vem da conta deles; o celular é pedido depois, em "Complete o seu cadastro". O mesmo email é a mesma conta, entre por onde entrar. Na App Store, o botão da Apple é obrigatório quando há o do Google. O login é feito no Supabase, seguido do desbloqueio do aparelho com Face ID, Touch ID ou código (veja [funcionamento](../funcionamento/autenticacao-e-navegacao.md)).
+O login é **só por email e senha** no MVP, sem "Entrar com Google" ou "Entrar com Apple". "Continuar com o Google" e "Continuar com a Apple" ficaram para depois (decisão de 18 de outubro de 2026, pela complexidade da configuração). O código já foi escrito e está guardado no histórico do git (commit `bc0020a`, com o guia `docs/guias/login-social.md`): para trazer de volta, basta reverter o commit que o desfez. O login é feito no Supabase, seguido do desbloqueio do aparelho com Face ID, Touch ID ou código (veja [funcionamento](../funcionamento/autenticacao-e-navegacao.md)).
 
 ### Para que serve o celular
 
