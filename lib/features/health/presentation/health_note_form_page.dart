@@ -8,7 +8,9 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/text.dart';
+import 'package:bowie/core/ui/choice_field.dart';
 import 'package:bowie/features/health/domain/health_note.dart';
+import 'package:bowie/features/health/presentation/health_notes_section.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 
 /// Adds an allergy, a diet note or a special care, or edits one when
@@ -99,14 +101,26 @@ class _NoteFormState extends ConsumerState<_NoteForm> {
           BowieSpacing.s8,
         ),
         children: [
-          SegmentedButton<HealthNoteKind>(
-            showSelectedIcon: false,
-            segments: [
+          ChoiceField<HealthNoteKind>(
+            label: 'Tipo',
+            value: _kind,
+            options: [
               for (final kind in HealthNoteKind.values)
-                ButtonSegment(value: kind, label: Text(kind.label)),
+                ChoiceOption(
+                  value: kind,
+                  label: kind.label,
+                  icon: healthNoteIcon(kind),
+                  description: switch (kind) {
+                    HealthNoteKind.specialCare =>
+                      'Condição de saúde ou comportamento',
+                    HealthNoteKind.allergy =>
+                      'Alimento, remédio ou outra substância',
+                    HealthNoteKind.diet =>
+                      'Ração, quantidade e o que não pode comer',
+                  },
+                ),
             ],
-            selected: {_kind},
-            onSelectionChanged: (s) => setState(() => _kind = s.first),
+            onChanged: (kind) => setState(() => _kind = kind),
           ),
           gap,
           RawAutocomplete<String>(

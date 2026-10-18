@@ -31,7 +31,7 @@ O que a aba **Diário** faz hoje. As regras de produto estão em [`docs/produto/
 - Cada registro (`EventCard`) mostra tipo, "Agendado", horário, contato e o começo das observações. Com contato com telefone, um botão liga.
 - O botão principal diz "Registrar" ou "Agendar", conforme o dia escolhido.
 
-`/diario/novo?pet=&dia=` e `/diario/:id` (`EventFormPage`): tipo, título com sugestões, dia, horário opcional (com botão para tirar), profissional ou local (lista de contatos da casa do pet), observações. Em "Sintoma", um texto lembra que o diário não faz diagnóstico. Editando, há "Excluir este registro".
+`/diario/novo?pet=&dia=` e `/diario/:id` (`EventFormPage`): tipo (um campo que abre a lista Sintoma, Consulta, Exame e Outro, cada um com ícone e exemplo), título com sugestões, dia, horário opcional (com botão para tirar), profissional ou local (lista de contatos da casa do pet), observações. Em "Sintoma", um texto lembra que o diário não faz diagnóstico. Editando, há "Excluir este registro".
 
 Fotos (`lib/features/diary/presentation/event_photos.dart`):
 

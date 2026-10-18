@@ -56,7 +56,7 @@ No topo da aba Saúde, "Importante sobre Bowie" lista os registros com ícone (a
 | `/saude/doses/nova?pet=&tipo=&nome=` | `DoseFormPage`: registrar. `tipo` e `nome` são preenchidos quando se registra uma nova dose a partir do histórico. |
 | `/saude/doses/:id` | `DoseHistoryPage`: todas as doses daquela vacina, a mais nova primeiro, e o botão "Registrar nova dose". |
 | `/saude/doses/:id/editar` | `DoseFormPage`: editar ou excluir um registro. |
-| `/saude/notas/nova?pet=&tipo=` | `HealthNoteFormPage`: cuidado especial, alergia ou alimentação (`tipo` = `special_care`, `allergy` ou `diet`). Título com sugestões e detalhes. |
+| `/saude/notas/nova?pet=&tipo=` | `HealthNoteFormPage`: cuidado especial, alergia ou alimentação (`tipo` = `special_care`, `allergy` ou `diet`), num campo que abre a lista dos três. Título com sugestões e detalhes. |
 | `/saude/notas/:id` | `HealthNoteFormPage`: editar ou excluir. |
 
 O botão "Registrar" da aba abre `showHealthAddSheet`: "O que você quer registrar?", com Medicação, Vacina ou vermífugo, Alergia, Alimentação e Cuidado especial.
