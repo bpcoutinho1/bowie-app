@@ -11,10 +11,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 - [ ] O prestador tem conta própria no Bowie, e como o tutor autoriza o acesso a um pet?
 - [ ] O Bowie Biz é pago? Por quem: prestador, tutor ou os dois?
 
-## Planos
-
-- [ ] Apagar uma foto ou PDF do diário libera espaço no limite de 10 arquivos do plano grátis?
-
 ## Negócio
 
 - [ ] Quando o app passa a usar links de afiliado, e com quais lojas?
