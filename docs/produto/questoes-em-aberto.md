@@ -11,10 +11,6 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 - [ ] O prestador tem conta própria no Bowie, e como o tutor autoriza o acesso a um pet?
 - [ ] O Bowie Biz é pago? Por quem: prestador, tutor ou os dois?
 
-## Planos
-
-- [ ] Os limites do plano grátis (3 fotos lidas por IA e 10 arquivos no diário) valem para sempre ou se renovam todo mês?
-
 ## Negócio
 
 - [ ] Quando o app passa a usar links de afiliado, e com quais lojas?
