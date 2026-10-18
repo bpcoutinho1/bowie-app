@@ -38,11 +38,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          # A variable is enough (the URL is public); a secret with the same
+          # name also works.
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || secrets.SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ]; then
-            echo "::error::Defina a variável SUPABASE_URL em Settings → Secrets and variables → Actions → Variables."
+            echo "::error::Defina SUPABASE_URL em Settings → Secrets and variables → Actions (aba Variables ou Secrets)."
             exit 1
           fi
           scripts/build-web-share.sh _site
