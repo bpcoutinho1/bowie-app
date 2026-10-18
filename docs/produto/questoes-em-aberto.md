@@ -13,8 +13,7 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Planos
 
-- [ ] Limite de fotos e PDFs do diário no plano grátis: 20 arquivos foi só um exemplo.
-- [ ] Quem já é tutor convidado e quer cadastrar um pet próprio precisa de outra conta, com outro email? Ou a mesma conta pode ser tutor principal dos próprios pets e convidada nos de outra casa (como o app faz hoje)?
+- [ ] Os limites do plano grátis (3 fotos lidas por IA e 10 arquivos no diário) valem para sempre ou se renovam todo mês?
 
 ## Negócio
 
