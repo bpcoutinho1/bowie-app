@@ -9,11 +9,13 @@ import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/text.dart';
+import 'package:bowie/core/ui/choice_field.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/contacts/presentation/contacts_providers.dart';
 import 'package:bowie/features/diary/data/diary_repository.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/diary/presentation/diary_providers.dart';
+import 'package:bowie/features/diary/presentation/diary_page.dart';
 import 'package:bowie/features/diary/presentation/event_files.dart';
 import 'package:bowie/features/diary/presentation/event_photos.dart';
 
@@ -154,15 +156,24 @@ class _EventFormState extends ConsumerState<_EventForm> {
           BowieSpacing.s8,
         ),
         children: [
-          SegmentedButton<EventKind>(
-            showSelectedIcon: false,
-            segments: [
+          ChoiceField<EventKind>(
+            label: 'Tipo',
+            value: _kind,
+            options: [
               for (final kind in EventKind.values)
-                ButtonSegment(value: kind, label: Text(kind.label)),
+                ChoiceOption(
+                  value: kind,
+                  label: kind.label,
+                  icon: eventIcon(kind),
+                  description: switch (kind) {
+                    EventKind.symptom => 'Diarreia, vômito, tosse, coceira',
+                    EventKind.vetVisit => 'Veterinário ou outro profissional',
+                    EventKind.exam => 'Sangue, imagem e outros resultados',
+                    EventKind.other => 'Qualquer outro registro',
+                  },
+                ),
             ],
-            selected: {_kind},
-            onSelectionChanged: (selection) =>
-                setState(() => _kind = selection.first),
+            onChanged: (kind) => setState(() => _kind = kind),
           ),
           if (_kind == EventKind.symptom) ...[
             const SizedBox(height: BowieSpacing.s3),

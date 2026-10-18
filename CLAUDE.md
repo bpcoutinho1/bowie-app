@@ -68,6 +68,7 @@ Nos widgets, use os **tokens semânticos** (`background`, `surface`, `text`, `te
 - Raios: `md` 12 para inputs e botões, `lg` 18 para cards, `xl` 28 para bottom sheets.
 - Cards: fundo `surface` com `shadow.card` sobre o fundo `background`. Sem bordas coloridas laterais.
 - Alvos de toque com no mínimo 44×44.
+- Escolha entre opções: `SegmentedButton` só para 2 opções curtas ("Cão"/"Gato"). Com 3 ou mais, ou rótulos longos, use `ChoiceField` (`lib/core/ui/choice_field.dart`), que mostra a escolha e abre a lista num bottom sheet; lado a lado, as palavras quebram no celular.
 - Ícones: **Lucide** (`lucide_icons_flutter`, `LucideIcons.*`), na cor `text` ou `textMuted`. Sem emoji na interface. O Phosphor foi descartado: o pacote para Flutter não compila nas versões atuais.
 - Movimento: `motion.fast` (150 ms) para feedback e `motion.base` (250 ms) para transições, com a curva `motion.easing` (`Cubic(0.2, 0, 0, 1)`). Respeite "reduzir movimento" (`MediaQuery.disableAnimations`).
 - Acessibilidade: `Semantics`/`tooltip` em todo botão só com ícone; o foco visível usa `focusRing`.
