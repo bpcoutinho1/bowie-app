@@ -24,7 +24,7 @@ O app guarda dados pessoais dos tutores (nome, email, celular) e dados de saúde
 - **Dados mínimos:** só pedir o que o app usa. O celular serve para recuperar a senha por WhatsApp e, com consentimento à parte, para SMS comerciais (veja [contas e tutores](contas-e-tutores.md#para-que-serve-o-celular)).
 - **Marketing só com opt-in:** SMS e outras mensagens comerciais exigem um consentimento próprio, separado dos termos de uso, desmarcado por padrão e revogável no app. O app guarda quando e como a pessoa aceitou.
 - **Exportação:** a pessoa pode baixar os próprios dados e os dos pets dela.
-- **Exclusão de conta:** a pessoa pode apagar a conta pelo próprio app. A App Store e o Google Play também exigem isso. Se ela for tutora principal de algum pet, o app propõe transferir o pet para outro tutor (veja [contas e tutores](contas-e-tutores.md#exclusão-da-conta)).
+- **Exclusão de conta:** a pessoa pode apagar a conta pelo próprio app. A App Store e o Google Play também exigem isso. Se ela for tutora principal de algum pet, o app propõe transferir o pet para outro tutor (veja [contas e tutores](contas-e-tutores.md#exclusão-da-conta)). Feito: "Minha conta → Excluir minha conta" apaga a conta no servidor e os dados do celular.
 - **Acesso restrito:** só os tutores de um pet veem os dados e as fotos dele. Arquivos ficam em armazenamento privado, não em links públicos.
 - **Nada sensível em logs:** sem email, celular, nomes ou conteúdo de saúde em logs e relatórios de erro.
 - **Sair da conta limpa o aparelho:** os dados locais de uma conta não podem ficar disponíveis para a próxima pessoa que entrar no mesmo aparelho. O código atual ainda não faz isso.

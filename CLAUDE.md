@@ -30,6 +30,7 @@ web-share/             página pública da ficha compartilhada (GitHub Pages, sc
 - **Documentação junto com o código:** uma mudança que altera o comportamento descrito em `docs/funcionamento/` atualiza o documento no mesmo commit. Ao concluir uma área do MVP, atualize a tabela de prioridade em `docs/produto/README.md`.
 - **Vocabulário:** na interface e na documentação, use "tutor principal" (no código e no banco ainda aparece como `owner`) e "tutor".
 - **Testes:** rode `flutter test` antes de enviar.
+- **Entrega:** a cada PR, passe ao Bruno o passo a passo para atualizar no Mac e no Xcode ([guia](docs/guias/rodar-no-iphone.md#atualizar-para-uma-versão-nova)), incluindo as migrações e as funções do Supabase que a versão pede.
 
 ## Design no Flutter
 

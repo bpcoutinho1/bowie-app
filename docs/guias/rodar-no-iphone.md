@@ -82,6 +82,28 @@ Um Apple ID comum basta; não precisa da conta paga.
 
 Com o Apple ID gratuito, o app expira em 7 dias: é só apertar Play de novo. Com a conta Apple Developer, isso deixa de acontecer e o TestFlight fica disponível para outras pessoas.
 
+## Atualizar para uma versão nova
+
+Depois de juntar um PR no GitHub, rode no Terminal, com o Xcode fechado:
+
+```bash
+cd /Users/brunocoutinho/Documents/bowie-app
+git stash
+git checkout main
+git pull origin main
+git log --oneline -1
+git stash pop
+flutter clean
+flutter pub get
+flutter build ios --release --config-only --dart-define-from-file=dart_defines.json
+open ios/Runner.xcworkspace
+```
+
+- O `git log` deve mostrar o merge do PR que você acabou de juntar. Se não mostrar, o código não foi atualizado: não siga adiante.
+- `git stash` guarda as mudanças que o Xcode faz no projeto (como o Team), que senão impedem o `git pull`. Se o `git stash pop` der conflito, rode `git checkout -- . && git stash drop` e escolha o Team de novo no Xcode (Runner → Signing & Capabilities).
+- No Xcode: **Product → Clean Build Folder** (⇧⌘K) e ▶︎.
+- Se a versão trouxer migração ou função nova no Supabase, rode antes de abrir o app (o PR diz qual).
+
 ## Pelo Terminal, sem o Xcode
 
 Também funciona, depois do passo 3:

@@ -797,6 +797,21 @@ class PetLocalStore {
     _emit(ChangeReason.remote);
   }
 
+  /// Removes everything kept on this phone, after the account is deleted.
+  Future<void> eraseAll() async {
+    await _db.transaction((txn) async {
+      await txn.execute('PRAGMA defer_foreign_keys = ON');
+      final tables = await txn.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table' "
+        "AND name NOT LIKE 'sqlite_%' AND name <> 'android_metadata'",
+      );
+      for (final table in tables) {
+        await txn.delete(table['name']! as String);
+      }
+    });
+    _emit(ChangeReason.local);
+  }
+
   Future<void> close() async {
     await _changes.close();
     await _db.close();
