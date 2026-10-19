@@ -15,6 +15,7 @@ import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 import 'package:bowie/features/pets/presentation/pet_photo.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 class PetsHome {
   const PetsHome({required this.pets, required this.invites});
@@ -70,7 +71,7 @@ class PetsPage extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/pets/new'),
+        onPressed: () => openNewPet(context, () => context.push('/pets/new')),
         icon: const Icon(LucideIcons.plus),
         label: const Text('Adicionar pet'),
       ),

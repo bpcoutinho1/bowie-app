@@ -8,6 +8,11 @@ import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/auth/presentation/sign_out.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
+import 'package:bowie/core/dates.dart';
+import 'package:bowie/core/ui/bowie_card.dart';
+import 'package:bowie/features/plans/domain/account_plan.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
+import 'package:bowie/features/plans/presentation/premium_sheet.dart';
 
 /// "Minha conta": name and cell phone, the email, and signing out.
 class AccountPage extends ConsumerStatefulWidget {
@@ -108,6 +113,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             onPressed: _saving ? null : _save,
             child: Text(_saving ? 'Salvando' : 'Salvar'),
           ),
+          const SizedBox(height: BowieSpacing.s8),
+          const _PlanSection(),
           const SizedBox(height: BowieSpacing.s8),
           OutlinedButton.icon(
             onPressed: _saving ? null : _changePassword,
@@ -221,5 +228,87 @@ class _PasswordDialogState extends ConsumerState<_PasswordDialog> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+}
+
+/// "Seu plano": the tier and, on the free plan, how much of each limit is
+/// used.
+class _PlanSection extends ConsumerWidget {
+  const _PlanSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final usage = ref.watch(planUsageProvider).asData?.value;
+    if (usage == null || !usage.plan.known) return const SizedBox.shrink();
+    final plan = usage.plan;
+    final title = switch (plan.tier) {
+      PlanTier.free => 'Grátis',
+      PlanTier.trial =>
+        'Premium · teste grátis até ${formatDayBr(plan.trialEndsAt!.toLocal())}',
+      PlanTier.premium =>
+        plan.premiumUntil == null
+            ? 'Premium'
+            : 'Premium até ${formatDayBr(plan.premiumUntil!.toLocal())}',
+    };
+    Widget line(String label, int used, int total) => Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: BowieType.callout.copyWith(color: colors.textMuted),
+            ),
+          ),
+          Text(
+            '${used > total ? total : used} de $total',
+            style: BowieType.bodyStrong.copyWith(
+              color: used >= total ? colors.warning : colors.text,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return BowieCard(
+      child: Padding(
+        padding: const EdgeInsets.all(BowieSpacing.s4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Seu plano',
+              style: BowieType.caption.copyWith(color: colors.textMuted),
+            ),
+            Text(title, style: BowieType.title3.copyWith(color: colors.text)),
+            if (!plan.isPremium) ...[
+              line('Pets', usage.pets, freePetLimit),
+              line('Fotos lidas pela IA', plan.aiPhotosUsed, freeAiPhotos),
+              line(
+                'Fotos e PDFs enviados ao diário',
+                plan.diaryFilesUsed,
+                freeDiaryFiles,
+              ),
+            ] else
+              Padding(
+                padding: const EdgeInsets.only(top: BowieSpacing.s2),
+                child: Text(
+                  'Até $premiumPetLimit pets, leitura por IA e arquivos no '
+                  'diário sem limite.',
+                  style: BowieType.callout.copyWith(color: colors.textMuted),
+                ),
+              ),
+            if (plan.tier != PlanTier.premium) ...[
+              const SizedBox(height: BowieSpacing.s3),
+              OutlinedButton(
+                onPressed: () => showPremiumSheet(context),
+                child: const Text('Conhecer o Premium'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
