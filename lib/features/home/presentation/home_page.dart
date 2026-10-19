@@ -22,6 +22,7 @@ import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_photo.dart';
 import 'package:bowie/features/pets/presentation/pet_summary.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// What matters today: each pet with its most urgent vaccine.
 class HomePage extends ConsumerWidget {
@@ -242,7 +243,7 @@ class _AddPetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return BowieCard(
-      onTap: () => context.push('/pets/new'),
+      onTap: () => openNewPet(context, () => context.push('/pets/new')),
       child: Padding(
         padding: const EdgeInsets.all(BowieSpacing.s4),
         child: Row(

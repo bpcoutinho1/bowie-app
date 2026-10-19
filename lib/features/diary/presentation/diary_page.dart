@@ -21,6 +21,7 @@ import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_selector.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// The pet's diary: what happened (a diarrhea, a visit to the vet) and what
 /// is scheduled (an ultrasound next week), on a calendar.
@@ -61,7 +62,8 @@ class DiaryPage extends ConsumerWidget {
           title: 'Nenhum pet ainda',
           message: 'Cadastre um pet para começar o diário dele.',
           action: FilledButton(
-            onPressed: () => context.push('/pets/new'),
+            onPressed: () =>
+                openNewPet(context, () => context.push('/pets/new')),
             child: const Text('Cadastrar pet'),
           ),
         ),

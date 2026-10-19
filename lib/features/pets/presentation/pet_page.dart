@@ -18,6 +18,7 @@ import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_age.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 import 'package:bowie/features/pets/presentation/pet_photo.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 final petDetailsProvider = FutureProvider.autoDispose
     .family<PetDetails?, String>((ref, id) async {
@@ -383,6 +384,9 @@ class _PetPageState extends ConsumerState<PetPage> {
   Future<void> _save(PetDetails? details) async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
+    // A new pet must fit in the plan (the entry points check it too).
+    if (details == null && !await ensureCanAddPet(context)) return;
+    if (!mounted) return;
     setState(() {
       _saving = true;
       _error = null;

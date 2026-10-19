@@ -14,6 +14,7 @@ import 'package:bowie/features/contacts/presentation/contacts_providers.dart';
 import 'package:bowie/features/houses/house_selector.dart';
 import 'package:bowie/features/houses/houses.dart';
 import 'package:bowie/features/houses/houses_providers.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// The house's contact book: vets, nutritionists, daycare, hotel, and more.
 class ContactsPage extends ConsumerWidget {
@@ -45,7 +46,8 @@ class ContactsPage extends ConsumerWidget {
               'Cadastre um pet para guardar os contatos da casa, '
               'compartilhados com quem cuida dele com você.',
           action: FilledButton(
-            onPressed: () => context.push('/pets/new'),
+            onPressed: () =>
+                openNewPet(context, () => context.push('/pets/new')),
             child: const Text('Cadastrar pet'),
           ),
         ),

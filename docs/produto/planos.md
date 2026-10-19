@@ -30,5 +30,7 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 
 ## Antes de cobrar
 
-- Guardar no banco o plano de cada tutor principal (grátis, teste ou Premium, e até quando), para não precisar migrar dados depois.
-- Contar no servidor, por conta, as fotos lidas por IA (a Edge Function `read-vaccine-card`) e os envios de arquivos do diário. Os contadores nunca diminuem: apagar não devolve.
+Já existe: o plano de cada conta no banco (`account_plans`), o teste de 30 dias, os contadores e os limites no app, com a tela "Bowie Premium". O plano é mudado à mão no Supabase para testes ([guia](../guias/planos.md)). Falta:
+
+- Conferir os limites também no servidor (na função `read-vaccine-card` e no envio de arquivos), e não só no app.
+- A assinatura pelas lojas, que liga e desliga o `plan` sozinha.

@@ -16,6 +16,7 @@ import 'package:bowie/features/houses/houses.dart';
 import 'package:bowie/features/houses/house_selector.dart';
 import 'package:bowie/features/houses/houses_providers.dart';
 import 'package:bowie/features/shopping/presentation/shopping_providers.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// The house's shopping list, as in Bring!: big tiles, a tap marks an item
 /// as bought, and bought items wait among the frequent ones to come back.
@@ -50,7 +51,8 @@ class ShoppingPage extends ConsumerWidget {
               'Cadastre um pet para ter a lista de compras da casa, '
               'compartilhada com quem cuida dele com você.',
           action: FilledButton(
-            onPressed: () => context.push('/pets/new'),
+            onPressed: () =>
+                openNewPet(context, () => context.push('/pets/new')),
             child: const Text('Cadastrar pet'),
           ),
         ),

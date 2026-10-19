@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +20,8 @@ import 'package:bowie/features/diary/presentation/diary_providers.dart';
 import 'package:bowie/features/diary/presentation/diary_page.dart';
 import 'package:bowie/features/diary/presentation/event_files.dart';
 import 'package:bowie/features/diary/presentation/event_photos.dart';
+import 'package:bowie/features/plans/data/plan_repository.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// Records or schedules a diary entry, or edits one when [eventId] is given.
 class EventFormPage extends ConsumerWidget {
@@ -386,6 +390,13 @@ class _EventFormState extends ConsumerState<_EventForm> {
   Future<void> _save() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
+    // New photos and PDFs count in the free plan; kept ones do not.
+    final sent =
+        _photos.where((photo) => photo.bytes != null).length +
+        _files.where((file) => file.fresh != null).length;
+    if (!await ensureQuota(context, Quota.diaryFiles, sent) || !mounted) {
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
@@ -412,6 +423,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
             byUser: user,
           );
       if (!mounted) return;
+      unawaited(consumeQuota(context, Quota.diaryFiles, sent));
       ref.read(diaryDayProvider.notifier).select(_day);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

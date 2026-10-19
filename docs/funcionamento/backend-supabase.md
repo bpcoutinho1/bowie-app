@@ -11,6 +11,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 7. `20261012120000_medications.sql`: medicações (`pet_medications`) e doses dadas (`pet_medication_doses`). Pode rodar mais de uma vez.
 8. `20261013120000_diary_photos.sql`: coluna `photo_paths` em `pet_events`. Os arquivos vão para o bucket `pet-photos`, na pasta do pet. Pode rodar mais de uma vez.
 9. `20261014120000_notes_proofs_files_shares.sql`: cuidados, alergias e alimentação (`pet_health_notes`) comprovantes das vacinas (`pet_vaccines.proof_paths`), PDFs do diário (`pet_events.files`; o bucket `pet-photos` passa a aceitar `application/pdf` e até 10 MB) e links da ficha compartilhada (`pet_shares`). Pode rodar mais de uma vez.
+10. `20261019120000_account_plans.sql`: planos (`account_plans`), o teste de 30 dias para contas novas e `consume_quota`. Pode rodar mais de uma vez. Veja [planos](planos.md).
 
 ## Configuração do app
 

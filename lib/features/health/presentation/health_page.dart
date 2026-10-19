@@ -21,6 +21,7 @@ import 'package:bowie/features/health/presentation/status_badge.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_selector.dart';
 import 'package:bowie/features/pets/presentation/pets_page.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 class HealthPage extends ConsumerWidget {
   const HealthPage({super.key});
@@ -63,7 +64,8 @@ class HealthPage extends ConsumerWidget {
           title: 'Nenhum pet ainda',
           message: 'Cadastre um pet para registrar as vacinas dele.',
           action: FilledButton(
-            onPressed: () => context.push('/pets/new'),
+            onPressed: () =>
+                openNewPet(context, () => context.push('/pets/new')),
             child: const Text('Cadastrar pet'),
           ),
         ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,8 @@ import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
+import 'package:bowie/features/plans/data/plan_repository.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// Reads photos of the vaccine card in the cloud and lets the person review
 /// every dose before saving (docs/produto/carteirinha-de-vacinacao.md).
@@ -213,6 +216,11 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
       return;
     }
     if (!await _ensureConsent() || !mounted) return;
+    final photos = List.of(_photos);
+    if (!await ensureQuota(context, Quota.aiPhotos, photos.length) ||
+        !mounted) {
+      return;
+    }
 
     final attempt = ++_attempt;
     setState(() {
@@ -220,7 +228,11 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
       _error = null;
     });
     try {
-      final reading = await reader.read(List.of(_photos));
+      final reading = await reader.read(photos);
+      // Only photos the AI actually read count in the free plan.
+      if (mounted) {
+        unawaited(consumeQuota(context, Quota.aiPhotos, photos.length));
+      }
       final health = ref.read(healthRepositoryProvider);
       final existing = await health.listDoses(widget.petId);
       final pet =
