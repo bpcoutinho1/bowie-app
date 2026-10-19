@@ -12,8 +12,15 @@ No SQL Editor, troque `seu@email.com` pelo email da conta e rode o comando do qu
 
 **Ver o plano da conta**
 
+A coluna `plan` diz `free` também durante o teste de 30 dias: toda conta nova nasce assim. A última coluna desta consulta mostra o plano que o app usa de fato.
+
 ```sql
-select email, plan, premium_until, trial_ends_at, ai_photos_used, diary_files_used
+select email, plan, premium_until, trial_ends_at, ai_photos_used, diary_files_used,
+  case
+    when plan = 'premium' and (premium_until is null or premium_until > now()) then 'Premium'
+    when trial_ends_at > now() then 'Teste do Premium (até ' || to_char(trial_ends_at, 'DD/MM') || ')'
+    else 'Grátis'
+  end as plano_no_app
 from account_plans where email = 'seu@email.com';
 ```
 
@@ -52,6 +59,8 @@ update account_plans set ai_photos_used = 0, diary_files_used = 0, updated_at = 
 where email = 'seu@email.com';
 ```
 
+Para testar o grátis numa conta nova, rode "Voltar para o grátis": sem isso, ela está no teste e pode cadastrar até 5 pets.
+
 Também dá para editar pelo **Table Editor → account_plans**: clique duas vezes na célula (`plan`, `trial_ends_at`, os contadores), mude e salve.
 
 ## 3. O que testar
@@ -65,3 +74,21 @@ Também dá para editar pelo **Table Editor → account_plans**: clique duas vez
 | Premium com 5 pets | "Limite do plano: o Premium tem até 5 pets por conta." |
 
 Os pets que a conta já tem continuam todos lá: o limite só impede de cadastrar mais.
+
+Em "Minha conta", o cartão "Plano atual" mostra o plano que o app leu. Se aparecer "Não foi possível ver o plano" com internet, a migração não foi rodada ou o app é de antes dela (refaça o build depois do `git pull`).
+
+## 4. Página de assinatura (fora das lojas)
+
+O botão "Mudar para Premium" de "Bowie Premium" abre uma página no navegador. Coloque o endereço no `dart_defines.json` (que não vai para o Git) e refaça o build:
+
+```json
+{
+  "SUPABASE_URL": "...",
+  "SUPABASE_ANON_KEY": "...",
+  "PREMIUM_URL": "https://bowieapp.pet/premium"
+}
+```
+
+Sem `PREMIUM_URL`, o botão aparece desativado como "Assinatura em breve". Por enquanto, depois que alguém assina na página, o Premium é ligado à mão (seção 2).
+
+Antes de publicar nas lojas: Apple e Google têm regras para links de compra de assinatura fora da loja, e elas mudam por país. Confira as regras para o Brasil na época do envio para revisão; pode ser preciso esconder o link numa das lojas.

@@ -6,12 +6,14 @@ import 'package:sqflite/sqflite.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
+import 'package:bowie/features/auth/presentation/account_page.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/plans/data/plan_repository.dart';
 import 'package:bowie/features/plans/domain/account_plan.dart';
 import 'package:bowie/features/plans/presentation/plan_providers.dart';
+import 'package:bowie/features/plans/presentation/premium_sheet.dart';
 
 /// The account_plans row of the person, in memory.
 class FakePlanApi implements PlanApi {
@@ -95,6 +97,15 @@ void main() {
     ).current('u2');
     expect(unknown.known, isFalse);
     expect(unknown.isPremium, isTrue);
+  });
+
+  test('an account the server has no row for is on the free plan', () async {
+    final plan = await PlanRepository(
+      FakePlanApi(null),
+      MemoryPlanCache(),
+    ).current('u3');
+    expect(plan.known, isTrue);
+    expect(plan.tier, PlanTier.free);
   });
 
   test('the messages say what is left and what to do', () {
@@ -209,6 +220,79 @@ void main() {
       await tapAndSettle(tester, 'Enviar 3');
       expect(find.text('Bowie Premium'), findsOneWidget);
       expect(find.textContaining('Restam 2 dos 10 envios'), findsOneWidget);
+    });
+
+    Future<void> pumpAccount(
+      WidgetTester tester,
+      PlanApi planApi, {
+      int pets = 0,
+    }) async {
+      store = (await tester.runAsync(
+        () => PetLocalStore.open(databasePath: inMemoryDatabasePath),
+      ))!;
+      addTearDown(() => tester.runAsync(store.close));
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            petLocalStoreProvider.overrideWithValue(store),
+            currentUserProvider.overrideWithValue(bruno),
+            planRepositoryProvider.overrideWithValue(
+              PlanRepository(planApi, MemoryPlanCache(), now: () => now),
+            ),
+          ],
+          child: MaterialApp(
+            theme: buildTheme(Brightness.light),
+            home: const AccountPage(),
+          ),
+        ),
+      );
+      for (var i = 0; i < 4; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    testWidgets('"Minha conta" shows the free plan and the way to Premium', (
+      tester,
+    ) async {
+      await pumpAccount(tester, FakePlanApi(row(ai: 1)));
+      expect(find.text('Plano atual'), findsOneWidget);
+      expect(find.text('Grátis'), findsOneWidget);
+      expect(find.text('1 de 3'), findsOneWidget);
+      expect(find.text('Mudar para Premium'), findsOneWidget);
+    });
+
+    testWidgets('"Minha conta" makes the trial plain', (tester) async {
+      await pumpAccount(
+        tester,
+        FakePlanApi(row(trialEndsAt: '2026-11-18T12:00:00Z')),
+      );
+      expect(find.text('Teste grátis do Premium'), findsOneWidget);
+      expect(find.textContaining('passa para o plano grátis'), findsOneWidget);
+    });
+
+    testWidgets('"Minha conta" says when the plan could not be read', (
+      tester,
+    ) async {
+      await pumpAccount(tester, FakePlanApi(null, offline: true));
+      expect(find.text('Não foi possível ver o plano'), findsOneWidget);
+      expect(find.text('Tentar de novo'), findsOneWidget);
+    });
+
+    testWidgets('with a subscription page set, the sheet links to it', (
+      tester,
+    ) async {
+      await pumpAccount(tester, FakePlanApi(row()));
+      final context = tester.element(find.text('Plano atual'));
+      showPremiumSheet(context, url: 'https://bowieapp.pet/premium');
+      await tester.pumpAndSettle();
+      expect(find.text('Mudar para Premium'), findsNWidgets(2));
+      expect(find.text('Assinatura em breve'), findsNothing);
     });
   });
 }

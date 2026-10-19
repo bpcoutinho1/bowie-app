@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bowie/app/design_tokens.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/features/plans/domain/account_plan.dart';
 
-/// "Bowie Premium": what it adds and the price. Payment is not live yet
-/// (docs/produto/planos.md), so the button only says so.
-Future<void> showPremiumSheet(BuildContext context, {String? reason}) {
+/// The subscription page, outside the app stores. Set with
+/// `"PREMIUM_URL": "https://..."` in dart_defines.json; empty, the sheet says
+/// the subscription is coming.
+const premiumUrl = String.fromEnvironment('PREMIUM_URL');
+
+/// "Bowie Premium": what it adds, the price and the way to subscribe.
+Future<void> showPremiumSheet(
+  BuildContext context, {
+  String? reason,
+  String url = premiumUrl,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -70,16 +79,30 @@ Future<void> showPremiumSheet(BuildContext context, {String? reason}) {
               style: BowieType.callout.copyWith(color: colors.textMuted),
             ),
             const SizedBox(height: BowieSpacing.s6),
-            const FilledButton(
-              onPressed: null,
-              child: Text('Assinatura em breve'),
-            ),
-            const SizedBox(height: BowieSpacing.s2),
-            Text(
-              'A assinatura pelo app chega nas próximas versões.',
-              textAlign: TextAlign.center,
-              style: BowieType.caption.copyWith(color: colors.textMuted),
-            ),
+            if (url.isEmpty) ...[
+              const FilledButton(
+                onPressed: null,
+                child: Text('Assinatura em breve'),
+              ),
+              const SizedBox(height: BowieSpacing.s2),
+              Text(
+                'A assinatura chega nas próximas versões.',
+                textAlign: TextAlign.center,
+                style: BowieType.caption.copyWith(color: colors.textMuted),
+              ),
+            ] else ...[
+              FilledButton.icon(
+                onPressed: () => _openSubscription(sheet, url),
+                icon: const Icon(LucideIcons.externalLink),
+                label: const Text('Mudar para Premium'),
+              ),
+              const SizedBox(height: BowieSpacing.s2),
+              Text(
+                'A assinatura abre no navegador, fora do app.',
+                textAlign: TextAlign.center,
+                style: BowieType.caption.copyWith(color: colors.textMuted),
+              ),
+            ],
             const SizedBox(height: BowieSpacing.s2),
             TextButton(
               onPressed: () => Navigator.of(sheet).pop(),
@@ -90,6 +113,24 @@ Future<void> showPremiumSheet(BuildContext context, {String? reason}) {
       );
     },
   );
+}
+
+Future<void> _openSubscription(BuildContext context, String url) async {
+  final messenger = ScaffoldMessenger.of(context);
+  var opened = false;
+  try {
+    opened = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
+  } on Exception {
+    opened = false;
+  }
+  if (!opened) {
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Não foi possível abrir a assinatura.')),
+    );
+  }
 }
 
 /// A limit that the Premium does not lift.
