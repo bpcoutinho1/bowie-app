@@ -58,6 +58,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           BowieSpacing.s8,
         ),
         children: [
+          const _PlanSection(),
+          const SizedBox(height: BowieSpacing.s6),
           if (user != null && !user.profileComplete) ...[
             Text(
               'Complete o seu cadastro. O seu nome e o celular aparecem para '
@@ -113,8 +115,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             onPressed: _saving ? null : _save,
             child: Text(_saving ? 'Salvando' : 'Salvar'),
           ),
-          const SizedBox(height: BowieSpacing.s8),
-          const _PlanSection(),
           const SizedBox(height: BowieSpacing.s8),
           OutlinedButton.icon(
             onPressed: _saving ? null : _changePassword,
@@ -231,8 +231,9 @@ class _PasswordDialogState extends ConsumerState<_PasswordDialog> {
   }
 }
 
-/// "Plano atual": the tier and, on the free plan, how much of each limit is
-/// used. Always shown, also when the plan could not be read.
+/// The plan, first thing on the page: "Conta: Teste grátis do Premium",
+/// when it ends and, on the free plan, how much of each limit is used.
+/// Always shown, also when the plan could not be read.
 class _PlanSection extends ConsumerWidget {
   const _PlanSection();
 
@@ -242,44 +243,58 @@ class _PlanSection extends ConsumerWidget {
     final state = ref.watch(planUsageProvider);
     final usage = state.asData?.value;
 
-    Widget card(List<Widget> children) => BowieCard(
-      child: Padding(
-        padding: const EdgeInsets.all(BowieSpacing.s4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Plano atual',
-              style: BowieType.caption.copyWith(color: colors.textMuted),
+    // Label on the left, value on the right; with large text, the value
+    // goes to the next line instead of squeezing the label.
+    Widget row(String label, String value, {bool warn = false}) => Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: BowieSpacing.s3,
+        children: [
+          Text(
+            label,
+            style: BowieType.callout.copyWith(color: colors.textMuted),
+          ),
+          Text(
+            value,
+            style: BowieType.bodyStrong.copyWith(
+              color: warn ? colors.warning : colors.text,
             ),
-            ...children,
-          ],
-        ),
+          ),
+        ],
       ),
     );
 
     Widget note(String text) => Padding(
-      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      padding: const EdgeInsets.only(top: BowieSpacing.s3),
       child: Text(
         text,
         style: BowieType.callout.copyWith(color: colors.textMuted),
       ),
     );
 
-    if (usage == null && state.isLoading) {
-      return card([
-        Text(
-          'Carregando…',
-          style: BowieType.title3.copyWith(color: colors.text),
+    Widget card(List<Widget> children) => BowieCard(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          BowieSpacing.s4,
+          BowieSpacing.s2,
+          BowieSpacing.s4,
+          BowieSpacing.s4,
         ),
-      ]);
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
+    );
+
+    if (usage == null && state.isLoading) {
+      return card([row('Conta', 'Carregando…')]);
     }
     if (usage == null || !usage.plan.known) {
       return card([
-        Text(
-          'Não foi possível ver o plano',
-          style: BowieType.title3.copyWith(color: colors.text),
-        ),
+        row('Conta', 'Não foi possível ver o plano'),
         note('Confira a internet e tente de novo.'),
         const SizedBox(height: BowieSpacing.s3),
         OutlinedButton.icon(
@@ -291,63 +306,51 @@ class _PlanSection extends ConsumerWidget {
     }
 
     final plan = usage.plan;
-    final title = switch (plan.tier) {
-      PlanTier.free => 'Grátis',
-      PlanTier.trial => 'Teste grátis do Premium',
-      PlanTier.premium => 'Premium',
-    };
-    Widget line(String label, int used, int total) => Padding(
-      padding: const EdgeInsets.only(top: BowieSpacing.s2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: BowieType.callout.copyWith(color: colors.textMuted),
-            ),
-          ),
-          Text(
-            '${used > total ? total : used} de $total',
-            style: BowieType.bodyStrong.copyWith(
-              color: used >= total ? colors.warning : colors.text,
-            ),
-          ),
-        ],
-      ),
-    );
+    // Pets added during the trial stay: then the count is over the limit.
+    String count(int used, int total) =>
+        used > total ? '$used (limite: $total)' : '$used de $total';
 
     return card([
-      Text(title, style: BowieType.title3.copyWith(color: colors.text)),
-      switch (plan.tier) {
-        PlanTier.free => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            line('Pets', usage.pets, freePetLimit),
-            line('Fotos lidas pela IA', plan.aiPhotosUsed, freeAiPhotos),
-            line(
-              'Fotos e PDFs enviados ao diário',
-              plan.diaryFilesUsed,
-              freeDiaryFiles,
-            ),
-          ],
-        ),
-        PlanTier.trial => note(
-          'Até ${formatDayBr(plan.trialEndsAt!.toLocal())}, você tem tudo do '
-          'Premium. Depois, a conta passa para o plano grátis: '
-          '$freePetLimit pet, $freeAiPhotos fotos lidas pela IA e '
-          '$freeDiaryFiles envios ao diário.',
-        ),
-        PlanTier.premium => note(
-          plan.premiumUntil == null
-              ? 'Até $premiumPetLimit pets, leitura por IA e arquivos no '
-                    'diário sem limite.'
-              : 'Válido até ${formatDayBr(plan.premiumUntil!.toLocal())}. '
-                    'Até $premiumPetLimit pets, leitura por IA e arquivos no '
-                    'diário sem limite.',
-        ),
+      ...switch (plan.tier) {
+        PlanTier.free => [
+          row('Conta', 'Grátis'),
+          row(
+            'Pets',
+            count(usage.pets, freePetLimit),
+            warn: usage.pets >= freePetLimit,
+          ),
+          row(
+            'Fotos lidas pela IA',
+            count(plan.aiPhotosUsed, freeAiPhotos),
+            warn: plan.aiPhotosUsed >= freeAiPhotos,
+          ),
+          row(
+            'Fotos e PDFs no diário',
+            count(plan.diaryFilesUsed, freeDiaryFiles),
+            warn: plan.diaryFilesUsed >= freeDiaryFiles,
+          ),
+        ],
+        PlanTier.trial => [
+          row('Conta', 'Teste grátis do Premium'),
+          row('Acaba em', formatDayBr(plan.trialEndsAt!.toLocal())),
+          note(
+            'Depois, a conta passa para o plano grátis: $freePetLimit pet, '
+            '$freeAiPhotos fotos lidas pela IA e $freeDiaryFiles envios ao '
+            'diário.',
+          ),
+        ],
+        PlanTier.premium => [
+          row('Conta', 'Premium'),
+          if (plan.premiumUntil != null)
+            row('Válido até', formatDayBr(plan.premiumUntil!.toLocal())),
+          note(
+            'Até $premiumPetLimit pets, leitura por IA e arquivos no diário '
+            'sem limite.',
+          ),
+        ],
       },
       if (plan.tier != PlanTier.premium) ...[
-        const SizedBox(height: BowieSpacing.s3),
+        const SizedBox(height: BowieSpacing.s4),
         FilledButton.icon(
           onPressed: () => showPremiumSheet(context),
           icon: const Icon(LucideIcons.sparkles),
