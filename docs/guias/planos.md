@@ -75,7 +75,7 @@ Também dá para editar pelo **Table Editor → account_plans**: clique duas vez
 
 Os pets que a conta já tem continuam todos lá: o limite só impede de cadastrar mais.
 
-Em "Minha conta", o cartão "Plano atual" mostra o plano que o app leu. Se aparecer "Não foi possível ver o plano" com internet, a migração não foi rodada ou o app é de antes dela (refaça o build depois do `git pull`).
+No topo de "Minha conta", o cartão do plano mostra o que o app leu ("Conta: Teste grátis do Premium", "Acaba em: 18/11/2026"). Se aparecer "Não foi possível ver o plano" com internet, a migração não foi rodada ou o app é de antes dela (refaça o build depois do `git pull`).
 
 ## 4. Página de assinatura (fora das lojas)
 

@@ -27,6 +27,6 @@ A regra de produto está em [planos e preço](../produto/planos.md). Nada é cob
 - `ensureCanAddPet` (todos os botões de novo pet e o salvar do formulário): conta os pets em que a pessoa é tutor principal; os pets em que ela é convidada não contam.
 - `ensureQuota`: antes de enviar fotos para a leitura da carteirinha e antes de salvar um registro do diário com fotos ou PDFs novos (os que já estavam no registro não contam). `consumeQuota` soma depois que deu certo.
 - No limite, `showPremiumSheet` abre "Bowie Premium" com o motivo, o que o Premium dá e o preço. O botão "Mudar para Premium" abre no navegador a página de assinatura fora das lojas, definida em `PREMIUM_URL` no `dart_defines.json`. Sem ela, o botão diz "Assinatura em breve".
-- "Minha conta" mostra sempre "Plano atual": Grátis (com quanto de cada limite já foi usado), Teste grátis do Premium (com a data em que acaba) ou Premium. Se o plano não pôde ser lido, diz isso e oferece "Tentar de novo". Fora do Premium pago, o botão "Mudar para Premium" abre "Bowie Premium".
+- "Minha conta" mostra sempre o plano no topo, em "Conta": Grátis (com quanto de cada limite já foi usado), Teste grátis do Premium (com "Acaba em" e a data) ou Premium. Se o plano não pôde ser lido, diz isso e oferece "Tentar de novo". Fora do Premium pago, o botão "Mudar para Premium" abre "Bowie Premium".
 
 Os limites são conferidos no app. Antes de cobrar, a conferência precisa ir também para o servidor (a função `read-vaccine-card` e o envio de arquivos), para não depender do app.

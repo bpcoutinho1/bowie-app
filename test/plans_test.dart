@@ -261,7 +261,7 @@ void main() {
       tester,
     ) async {
       await pumpAccount(tester, FakePlanApi(row(ai: 1)));
-      expect(find.text('Plano atual'), findsOneWidget);
+      expect(find.text('Conta'), findsOneWidget);
       expect(find.text('Grátis'), findsOneWidget);
       expect(find.text('1 de 3'), findsOneWidget);
       expect(find.text('Mudar para Premium'), findsOneWidget);
@@ -273,7 +273,8 @@ void main() {
         FakePlanApi(row(trialEndsAt: '2026-11-18T12:00:00Z')),
       );
       expect(find.text('Teste grátis do Premium'), findsOneWidget);
-      expect(find.textContaining('passa para o plano grátis'), findsOneWidget);
+      expect(find.text('Acaba em'), findsOneWidget);
+      expect(find.text('18/11/2026'), findsOneWidget);
     });
 
     testWidgets('"Minha conta" says when the plan could not be read', (
@@ -288,7 +289,7 @@ void main() {
       tester,
     ) async {
       await pumpAccount(tester, FakePlanApi(row()));
-      final context = tester.element(find.text('Plano atual'));
+      final context = tester.element(find.text('Conta'));
       showPremiumSheet(context, url: 'https://bowieapp.pet/premium');
       await tester.pumpAndSettle();
       expect(find.text('Mudar para Premium'), findsNWidgets(2));
