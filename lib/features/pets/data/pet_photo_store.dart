@@ -62,4 +62,9 @@ class PetPhotoStore {
     final file = _file(photoPath);
     if (await file.exists()) await file.delete();
   }
+
+  /// Removes every photo and file kept on this phone.
+  Future<void> eraseAll() async {
+    if (await _root.exists()) await _root.delete(recursive: true);
+  }
 }

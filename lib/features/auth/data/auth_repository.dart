@@ -157,7 +157,15 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
-    await _client?.auth.signOut();
+    final client = _client;
+    if (client == null) return;
+    try {
+      await client.auth.signOut();
+    } on AuthException {
+      // The server no longer knows the session (a deleted account, for
+      // example): forget it on the phone anyway.
+      await client.auth.signOut(scope: SignOutScope.local);
+    }
   }
 
   SupabaseClient _require() {

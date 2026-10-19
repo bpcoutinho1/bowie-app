@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:bowie/app/design_tokens.dart';
@@ -126,6 +127,13 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             onPressed: _saving ? null : () => signOut(ref),
             icon: const Icon(LucideIcons.logOut),
             label: const Text('Sair da conta'),
+          ),
+          const SizedBox(height: BowieSpacing.s6),
+          TextButton.icon(
+            onPressed: _saving ? null : () => context.push('/conta/excluir'),
+            style: TextButton.styleFrom(foregroundColor: colors.danger),
+            icon: const Icon(LucideIcons.trash2),
+            label: const Text('Excluir minha conta'),
           ),
         ],
       ),

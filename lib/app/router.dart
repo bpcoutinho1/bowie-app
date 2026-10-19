@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/shell.dart';
 import 'package:bowie/features/auth/presentation/account_page.dart';
+import 'package:bowie/features/auth/presentation/delete_account_page.dart';
 import 'package:bowie/features/auth/presentation/confirm_email_page.dart';
 import 'package:bowie/features/auth/presentation/forgot_password_page.dart';
 import 'package:bowie/features/auth/presentation/login_page.dart';
@@ -249,6 +250,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: '/conta', builder: (context, state) => const AccountPage()),
+      GoRoute(
+        path: '/conta/excluir',
+        builder: (context, state) => const DeleteAccountPage(),
+      ),
       ...onboardingRoutes(),
       GoRoute(
         path: '/notificacoes',

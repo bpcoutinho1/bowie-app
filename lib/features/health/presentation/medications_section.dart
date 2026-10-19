@@ -134,6 +134,9 @@ class DoseTile extends ConsumerWidget {
           '${local.minute.toString().padLeft(2, '0')}';
       final who = user != null && given.givenBy == user.id
           ? 'você'
+          : given.givenByEmail.endsWith('@bowieapp.invalid')
+          // Erased with a deleted account (delete-account).
+          ? 'uma conta excluída'
           : given.givenByEmail.split('@').first;
       givenText = 'Dada por $who às $at';
     }

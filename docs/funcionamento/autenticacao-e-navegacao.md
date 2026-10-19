@@ -53,7 +53,8 @@ Definidas em `lib/app/router.dart`. A função `redirectFor` leva o usuário par
 | `/pets` | `PetsPage` (aba Pets) | `AuthGate.ready` |
 | `/pets/new` | `PetPage` sem id (novo pet) | `AuthGate.ready` |
 | `/pets/:id` | `PetPage` com id (detalhes) | `AuthGate.ready` |
-| `/conta` | `AccountPage` ("Minha conta", pelo ícone de pessoa na aba Pets): nome, celular, email e "Sair da conta" | `AuthGate.ready` |
+| `/conta` | `AccountPage` ("Minha conta", pelo ícone de pessoa na aba Pets): o plano, nome, celular, email, "Sair da conta" e "Excluir minha conta" | `AuthGate.ready` |
+| `/conta/excluir` | `DeleteAccountPage`: exclusão definitiva da conta | `AuthGate.ready` |
 | `/notificacoes` | `NotificationsPage` (aberta pelo sino, ainda vazia) | `AuthGate.ready` |
 
 Em `ready`, quem estiver em `/login`, `/confirmar-email`, `/recuperar-senha`, `/unlock` ou `/loading` é levado para `/inicio` (`homeLocation`). Nos outros estados, qualquer rota leva para a tela do estado.
@@ -124,3 +125,15 @@ O estado "desbloqueado" fica só em memória. Ele volta a `false` quando o app �
 ## Sign out
 
 `signOut` (`lib/features/auth/presentation/sign_out.dart`) encerra a sessão no Supabase e volta `unlockedProvider` para `false`. O `AuthGate` vai para `signedOut` e o router leva ao login. O banco local **não** é apagado (veja [Limitações](sincronizacao.md#limitações-conhecidas)).
+
+## Exclusão de conta
+
+"Minha conta" termina com "Excluir minha conta", que abre `DeleteAccountPage` (`lib/features/auth/presentation/delete_account_page.dart`):
+
+- `accountPets` lê do celular os pets em que a pessoa é tutor principal, cada um com os tutores que já aceitaram o convite (quem pode ficar com ele), e quantos pets ela só acompanha como tutor.
+- A tela explica que a exclusão é definitiva e lista o que será apagado: cadastro, plano, lista de compras, contatos, os pets sem outros tutores (pelo nome) e a participação nos pets de outros tutores.
+- Para cada pet com outros tutores, um `ChoiceField` "Tutor principal de Bowie" já vem com o primeiro tutor escolhido.
+- O botão "Excluir minha conta" só funciona depois de marcar "Entendo que a exclusão é permanente e que os dados não poderão ser recuperados." "Manter minha conta" volta.
+- `SupabaseAccountEraser` (`lib/features/auth/data/account_eraser.dart`) chama a Edge Function `delete-account` ([backend](backend-supabase.md#edge-function-delete-account)). Precisa de internet; se falhar, a tela mostra o motivo e nada muda no celular.
+- Depois que o servidor confirma, o app apaga o banco local (`PetLocalStore.eraseAll`) e as fotos e arquivos guardados (`PetPhotoStore.eraseAll`), sai da conta (`signOut` também funciona com a sessão já invalidada) e mostra "Sua conta foi excluída."
+

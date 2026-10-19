@@ -87,4 +87,5 @@ Depois da transferência:
 - Contas criadas antes do nome e do celular veem "Complete o seu cadastro" no Início até preencher em "Minha conta".
 - Ainda não existem email de convite, remoção e saída de tutor.
 - Hoje o convidado precisa tocar em "Accept" no app para aceitar. Pela regra acima, o cadastro com o email do convite já basta.
+- A exclusão da conta já segue a regra acima: a pessoa escolhe quem fica com cada pet que tem outros tutores (o app já sugere um). Os links da ficha que ela criou deixam de funcionar.
 - No banco atual não há política de exclusão (`delete`). O papel (`role`) de um vínculo só muda pela função `transfer_pet` (veja [backend](../funcionamento/backend-supabase.md#transferência-do-pet)).
