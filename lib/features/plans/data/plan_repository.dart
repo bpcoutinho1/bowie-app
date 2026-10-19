@@ -10,7 +10,8 @@ enum Quota { aiPhotos, diaryFiles }
 /// The server side of the plan: reading it and counting what the free plan
 /// limits.
 abstract interface class PlanApi {
-  /// The row of the person signed in, or null when there is none.
+  /// The row of the person signed in, or null when there is none. Throws
+  /// when the server cannot answer.
   Future<Map<String, dynamic>?> fetch();
 
   Future<void> consume(Quota quota, int amount);
@@ -24,7 +25,7 @@ class SupabasePlanApi implements PlanApi {
   @override
   Future<Map<String, dynamic>?> fetch() async {
     final user = _client.auth.currentUser;
-    if (user == null) return null;
+    if (user == null) throw StateError('No session');
     return _client
         .from('account_plans')
         .select()
@@ -101,18 +102,18 @@ class PlanRepository {
   final DateTime Function() _now;
 
   /// The plan from the server; without internet, the last one read; without
-  /// either, [AccountPlan.unknown], which blocks nothing.
+  /// either, [AccountPlan.unknown], which blocks nothing. An account the
+  /// server answers for but has no row is on the free plan, the default.
   Future<AccountPlan> current(String userId) async {
     final api = _api;
     if (api != null) {
       try {
         final row = await api.fetch();
-        if (row != null) {
-          try {
-            await _cache.write(userId, row);
-          } catch (_) {}
-          return AccountPlan.fromRow(row, _now().toUtc());
-        }
+        if (row == null) return const AccountPlan(tier: PlanTier.free);
+        try {
+          await _cache.write(userId, row);
+        } catch (_) {}
+        return AccountPlan.fromRow(row, _now().toUtc());
       } catch (_) {
         // Offline or the table is missing: fall back below.
       }

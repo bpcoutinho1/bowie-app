@@ -231,25 +231,70 @@ class _PasswordDialogState extends ConsumerState<_PasswordDialog> {
   }
 }
 
-/// "Seu plano": the tier and, on the free plan, how much of each limit is
-/// used.
+/// "Plano atual": the tier and, on the free plan, how much of each limit is
+/// used. Always shown, also when the plan could not be read.
 class _PlanSection extends ConsumerWidget {
   const _PlanSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final usage = ref.watch(planUsageProvider).asData?.value;
-    if (usage == null || !usage.plan.known) return const SizedBox.shrink();
+    final state = ref.watch(planUsageProvider);
+    final usage = state.asData?.value;
+
+    Widget card(List<Widget> children) => BowieCard(
+      child: Padding(
+        padding: const EdgeInsets.all(BowieSpacing.s4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Plano atual',
+              style: BowieType.caption.copyWith(color: colors.textMuted),
+            ),
+            ...children,
+          ],
+        ),
+      ),
+    );
+
+    Widget note(String text) => Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      child: Text(
+        text,
+        style: BowieType.callout.copyWith(color: colors.textMuted),
+      ),
+    );
+
+    if (usage == null && state.isLoading) {
+      return card([
+        Text(
+          'Carregando…',
+          style: BowieType.title3.copyWith(color: colors.text),
+        ),
+      ]);
+    }
+    if (usage == null || !usage.plan.known) {
+      return card([
+        Text(
+          'Não foi possível ver o plano',
+          style: BowieType.title3.copyWith(color: colors.text),
+        ),
+        note('Confira a internet e tente de novo.'),
+        const SizedBox(height: BowieSpacing.s3),
+        OutlinedButton.icon(
+          onPressed: () => ref.invalidate(planUsageProvider),
+          icon: const Icon(LucideIcons.refreshCw),
+          label: const Text('Tentar de novo'),
+        ),
+      ]);
+    }
+
     final plan = usage.plan;
     final title = switch (plan.tier) {
       PlanTier.free => 'Grátis',
-      PlanTier.trial =>
-        'Premium · teste grátis até ${formatDayBr(plan.trialEndsAt!.toLocal())}',
-      PlanTier.premium =>
-        plan.premiumUntil == null
-            ? 'Premium'
-            : 'Premium até ${formatDayBr(plan.premiumUntil!.toLocal())}',
+      PlanTier.trial => 'Teste grátis do Premium',
+      PlanTier.premium => 'Premium',
     };
     Widget line(String label, int used, int total) => Padding(
       padding: const EdgeInsets.only(top: BowieSpacing.s2),
@@ -271,44 +316,44 @@ class _PlanSection extends ConsumerWidget {
       ),
     );
 
-    return BowieCard(
-      child: Padding(
-        padding: const EdgeInsets.all(BowieSpacing.s4),
-        child: Column(
+    return card([
+      Text(title, style: BowieType.title3.copyWith(color: colors.text)),
+      switch (plan.tier) {
+        PlanTier.free => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Seu plano',
-              style: BowieType.caption.copyWith(color: colors.textMuted),
+            line('Pets', usage.pets, freePetLimit),
+            line('Fotos lidas pela IA', plan.aiPhotosUsed, freeAiPhotos),
+            line(
+              'Fotos e PDFs enviados ao diário',
+              plan.diaryFilesUsed,
+              freeDiaryFiles,
             ),
-            Text(title, style: BowieType.title3.copyWith(color: colors.text)),
-            if (!plan.isPremium) ...[
-              line('Pets', usage.pets, freePetLimit),
-              line('Fotos lidas pela IA', plan.aiPhotosUsed, freeAiPhotos),
-              line(
-                'Fotos e PDFs enviados ao diário',
-                plan.diaryFilesUsed,
-                freeDiaryFiles,
-              ),
-            ] else
-              Padding(
-                padding: const EdgeInsets.only(top: BowieSpacing.s2),
-                child: Text(
-                  'Até $premiumPetLimit pets, leitura por IA e arquivos no '
-                  'diário sem limite.',
-                  style: BowieType.callout.copyWith(color: colors.textMuted),
-                ),
-              ),
-            if (plan.tier != PlanTier.premium) ...[
-              const SizedBox(height: BowieSpacing.s3),
-              OutlinedButton(
-                onPressed: () => showPremiumSheet(context),
-                child: const Text('Conhecer o Premium'),
-              ),
-            ],
           ],
         ),
-      ),
-    );
+        PlanTier.trial => note(
+          'Até ${formatDayBr(plan.trialEndsAt!.toLocal())}, você tem tudo do '
+          'Premium. Depois, a conta passa para o plano grátis: '
+          '$freePetLimit pet, $freeAiPhotos fotos lidas pela IA e '
+          '$freeDiaryFiles envios ao diário.',
+        ),
+        PlanTier.premium => note(
+          plan.premiumUntil == null
+              ? 'Até $premiumPetLimit pets, leitura por IA e arquivos no '
+                    'diário sem limite.'
+              : 'Válido até ${formatDayBr(plan.premiumUntil!.toLocal())}. '
+                    'Até $premiumPetLimit pets, leitura por IA e arquivos no '
+                    'diário sem limite.',
+        ),
+      },
+      if (plan.tier != PlanTier.premium) ...[
+        const SizedBox(height: BowieSpacing.s3),
+        FilledButton.icon(
+          onPressed: () => showPremiumSheet(context),
+          icon: const Icon(LucideIcons.sparkles),
+          label: const Text('Mudar para Premium'),
+        ),
+      ],
+    ]);
   }
 }
