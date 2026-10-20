@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:bowie/features/plans/data/store_billing.dart';
 import 'package:bowie/features/plans/domain/account_plan.dart';
 
 enum Quota { aiPhotos, diaryFiles }
@@ -93,18 +95,41 @@ class MemoryPlanCache implements PlanCache {
 }
 
 class PlanRepository {
-  PlanRepository(this._api, this._cache, {DateTime Function()? now})
-    : _now = now ?? DateTime.now;
+  PlanRepository(
+    this._api,
+    this._cache, {
+    this._store = const NoStoreBilling(),
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   /// Null when the app is not connected to a server.
   final PlanApi? _api;
   final PlanCache _cache;
+  final StoreBilling _store;
   final DateTime Function() _now;
+
+  /// The plan from the server, or Premium when the store says it is paid and
+  /// the server has not heard of it yet (revenuecat-webhook takes a few
+  /// seconds).
+  Future<AccountPlan> current(String userId) async {
+    final plan = await _fromServer(userId);
+    if (plan.tier == PlanTier.premium || !_store.available) return plan;
+    try {
+      final bought = await _store
+          .current(userId)
+          .timeout(const Duration(seconds: 4));
+      final until = bought?.until;
+      if (bought != null && (until == null || until.isAfter(_now()))) {
+        return plan.withStorePremium(until);
+      }
+    } catch (_) {}
+    return plan;
+  }
 
   /// The plan from the server; without internet, the last one read; without
   /// either, [AccountPlan.unknown], which blocks nothing. An account the
   /// server answers for but has no row is on the free plan, the default.
-  Future<AccountPlan> current(String userId) async {
+  Future<AccountPlan> _fromServer(String userId) async {
     final api = _api;
     if (api != null) {
       try {

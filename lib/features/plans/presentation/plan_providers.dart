@@ -6,16 +6,24 @@ import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 import 'package:bowie/features/plans/data/plan_repository.dart';
+import 'package:bowie/features/plans/data/store_billing.dart';
 import 'package:bowie/features/plans/domain/account_plan.dart';
 import 'package:bowie/features/plans/presentation/premium_sheet.dart';
 
 final planCacheProvider = Provider<PlanCache>((ref) => PrefsPlanCache());
+
+/// The App Store or Google Play, through RevenueCat, when its key is set.
+final storeBillingProvider = Provider<StoreBilling>((ref) {
+  final key = RevenueCatBilling.keyForPlatform();
+  return key == null ? const NoStoreBilling() : RevenueCatBilling(key);
+});
 
 final planRepositoryProvider = Provider<PlanRepository>((ref) {
   final client = ref.watch(supabaseClientProvider);
   return PlanRepository(
     client == null ? null : SupabasePlanApi(client),
     ref.watch(planCacheProvider),
+    store: ref.watch(storeBillingProvider),
   );
 });
 

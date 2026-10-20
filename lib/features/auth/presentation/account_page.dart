@@ -357,6 +357,17 @@ class _PlanSection extends ConsumerWidget {
           ),
         ],
       },
+      if (plan.fromStore) ...[
+        const SizedBox(height: BowieSpacing.s4),
+        OutlinedButton.icon(
+          onPressed: () => openExternal(
+            context,
+            manageSubscriptionsUrl(Theme.of(context).platform),
+          ),
+          icon: const Icon(LucideIcons.externalLink),
+          label: const Text('Gerenciar assinatura'),
+        ),
+      ],
       if (plan.tier != PlanTier.premium) ...[
         const SizedBox(height: BowieSpacing.s4),
         FilledButton.icon(
