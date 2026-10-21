@@ -6,8 +6,9 @@
 //
 // Deploy: docs/guias/convites.md (function name "send-invite", "Verify JWT"
 // on). Secrets: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS (the mailbox that
-// sends, contato@bowieapp.pet) and, optionally, INVITE_URL (where to get the
-// app; https://bowieapp.pet by default).
+// sends, no-reply@bowieapp.pet) and, optionally, REPLY_TO (where answers go;
+// contato@bowieapp.pet by default) and INVITE_URL (where to get the app;
+// https://bowieapp.pet by default).
 
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import nodemailer from "npm:nodemailer@6.9.16";
@@ -179,6 +180,8 @@ Deno.serve(async (req) => {
     });
     await transport.sendMail({
       from: { name: "Bowie", address: smtp.user },
+      // Answers reach a person, not the sending mailbox.
+      replyTo: Deno.env.get("REPLY_TO") || "contato@bowieapp.pet",
       to: invite.email,
       subject,
       text,
