@@ -109,7 +109,7 @@ Future<bool> ensureQuota(BuildContext context, Quota quota, int amount) async {
 
 /// Why the free plan stops here, in the person's words.
 String quotaReason(Quota quota, int left, int amount) {
-  // "as 3 fotos" / "os 10 envios": the article follows the word.
+  // "as 3 fotos" / "os 5 envios": the article follows the word.
   final (total, what, the, ofThe, remove) = switch (quota) {
     Quota.aiPhotos => (
       freeAiPhotos,

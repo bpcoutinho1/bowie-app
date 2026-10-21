@@ -14,6 +14,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 10. `20261019120000_account_plans.sql`: planos (`account_plans`), o teste de 30 dias para contas novas e `consume_quota`. Pode rodar mais de uma vez. Veja [planos](planos.md).
 11. `20261020120000_account_deletion.sql`: a função `delete_account` (só para a chave de serviço) e as chaves estrangeiras para `auth.users` passam a soltar o autor (`on delete set null`) ou apagar os links da ficha (`on delete cascade`). `pet_medication_doses.given_by` passa a aceitar vazio. Pode rodar mais de uma vez. Veja [exclusão de conta](autenticacao-e-navegacao.md#exclusão-de-conta).
 12. `20261021120000_store_subscriptions.sql`: colunas `store_premium_until`, `store_product` e `store_updated_at` em `account_plans`, gravadas pela função `revenuecat-webhook`. Pode rodar mais de uma vez. Veja [planos](planos.md#assinatura-pelas-lojas).
+13. `20261022120000_flea_tick_reminders.sql`: `pet_vaccines.kind` aceita `flea_tick` (pulgas e carrapatos) e ganha `remind_days` (7, 14 ou 30, padrão 7). Pode rodar mais de uma vez. Veja [saúde](saude.md).
 
 ## Configuração do app
 

@@ -8,7 +8,7 @@ O que precisa existir para os primeiros testes com outras pessoas e, depois, par
 | Conta Google Play Console | Pendente | US$ 25, pagamento único. Necessária para o teste interno e para o Google Play. |
 | Projeto no Supabase | Criado | Conferir a **região do servidor** (veja abaixo). |
 | Domínio | Comprado | `bowieapp.pet`, no Hostinger: landing page no domínio principal e a ficha compartilhada em `ficha.bowieapp.pet`. Passo a passo em [domínio](../guias/dominio.md). |
-| Página web | Parcial | A [política de privacidade](../legal/politica-de-privacidade.md) está escrita; o link dela no GitHub serve para o TestFlight. Faltam os termos de uso e a página do link de convite, com os botões das lojas. |
+| Página web | Parcial | Política de privacidade em https://bowieapp.pet/privacidade/ e termos de uso em https://bowieapp.pet/termos/ (o app abre os dois na tela do Premium). Falta a página do link de convite, com os botões das lojas. |
 | Email de envio | Pronto para configurar | `contato@bowieapp.pet` (Hostinger) como remetente dos emails da conta, pelo SMTP do Supabase. Passo a passo em [emails da conta](../guias/emails.md). |
 
 ## Região do Supabase

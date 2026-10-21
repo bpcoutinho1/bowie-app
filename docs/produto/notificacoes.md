@@ -36,7 +36,7 @@ Decidido com o fundador em 17 de outubro de 2026. Estes já existem, como notifi
 
 | Lembrete | Quando | Texto |
 | --- | --- | --- |
-| Vacina ou vermífugo | 7 dias antes do vencimento da dose mais recente, às 9h | "A vacina V10 do Bowie vence em 7 dias." / "O vermífugo Drontal do Bowie vence em 7 dias." |
+| Vacina, vermífugo ou antipulgas | 7, 14 ou 30 dias antes do vencimento da dose mais recente (escolhido no registro), às 9h | "A vacina V10 do Bowie vence em 7 dias." / "O vermífugo Drontal do Bowie vence em 14 dias." / "A proteção contra pulgas e carrapatos do Bowie (Coleira Seresto) vence em 30 dias." |
 | Aniversário | 7 dias antes, às 9h | "Bowie faz aniversário em 7 dias! Faça algo incrível para celebrar este dia!" |
 
 - Cada tutor recebe no próprio celular, para todos os pets de que cuida.
@@ -48,7 +48,7 @@ Decidido com o fundador em 17 de outubro de 2026. Estes já existem, como notifi
 
 Só três eventos viram push no celular, além de aparecer na central:
 
-- O lembrete de vacina e vermífugo, 7 dias antes do vencimento (veja [saúde](saude.md#lembrete)).
+- O lembrete de vacina, vermífugo e antipulgas, 7, 14 ou 30 dias antes do vencimento (veja [saúde](saude.md#lembrete)).
 - O lembrete de dose de medicamento, no horário de cada período (veja [saúde](saude.md#lembrete-de-dose)).
 - O convite recebido por quem já tem conta.
 

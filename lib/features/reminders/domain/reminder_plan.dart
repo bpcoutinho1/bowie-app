@@ -4,7 +4,8 @@ import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_age.dart';
 
-/// Reminders go off this many days before the date (docs/produto/notificacoes.md).
+/// Birthday reminders go off this many days before (docs/produto/notificacoes.md).
+/// Doses use the days chosen in each one (`VaccineDose.remindDays`).
 const reminderDaysBefore = 7;
 
 /// At this hour of the phone's day.
@@ -46,7 +47,8 @@ class Reminder {
 }
 
 /// The reminders to schedule now, soonest first:
-/// - each vaccine or dewormer, 7 days before its latest dose expires;
+/// - each vaccine, dewormer or flea and tick protection, 7, 14 or 30 days
+///   (as chosen in the latest dose) before it expires;
 /// - each pet's birthday, 7 days before (not for estimated birth dates).
 List<Reminder> planReminders({
   required List<Pet> pets,
@@ -54,8 +56,8 @@ List<Reminder> planReminders({
   required DateTime now,
 }) {
   final today = dayOf(now);
-  DateTime when(DateTime day) {
-    final remind = day.subtract(const Duration(days: reminderDaysBefore));
+  DateTime when(DateTime day, [int daysBefore = reminderDaysBefore]) {
+    final remind = day.subtract(Duration(days: daysBefore));
     return DateTime(remind.year, remind.month, remind.day, reminderHour);
   }
 
@@ -64,19 +66,26 @@ List<Reminder> planReminders({
     if (pet.deletedAt != null) continue;
     final of = ofPet(pet);
     for (final group in groupDoses(dosesByPet[pet.id] ?? const [], today)) {
-      final at = when(group.latest.nextDueOn);
+      final days = group.latest.remindDays;
+      final at = when(group.latest.nextDueOn, days);
       if (!at.isAfter(now)) continue;
-      final vaccine = group.kind == DoseKind.vaccine;
       reminders.add(
         Reminder(
           at: at,
-          title: vaccine
-              ? 'Vacina perto de vencer'
-              : 'Vermífugo perto de vencer',
-          body: vaccine
-              ? 'A vacina ${group.name} $of vence em $reminderDaysBefore dias.'
-              : 'O vermífugo ${group.name} $of vence em $reminderDaysBefore '
-                    'dias.',
+          title: switch (group.kind) {
+            DoseKind.vaccine => 'Vacina perto de vencer',
+            DoseKind.dewormer => 'Vermífugo perto de vencer',
+            DoseKind.fleaTick => 'Antipulgas perto de vencer',
+          },
+          body: switch (group.kind) {
+            DoseKind.vaccine =>
+              'A vacina ${group.name} $of vence em $days dias.',
+            DoseKind.dewormer =>
+              'O vermífugo ${group.name} $of vence em $days dias.',
+            DoseKind.fleaTick =>
+              'A proteção contra pulgas e carrapatos $of (${group.name}) '
+                  'vence em $days dias.',
+          },
           route: '/saude',
         ),
       );

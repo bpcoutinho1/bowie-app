@@ -145,9 +145,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                       final query = state.uri.queryParameters;
                       return DoseFormPage(
                         petId: query['pet'],
-                        kind: DoseKind.values
-                            .where((kind) => kind.name == query['tipo'])
-                            .firstOrNull,
+                        kind: DoseKind.fromCode(query['tipo']),
                         name: query['nome'],
                       );
                     },

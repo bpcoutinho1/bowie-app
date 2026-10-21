@@ -8,7 +8,7 @@ A regra de produto está em [primeiro uso](../produto/primeiro-uso.md) e em [not
 
 | Rota | Tela |
 | --- | --- |
-| `/inicio` sem pet nem convite | `WelcomeView`: "Boas-vindas ao Bowie", os três passos e "Cadastrar meu pet" |
+| `/inicio` sem pet nem convite | `WelcomeView`: "Boas-vindas ao Bowie", os três passos e "Cadastrar meu pet". Logo depois de entrar, enquanto a primeira sincronização da conta não termina (`SyncStatus.checkedFor`), mostra "Buscando os seus pets": o celular vazio pode só ainda não ter recebido os pets do servidor |
 | `/boas-vindas/pet` | `PetPage(onboarding: true)`: o formulário de sempre, com "Passo 1 de 3". Ao salvar, vai para o passo 2 em vez de abrir o pet |
 | `/boas-vindas/vacinas?pet=` | `OnboardingVaccinesPage`: "Fotografar a carteirinha" (`CardReadingPage`), "Registrar à mão" (`DoseFormPage`) ou "Fazer depois". Com vacinas, lista cada uma com o status e mostra "Continuar" |
 | `/boas-vindas/pronto?pet=` | `OnboardingDonePage`: `NotificationsPrompt` e os extras (remédios, alergias e cuidados, exames e consultas) |
@@ -21,7 +21,7 @@ No Início, cada pet com algo essencial faltando mostra "Ficha do Bowie: 2 de 4"
 
 `lib/features/reminders/`:
 
-- `planReminders` (domínio, sem efeitos): para cada pet, a dose mais recente de cada vacina ou vermífugo gera um lembrete 7 dias antes do vencimento, às 9h; e o aniversário (só com data exata) gera um 7 dias antes, às 9h, no ano que vem se o deste ano já passou. Lembretes no passado ficam de fora. Ordena pelo horário e fica com os 60 primeiros (o iOS guarda até 64 por app).
+- `planReminders` (domínio, sem efeitos): para cada pet, a dose mais recente de cada vacina, vermífugo ou antipulgas gera um lembrete `remindDays` dias antes do vencimento (7, 14 ou 30, escolhido no registro), às 9h; e o aniversário (só com data exata) gera um 7 dias antes, às 9h, no ano que vem se o deste ano já passou. Lembretes no passado ficam de fora. Ordena pelo horário e fica com os 60 primeiros (o iOS guarda até 64 por app).
 - `LocalNotificationsGateway` (`flutter_local_notifications`): agenda no fuso do celular (`flutter_timezone`, com São Paulo como reserva), sem alarme exato no Android (`inexactAllowWhileIdle`, que dispensa permissão especial). O pedido de permissão do iOS não acontece ao abrir o app; só quando a pessoa toca em "Ativar avisos".
 - `ReminderService.reschedule` lê os pets e as doses do SQLite e troca todos os lembretes agendados. `clear` apaga todos, ao sair da conta.
 - `reminderControllerProvider`, observado pelo `BowieApp`: reagenda ao entrar e 2 segundos depois de qualquer mudança no banco local (salvar uma leitura grava várias doses de uma vez), e apaga ao sair. Tocar num lembrete abre a rota dele (`/saude` ou `/pets/:id`); o que abriu o app é aberto depois do desbloqueio.

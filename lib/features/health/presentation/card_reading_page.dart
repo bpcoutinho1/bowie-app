@@ -17,6 +17,8 @@ import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/domain/card_reading.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
+import 'package:bowie/core/ui/choice_field.dart';
+import 'package:bowie/features/health/presentation/dose_kind_icon.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
@@ -877,7 +879,9 @@ class _ReviewCard extends StatelessWidget {
     final problem = dose.problemOn(today);
     final applied = dose.appliedOn;
     final due = dose.nextDueOn;
-    final dueLabel = dose.kind == DoseKind.vaccine ? 'Revacinar em' : 'Próxima';
+    final dueLabel = dose.kind == DoseKind.dewormer
+        ? 'Próxima'
+        : dose.kind.dueLabel;
     final details = [
       ?dose.product,
       if (dose.lot != null) 'Lote ${dose.lot}',
@@ -1185,14 +1189,18 @@ class _DoseEditorState extends State<_DoseEditor> {
             style: BowieType.title3.copyWith(color: colors.text),
           ),
           gap,
-          SegmentedButton<DoseKind>(
-            showSelectedIcon: false,
-            segments: [
+          ChoiceField<DoseKind>(
+            label: 'Tipo',
+            value: _kind,
+            options: [
               for (final kind in DoseKind.values)
-                ButtonSegment(value: kind, label: Text(kind.label)),
+                ChoiceOption(
+                  value: kind,
+                  label: kind.label,
+                  icon: doseKindIcon(kind),
+                ),
             ],
-            selected: {_kind},
-            onSelectionChanged: (s) => setState(() => _kind = s.first),
+            onChanged: (kind) => setState(() => _kind = kind),
           ),
           gap,
           TextField(
@@ -1218,9 +1226,7 @@ class _DoseEditorState extends State<_DoseEditor> {
           ),
           gap,
           _DateButton(
-            label: _kind == DoseKind.vaccine
-                ? 'Revacinar em'
-                : 'Próxima dose em',
+            label: _kind.dueLabel,
             value: _nextDueOn,
             doubt: _doubt(ReadField.nextDueOn),
             onTap: () async {

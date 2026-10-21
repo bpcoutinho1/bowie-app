@@ -59,7 +59,7 @@ update account_plans set ai_photos_used = 0, diary_files_used = 0, updated_at = 
 where email = 'seu@email.com';
 ```
 
-Para testar o grátis numa conta nova, rode "Voltar para o grátis": sem isso, ela está no teste e pode cadastrar até 5 pets.
+Para testar o grátis numa conta nova, rode "Voltar para o grátis": sem isso, ela está no teste e pode cadastrar até 10 pets.
 
 Também dá para editar pelo **Table Editor → account_plans**: clique duas vezes na célula (`plan`, `trial_ends_at`, os contadores), mude e salve.
 
@@ -69,9 +69,9 @@ Também dá para editar pelo **Table Editor → account_plans**: clique duas vez
 | --- | --- |
 | Grátis, com 1 pet | "Adicionar pet" abre "Bowie Premium": "No plano grátis, a conta tem 1 pet." |
 | Grátis, 3 fotos já lidas | A leitura da carteirinha abre "Bowie Premium" antes de enviar as fotos |
-| Grátis, 10 envios no diário | Salvar um registro com foto ou PDF novo abre "Bowie Premium" |
-| Premium ou teste | Até 5 pets, leitura e diário sem limite |
-| Premium com 5 pets | "Limite do plano: o Premium tem até 5 pets por conta." |
+| Grátis, 5 envios no diário | Salvar um registro com foto ou PDF novo abre "Bowie Premium" |
+| Premium ou teste | Até 10 pets, leitura e diário sem limite |
+| Premium com 10 pets | "Limite do plano: o Premium tem até 10 pets por conta." |
 
 Os pets que a conta já tem continuam todos lá: o limite só impede de cadastrar mais.
 

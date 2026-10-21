@@ -12,9 +12,15 @@ class SyncStatus {
     this.lastSyncedAt,
     this.message,
     this.failed = false,
+    this.checkedFor,
   });
 
   final bool syncing;
+
+  /// The account a sync last finished for, in any way. Until it is the one
+  /// signed in, an empty phone may just not have its pets from the server
+  /// yet.
+  final String? checkedFor;
   final DateTime? lastSyncedAt;
   final String? message;
   final bool failed;
@@ -47,21 +53,34 @@ class SyncController extends Notifier<SyncStatus> {
   Future<void> sync() async {
     final previous = state;
     if (!previous.syncing) {
-      state = SyncStatus(syncing: true, lastSyncedAt: previous.lastSyncedAt);
+      state = SyncStatus(
+        syncing: true,
+        lastSyncedAt: previous.lastSyncedAt,
+        checkedFor: previous.checkedFor,
+      );
     }
+    final userId = ref.read(currentUserProvider)?.id;
     final result = await ref.read(syncServiceProvider).sync();
     if (!ref.mounted || previous.syncing) return;
     state = switch (result) {
-      SyncOk() => SyncStatus(lastSyncedAt: DateTime.now().toUtc()),
-      SyncSkipped() => SyncStatus(lastSyncedAt: previous.lastSyncedAt),
+      SyncOk() => SyncStatus(
+        lastSyncedAt: DateTime.now().toUtc(),
+        checkedFor: userId,
+      ),
+      SyncSkipped() => SyncStatus(
+        lastSyncedAt: previous.lastSyncedAt,
+        checkedFor: userId,
+      ),
       SyncWaiting(:final message) => SyncStatus(
         lastSyncedAt: previous.lastSyncedAt,
         message: message,
+        checkedFor: userId,
       ),
       SyncFailed(:final message) => SyncStatus(
         lastSyncedAt: previous.lastSyncedAt,
         message: message,
         failed: true,
+        checkedFor: userId,
       ),
     };
   }

@@ -48,7 +48,7 @@ Os nomes que o código espera, escritos exatamente assim:
    ```json
    "REVENUECAT_IOS_KEY": "appl_..."
    ```
-2. No Xcode, em Runner → **Signing & Capabilities**, clique em **+ Capability** e adicione **In-App Purchase**.
+2. No Xcode, em Runner → **Signing & Capabilities**, confira se o **Team** é o pago (o seu nome, sem "Personal Team"): o time gratuito não permite compras dentro do app. A compra já vem ligada em todo app da conta paga; se **In-App Purchase** não aparecer em **+ Capability**, não precisa adicionar.
 3. Gere o build como sempre ([TestFlight](testflight.md) ou [Xcode](rodar-no-iphone.md#atualizar-para-uma-versão-nova)).
 
 Sem a chave no `dart_defines.json`, o app continua funcionando e a tela do Premium mostra "Assinatura em breve".

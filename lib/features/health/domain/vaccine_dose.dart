@@ -3,15 +3,33 @@ import 'dart:convert';
 import 'package:bowie/core/dates.dart';
 
 enum DoseKind {
-  vaccine('Vacina'),
-  dewormer('Vermífugo');
+  vaccine('vaccine', 'Vacina'),
+  dewormer('dewormer', 'Vermífugo'),
+  fleaTick('flea_tick', 'Pulgas e carrapatos');
 
-  const DoseKind(this.label);
+  const DoseKind(this.code, this.label);
 
+  /// As saved in the database.
+  final String code;
   final String label;
+
+  static DoseKind? fromCode(String? code) =>
+      values.where((kind) => kind.code == code).firstOrNull;
+
+  /// "Revacinar em", "Próxima dose em", "Trocar em".
+  String get dueLabel => switch (this) {
+    vaccine => 'Revacinar em',
+    dewormer => 'Próxima dose em',
+    fleaTick => 'Trocar em',
+  };
 }
 
-/// One applied dose of a vaccine or dewormer, as written on the vaccine card.
+/// Days before the due date the phone reminds (docs/produto/notificacoes.md).
+const reminderDayOptions = [7, 14, 30];
+const defaultReminderDays = 7;
+
+/// One applied dose of a vaccine, a dewormer or a flea and tick protection,
+/// as written on the vaccine card.
 class VaccineDose {
   const VaccineDose({
     required this.id,
@@ -26,6 +44,7 @@ class VaccineDose {
     this.veterinarian,
     this.notes,
     this.proofPaths = const [],
+    this.remindDays = defaultReminderDays,
     this.updatedBy,
     this.deletedAt,
   });
@@ -52,6 +71,9 @@ class VaccineDose {
 
   bool get hasProof => proofPaths.isNotEmpty;
 
+  /// The reminder goes off this many days before [nextDueOn]: 7, 14 or 30.
+  final int remindDays;
+
   /// The user who saved this version, so tutors can see who changed it.
   final String? updatedBy;
   final DateTime updatedAt;
@@ -74,6 +96,7 @@ class VaccineDose {
       veterinarian: veterinarian,
       notes: notes,
       proofPaths: proofPaths,
+      remindDays: remindDays,
       updatedBy: updatedBy ?? this.updatedBy,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -93,6 +116,7 @@ class VaccineDose {
       veterinarian: veterinarian,
       notes: notes,
       proofPaths: paths,
+      remindDays: remindDays,
       updatedBy: updatedBy,
       updatedAt: updatedAt,
       deletedAt: deletedAt,
@@ -103,7 +127,7 @@ class VaccineDose {
     return {
       'id': id,
       'pet_id': petId,
-      'kind': kind.name,
+      'kind': kind.code,
       'name': name,
       'applied_on': formatDay(appliedOn),
       'next_due_on': formatDay(nextDueOn),
@@ -112,6 +136,7 @@ class VaccineDose {
       'veterinarian': veterinarian,
       'notes': notes,
       'proof_paths': jsonEncode(proofPaths),
+      'remind_days': remindDays,
       'updated_by': updatedBy,
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'deleted_at': deletedAt?.toUtc().toIso8601String(),
@@ -125,7 +150,7 @@ class VaccineDose {
     return VaccineDose(
       id: row['id']! as String,
       petId: row['pet_id']! as String,
-      kind: DoseKind.values.byName(row['kind']! as String),
+      kind: DoseKind.fromCode(row['kind'] as String?) ?? DoseKind.vaccine,
       name: row['name']! as String,
       appliedOn: parseDay(row['applied_on']! as String),
       nextDueOn: parseDay(row['next_due_on']! as String),
@@ -137,6 +162,11 @@ class VaccineDose {
         for (final path in (proofs as List?) ?? const [])
           if (path is String) path,
       ],
+      remindDays: switch (row['remind_days']) {
+        final num days when reminderDayOptions.contains(days.toInt()) =>
+          days.toInt(),
+        _ => defaultReminderDays,
+      },
       updatedBy: row['updated_by'] as String?,
       updatedAt: DateTime.parse(row['updated_at']! as String).toUtc(),
       deletedAt: deleted == null ? null : DateTime.parse(deleted).toUtc(),

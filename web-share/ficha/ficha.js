@@ -144,17 +144,26 @@
     }
 
     // The contact comes early: it is what a hotel needs in a hurry.
+    const hasContact = (t) => t && (t.name || t.phone || t.email);
+    const contactCard = (t, fallback) => {
+      const whatsapp = t.phone && t.phone.length === 11 ? 'https://wa.me/55' + t.phone : null;
+      return h('div', { class: 'card' },
+        h('h3', {}, t.name || fallback),
+        t.phone ? h('p', { class: 'callout' }, phoneText(t.phone)) : null,
+        t.email ? h('p', { class: 'callout' }, h('a', { href: 'mailto:' + t.email }, t.email)) : null,
+        t.phone ? h('div', { class: 'actions' },
+          h('a', { class: 'button', href: 'tel:+55' + t.phone }, icon('phone'), 'Ligar'),
+          whatsapp ? h('a', { class: 'button secondary', href: whatsapp, target: '_blank', rel: 'noopener' }, icon('message'), 'WhatsApp') : null) : null);
+    };
     const tutor = data.tutor;
-    if (tutor && (tutor.name || tutor.phone || tutor.email)) {
-      const whatsapp = tutor.phone && tutor.phone.length === 11 ? 'https://wa.me/55' + tutor.phone : null;
-      parts.push(...section('user', 'Tutor principal',
-        h('div', { class: 'card' },
-          h('h3', {}, tutor.name || 'Tutor ' + of(pet)),
-          tutor.phone ? h('p', { class: 'callout' }, phoneText(tutor.phone)) : null,
-          tutor.email ? h('p', { class: 'callout' }, h('a', { href: 'mailto:' + tutor.email }, tutor.email)) : null,
-          tutor.phone ? h('div', { class: 'actions' },
-            h('a', { class: 'button', href: 'tel:+55' + tutor.phone }, icon('phone'), 'Ligar'),
-            whatsapp ? h('a', { class: 'button secondary', href: whatsapp, target: '_blank', rel: 'noopener' }, icon('message'), 'WhatsApp') : null) : null)));
+    if (hasContact(tutor)) {
+      parts.push(...section('user', 'Tutor principal', contactCard(tutor, 'Tutor ' + of(pet))));
+    }
+    const others = (data.other_tutors || []).filter(hasContact);
+    if (others.length > 0) {
+      parts.push(...section('user', others.length === 1 ? 'Outro tutor' : 'Outros tutores',
+        h('p', { class: 'muted' }, 'Se não conseguir falar com o tutor principal.'),
+        h('div', { class: 'stack' }, others.map((t) => contactCard(t, 'Tutor ' + of(pet))))));
     }
 
     parts.push(...section('pill', 'Remédios em uso',
@@ -167,7 +176,7 @@
             h('p', { class: 'caption' }, med.end_on ? 'Até ' + day(med.end_on) : 'Uso contínuo'),
             med.notes ? h('p', { class: 'caption' }, med.notes) : null)))));
 
-    parts.push(...section('syringe', 'Vacinas e vermífugos',
+    parts.push(...section('syringe', 'Vacinas, vermífugos e antipulgas',
       data.vaccines.length === 0
         ? h('p', { class: 'muted' }, 'Nenhuma vacina registrada.')
         : h('div', { class: 'stack' }, data.vaccines.map((group) => {
@@ -176,11 +185,11 @@
           const withProof = group.doses.some((d) => d.proofs.length > 0);
           const older = group.doses.slice(1);
           return h('div', { class: 'card' },
-            h('h3', {}, group.name + (group.kind === 'dewormer' ? ' (vermífugo)' : '')),
+            h('h3', {}, group.name + ({ dewormer: ' (vermífugo)', flea_tick: ' (pulgas e carrapatos)' }[group.kind] || '')),
             h('div', { class: 'badges' },
               h('span', { class: 'badge ' + tone[0] }, icon(tone[1]), due(group.days_left, latest.next_due_on)),
               h('span', { class: 'badge ' + (withProof ? 'ok' : 'plain') }, icon('proof'), withProof ? 'Com comprovante' : 'Sem comprovante')),
-            h('p', { class: 'callout' }, 'Última dose: ' + day(latest.applied_on) + ' · Próxima: ' + day(latest.next_due_on)),
+            h('p', { class: 'callout' }, 'Última dose: ' + day(latest.applied_on) + (group.kind === 'flea_tick' ? ' · Trocar em: ' : ' · Próxima: ') + day(latest.next_due_on)),
             [latest.product, latest.lot ? 'Lote ' + latest.lot : null, latest.veterinarian].filter(Boolean).length > 0
               ? h('p', { class: 'caption' }, [latest.product, latest.lot ? 'Lote ' + latest.lot : null, latest.veterinarian].filter(Boolean).join(' · '))
               : null,

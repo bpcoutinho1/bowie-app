@@ -12,10 +12,8 @@ import 'package:bowie/features/plans/domain/account_plan.dart';
 import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// Linked from the subscription sheet, as the stores require.
-const privacyPolicyUrl =
-    'https://github.com/bpcoutinho1/bowie-app/blob/main/docs/legal/politica-de-privacidade.md';
-const appleTermsUrl =
-    'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const privacyPolicyUrl = 'https://bowieapp.pet/privacidade/';
+const termsUrl = 'https://bowieapp.pet/termos/';
 
 /// Where the person cancels or changes the subscription.
 String manageSubscriptionsUrl(TargetPlatform platform) =>
@@ -244,7 +242,7 @@ class _PremiumSheetState extends ConsumerState<_PremiumSheet> {
             alignment: WrapAlignment.center,
             spacing: BowieSpacing.s4,
             children: [
-              _Link('Termos de uso', appleTermsUrl),
+              _Link('Termos de uso', termsUrl),
               _Link('Política de privacidade', privacyPolicyUrl),
             ],
           ),

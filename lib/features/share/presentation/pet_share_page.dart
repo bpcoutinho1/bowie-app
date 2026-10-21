@@ -108,7 +108,7 @@ class _PetSharePageState extends ConsumerState<PetSharePage> {
                 leading: Icon(LucideIcons.circleUser, color: colors.info),
                 title: const Text('Complete o seu cadastro'),
                 subtitle: const Text(
-                  'A ficha mostra o nome e o celular do tutor principal.',
+                  'A ficha mostra o nome e o celular de cada tutor.',
                 ),
                 trailing: const Icon(LucideIcons.chevronRight),
               ),

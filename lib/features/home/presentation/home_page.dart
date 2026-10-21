@@ -15,6 +15,7 @@ import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
 import 'package:bowie/features/onboarding/domain/pet_checklist.dart';
+import 'package:bowie/features/pets/data/pet_sync_controller.dart';
 import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/pets/domain/birthday.dart';
 import 'package:bowie/features/reminders/presentation/reminder_providers.dart';
@@ -45,8 +46,28 @@ class HomePage extends ConsumerWidget {
           child: Text('Não foi possível ler os pets salvos no celular.'),
         ),
         data: (data) {
-          // A new account starts the first-use path from here.
+          // A new account starts the first-use path from here. Right after
+          // signing in, the pets may still be on their way from the server:
+          // wait for the first sync before calling the account new.
           if (data.pets.isEmpty && data.invites.isEmpty) {
+            final waiting =
+                ref.watch(petRemoteApiProvider) != null &&
+                ref.watch(syncControllerProvider).checkedFor != user?.id;
+            if (waiting) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: BowieSpacing.s4),
+                    Text(
+                      'Buscando os seus pets',
+                      style: BowieType.body.copyWith(color: colors.textMuted),
+                    ),
+                  ],
+                ),
+              );
+            }
             return const WelcomeView();
           }
           return ListView(
