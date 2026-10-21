@@ -21,6 +21,7 @@ class AccountPlan {
     this.aiPhotosUsed = 0,
     this.diaryFilesUsed = 0,
     this.known = true,
+    this.fromStore = false,
   });
 
   /// Used when the plan could not be read (no internet, never synced): the
@@ -37,18 +38,23 @@ class AccountPlan {
 
     final premiumUntil = time('premium_until');
     final trialEndsAt = time('trial_ends_at');
-    final paid =
+    final storeUntil = time('store_premium_until');
+    // Set by hand in the dashboard.
+    final granted =
         row['plan'] == 'premium' &&
         (premiumUntil == null || premiumUntil.isAfter(now));
+    // Bought in the App Store or Google Play (revenuecat-webhook).
+    final bought = storeUntil != null && storeUntil.isAfter(now);
     final inTrial = trialEndsAt != null && trialEndsAt.isAfter(now);
     return AccountPlan(
-      tier: paid
+      tier: granted || bought
           ? PlanTier.premium
           : inTrial
           ? PlanTier.trial
           : PlanTier.free,
       trialEndsAt: trialEndsAt,
-      premiumUntil: premiumUntil,
+      premiumUntil: granted ? premiumUntil : (bought ? storeUntil : null),
+      fromStore: bought && !granted,
       aiPhotosUsed: count('ai_photos_used'),
       diaryFilesUsed: count('diary_files_used'),
     );
@@ -63,6 +69,10 @@ class AccountPlan {
   /// False when the server could not be read.
   final bool known;
 
+  /// Premium paid through the App Store or Google Play: it renews there, and
+  /// "Minha conta" offers to manage it.
+  final bool fromStore;
+
   /// The trial counts as Premium.
   bool get isPremium => tier != PlanTier.free;
 
@@ -75,9 +85,21 @@ class AccountPlan {
   int? get diaryFilesLeft =>
       isPremium ? null : max(0, freeDiaryFiles - diaryFilesUsed);
 
+  /// The same plan, now Premium bought in the store until [until].
+  AccountPlan withStorePremium(DateTime? until) => AccountPlan(
+    tier: PlanTier.premium,
+    trialEndsAt: trialEndsAt,
+    premiumUntil: until,
+    aiPhotosUsed: aiPhotosUsed,
+    diaryFilesUsed: diaryFilesUsed,
+    known: known,
+    fromStore: true,
+  );
+
   Map<String, dynamic> toRow() => {
-    'plan': tier == PlanTier.premium ? 'premium' : 'free',
-    'premium_until': premiumUntil?.toIso8601String(),
+    'plan': tier == PlanTier.premium && !fromStore ? 'premium' : 'free',
+    'premium_until': fromStore ? null : premiumUntil?.toIso8601String(),
+    'store_premium_until': fromStore ? premiumUntil?.toIso8601String() : null,
     'trial_ends_at': trialEndsAt?.toIso8601String(),
     'ai_photos_used': aiPhotosUsed,
     'diary_files_used': diaryFilesUsed,

@@ -11,6 +11,7 @@ import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/plans/data/plan_repository.dart';
+import 'package:bowie/features/plans/data/store_billing.dart';
 import 'package:bowie/features/plans/domain/account_plan.dart';
 import 'package:bowie/features/plans/presentation/plan_providers.dart';
 import 'package:bowie/features/plans/presentation/premium_sheet.dart';
@@ -47,6 +48,46 @@ Map<String, dynamic> row({
   'ai_photos_used': ai,
   'diary_files_used': diary,
 };
+
+/// The App Store, in memory: annual and monthly, as RevenueCat would offer.
+class FakeStore implements StoreBilling {
+  FakeStore({this.cancel = false});
+
+  final bool cancel;
+  final bought = <StorePeriod>[];
+  StorePremium? _premium;
+
+  @override
+  bool get available => true;
+
+  @override
+  Future<List<StoreOffer>> offers(String userId) async => const [
+    StoreOffer(period: StorePeriod.annual, price: 'R\$ 99,90', handle: 'y'),
+    StoreOffer(period: StorePeriod.monthly, price: 'R\$ 9,90', handle: 'm'),
+  ];
+
+  @override
+  Future<StorePremium?> buy(String userId, StoreOffer offer) async {
+    if (cancel) return null;
+    bought.add(offer.period);
+    return _premium = StorePremium(until: DateTime.utc(2026, 11, 19, 12));
+  }
+
+  @override
+  Future<StorePremium?> restore(String userId) async => _premium;
+
+  @override
+  Future<StorePremium?> current(String userId) async => _premium;
+}
+
+Future<void> settle(WidgetTester tester) async {
+  for (var i = 0; i < 6; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+}
 
 void main() {
   final now = DateTime.utc(2026, 10, 19, 12);
@@ -98,6 +139,32 @@ void main() {
     expect(unknown.known, isFalse);
     expect(unknown.isPremium, isTrue);
   });
+
+  test(
+    'Premium bought in the store counts, apart from the one set by hand',
+    () {
+      final bought = AccountPlan.fromRow({
+        ...row(),
+        'store_premium_until': '2026-11-19T12:00:00Z',
+      }, now);
+      expect(bought.tier, PlanTier.premium);
+      expect(bought.fromStore, isTrue);
+      expect(bought.premiumUntil, DateTime.utc(2026, 11, 19, 12));
+
+      final lapsed = AccountPlan.fromRow({
+        ...row(),
+        'store_premium_until': '2026-10-01T12:00:00Z',
+      }, now);
+      expect(lapsed.tier, PlanTier.free);
+
+      final byHand = AccountPlan.fromRow({
+        ...row(plan: 'premium'),
+        'store_premium_until': '2026-10-01T12:00:00Z',
+      }, now);
+      expect(byHand.tier, PlanTier.premium);
+      expect(byHand.fromStore, isFalse);
+    },
+  );
 
   test('an account the server has no row for is on the free plan', () async {
     final plan = await PlanRepository(
@@ -226,6 +293,7 @@ void main() {
       WidgetTester tester,
       PlanApi planApi, {
       int pets = 0,
+      StoreBilling billing = const NoStoreBilling(),
     }) async {
       store = (await tester.runAsync(
         () => PetLocalStore.open(databasePath: inMemoryDatabasePath),
@@ -239,8 +307,14 @@ void main() {
           overrides: [
             petLocalStoreProvider.overrideWithValue(store),
             currentUserProvider.overrideWithValue(bruno),
+            storeBillingProvider.overrideWithValue(billing),
             planRepositoryProvider.overrideWithValue(
-              PlanRepository(planApi, MemoryPlanCache(), now: () => now),
+              PlanRepository(
+                planApi,
+                MemoryPlanCache(),
+                store: billing,
+                now: () => now,
+              ),
             ),
           ],
           child: MaterialApp(
@@ -285,15 +359,63 @@ void main() {
       expect(find.text('Tentar de novo'), findsOneWidget);
     });
 
-    testWidgets('with a subscription page set, the sheet links to it', (
+    testWidgets(
+      'without the store, the sheet says the subscription is coming',
+      (tester) async {
+        await pumpAccount(tester, FakePlanApi(row()));
+        showPremiumSheet(tester.element(find.text('Conta')));
+        await tester.pumpAndSettle();
+        expect(find.text('Assinatura em breve'), findsOneWidget);
+        expect(find.text('Restaurar compras'), findsNothing);
+      },
+    );
+
+    testWidgets('the sheet sells through the store and turns Premium on', (
       tester,
     ) async {
-      await pumpAccount(tester, FakePlanApi(row()));
-      final context = tester.element(find.text('Conta'));
-      showPremiumSheet(context, url: 'https://bowieapp.pet/premium');
-      await tester.pumpAndSettle();
-      expect(find.text('Mudar para Premium'), findsNWidgets(2));
-      expect(find.text('Assinatura em breve'), findsNothing);
+      final billing = FakeStore();
+      await pumpAccount(tester, FakePlanApi(row()), billing: billing);
+      expect(find.text('Grátis'), findsOneWidget);
+      await tester.tap(find.text('Mudar para Premium'));
+      await settle(tester);
+      expect(find.text('Assinar por R\$ 99,90 por ano'), findsOneWidget);
+      expect(find.text('Assinar por R\$ 9,90 por mês'), findsOneWidget);
+      expect(find.textContaining('renova automaticamente'), findsOneWidget);
+      expect(find.text('Restaurar compras'), findsOneWidget);
+      expect(find.text('Termos de uso'), findsOneWidget);
+      expect(find.text('Política de privacidade'), findsOneWidget);
+
+      await tester.tap(find.text('Assinar por R\$ 9,90 por mês'));
+      await settle(tester);
+      expect(billing.bought, [StorePeriod.monthly]);
+      expect(find.text('Bowie Premium'), findsNothing);
+      expect(find.textContaining('Premium ativo'), findsOneWidget);
+      // The server has not heard yet; the store already says it is paid.
+      expect(find.text('Premium'), findsOneWidget);
+      expect(find.text('Gerenciar assinatura'), findsOneWidget);
+    });
+
+    testWidgets('a canceled store sheet changes nothing', (tester) async {
+      final billing = FakeStore(cancel: true);
+      await pumpAccount(tester, FakePlanApi(row()), billing: billing);
+      await tester.tap(find.text('Mudar para Premium'));
+      await settle(tester);
+      await tester.tap(find.text('Assinar por R\$ 99,90 por ano'));
+      await settle(tester);
+      expect(find.text('Bowie Premium'), findsOneWidget);
+      expect(find.text('Grátis'), findsOneWidget);
+    });
+
+    testWidgets('restoring with nothing bought says so', (tester) async {
+      await pumpAccount(tester, FakePlanApi(row()), billing: FakeStore());
+      await tester.tap(find.text('Mudar para Premium'));
+      await settle(tester);
+      await tester.tap(find.text('Restaurar compras'));
+      await settle(tester);
+      expect(
+        find.textContaining('Nenhuma assinatura encontrada'),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -26,11 +26,11 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 - **O limite de 10 arquivos vale para o diário.** Os comprovantes de vacina não contam: ficam sempre no plano grátis.
 - **30 dias de Premium grátis** para toda conta nova, **sem cartão**. Ao fim, a conta volta para o grátis; quem quiser continuar com o Premium (por exemplo, por ter mais de um pet) assina.
 - **Nada fica refém.** Quem volta para o grátis continua vendo e baixando tudo o que registrou e enviou. O que muda é só o que dá para adicionar: um segundo pet, novas leituras por IA além do limite, novos arquivos além do limite.
-- **Pagamento pelas lojas.** Assinatura de funcionalidade digital vendida dentro do app precisa usar a compra da App Store e do Google Play, que ficam com 15% a 30%. Sugestão: RevenueCat, que cuida das duas lojas.
+- **Pagamento pelas lojas** (decisão de 20 de outubro de 2026): só pela App Store e pelo Google Play, por meio do RevenueCat. Sem cobrança por fora da loja. Com o Small Business Program, a Apple fica com 15%.
 
 ## Antes de cobrar
 
 Já existe: o plano de cada conta no banco (`account_plans`), o teste de 30 dias, os contadores e os limites no app, com a tela "Bowie Premium". O plano é mudado à mão no Supabase para testes ([guia](../guias/planos.md)). Falta:
 
 - Conferir os limites também no servidor (na função `read-vaccine-card` e no envio de arquivos), e não só no app.
-- A assinatura pelas lojas, que liga e desliga o `plan` sozinha.
+- Ligar a assinatura pela App Store: o código está pronto e falta a configuração ([guia](../guias/assinaturas.md)). O Google Play vem com o app de Android.

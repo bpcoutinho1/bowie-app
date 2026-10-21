@@ -1,6 +1,6 @@
 # Política de Privacidade do Bowie
 
-Última atualização: 11 de outubro de 2026. Versão de teste (TestFlight).
+Última atualização: 20 de outubro de 2026. Versão de teste (TestFlight).
 
 O Bowie é um app para registrar a vida do seu cão ou gato e dividir o cuidado com outras pessoas. Esta política explica quais dados o app guarda, para quê, com quem eles são compartilhados e como você exerce os seus direitos, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018).
 
@@ -39,6 +39,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 - **Outros tutores do pet:** as pessoas que você convidar, e que aceitaram, veem e editam os dados daquele pet. As pessoas da sua casa veem a lista de compras e os contatos da casa.
 - **Supabase:** provedor que hospeda o banco de dados, a autenticação e as fotos (do pet e do diário). As fotos ficam em armazenamento privado, sem links públicos, e o acesso é restrito aos tutores do pet. Os servidores podem ficar fora do Brasil; a transferência segue o art. 33 da LGPD.
 - **Anthropic:** quando você usa "Ler carteirinha", as fotos da carteirinha são enviadas, com segurança, a um serviço de inteligência artificial da Anthropic, que devolve as datas e as vacinas para você conferir. O Bowie não guarda essas fotos. Pelos termos comerciais da Anthropic, os dados enviados pela API não são usados para treinar os modelos dela e ficam retidos só pelo prazo limitado previsto nesses termos. O app pede o seu consentimento antes do primeiro envio.
+- **App Store, Google Play e RevenueCat:** quem assina o Premium paga pela loja do celular (Apple ou Google), que cuida do pagamento. O Bowie não recebe nem guarda dados do seu cartão. O RevenueCat, serviço que confere as assinaturas para o Bowie, recebe o identificador da sua conta no Bowie (um código, sem nome ou email) e os dados da assinatura informados pela loja: produto, datas e situação.
 - **Apple (TestFlight):** durante os testes, a Apple pode coletar dados de uso e de falhas do app, conforme a política de privacidade da Apple. Os comentários e prints que você envia pelo TestFlight chegam ao Bowie.
 
 - **Quem você escolher, pela ficha compartilhada:** quando você cria um link da ficha do pet (para um hotel, uma creche ou um veterinário), quem tiver o link vê os dados daquela ficha: os dados do pet, cuidados, remédios, vacinas com comprovante e o nome e o celular do tutor principal; na ficha do veterinário, também o diário com fotos e arquivos. O link vale 60 dias e você pode cancelar a qualquer momento. A página fica no GitHub Pages (GitHub), que só entrega a página: os dados vêm direto do Supabase.

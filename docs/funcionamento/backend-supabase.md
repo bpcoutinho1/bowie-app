@@ -1,6 +1,6 @@
 # Backend no Supabase
 
-O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e três Edge Functions: uma para ler a carteirinha de vacinação, outra para a ficha compartilhada e outra para excluir a conta. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
+O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e quatro Edge Functions: uma para ler a carteirinha de vacinação, uma para a ficha compartilhada, uma para excluir a conta e uma para receber as assinaturas do RevenueCat. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
 
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
@@ -13,6 +13,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 9. `20261014120000_notes_proofs_files_shares.sql`: cuidados, alergias e alimentação (`pet_health_notes`) comprovantes das vacinas (`pet_vaccines.proof_paths`), PDFs do diário (`pet_events.files`; o bucket `pet-photos` passa a aceitar `application/pdf` e até 10 MB) e links da ficha compartilhada (`pet_shares`). Pode rodar mais de uma vez.
 10. `20261019120000_account_plans.sql`: planos (`account_plans`), o teste de 30 dias para contas novas e `consume_quota`. Pode rodar mais de uma vez. Veja [planos](planos.md).
 11. `20261020120000_account_deletion.sql`: a função `delete_account` (só para a chave de serviço) e as chaves estrangeiras para `auth.users` passam a soltar o autor (`on delete set null`) ou apagar os links da ficha (`on delete cascade`). `pet_medication_doses.given_by` passa a aceitar vazio. Pode rodar mais de uma vez. Veja [exclusão de conta](autenticacao-e-navegacao.md#exclusão-de-conta).
+12. `20261021120000_store_subscriptions.sql`: colunas `store_premium_until`, `store_product` e `store_updated_at` em `account_plans`, gravadas pela função `revenuecat-webhook`. Pode rodar mais de uma vez. Veja [planos](planos.md#assinatura-pelas-lojas).
 
 ## Configuração do app
 
@@ -142,6 +143,15 @@ Pública, devolve a ficha compartilhada de um pet a partir do token do link. Vej
 3. apaga o usuário (`auth.admin.deleteUser`), o que leva junto o plano (`account_plans`), a lista de compras, os contatos da casa e os links da ficha que a pessoa criou.
 
 Os erros respondem `{error, message}` com a mensagem em português; o log guarda só o código do erro.
+
+## Edge Function `revenuecat-webhook`
+
+`supabase/functions/revenuecat-webhook/index.ts`, com "Verify JWT" desligado ([guia](../guias/assinaturas.md)). O RevenueCat chama a função a cada mudança numa assinatura, com o cabeçalho `Authorization: Bearer <REVENUECAT_WEBHOOK_SECRET>`, conferido sem vazar pelo tempo de resposta.
+
+- Do evento, a função só usa os ids das contas envolvidas (`app_user_id`, `original_app_user_id`, `aliases` e, numa transferência, `transferred_from` e `transferred_to`). Ids que não são do Supabase (compradores anônimos) são ignorados.
+- Para cada conta, ela lê o estado atual em `GET /v1/subscribers/{id}` do RevenueCat, com `REVENUECAT_SECRET_API_KEY`, e grava em `account_plans` a validade do entitlement `premium` (`store_premium_until`) e o produto. Assim um evento atrasado ou fora de ordem não desfaz um mais novo.
+- Se o RevenueCat não responde ou o banco falha, devolve erro, e o RevenueCat tenta de novo mais tarde. Conta excluída (`23503`) é ignorada.
+- A resposta e o log trazem só contagens e códigos: nenhum id ou email.
 
 ## Aplicando o esquema
 

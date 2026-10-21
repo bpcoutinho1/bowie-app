@@ -77,18 +77,6 @@ Os pets que a conta já tem continuam todos lá: o limite só impede de cadastra
 
 No topo de "Minha conta", o cartão do plano mostra o que o app leu ("Conta: Teste grátis do Premium", "Acaba em: 18/11/2026"). Se aparecer "Não foi possível ver o plano" com internet, a migração não foi rodada ou o app é de antes dela (refaça o build depois do `git pull`).
 
-## 4. Página de assinatura (fora das lojas)
+## 4. Assinatura pelas lojas
 
-O botão "Mudar para Premium" de "Bowie Premium" abre uma página no navegador. Coloque o endereço no `dart_defines.json` (que não vai para o Git) e refaça o build:
-
-```json
-{
-  "SUPABASE_URL": "...",
-  "SUPABASE_ANON_KEY": "...",
-  "PREMIUM_URL": "https://bowieapp.pet/premium"
-}
-```
-
-Sem `PREMIUM_URL`, o botão aparece desativado como "Assinatura em breve". Por enquanto, depois que alguém assina na página, o Premium é ligado à mão (seção 2).
-
-Antes de publicar nas lojas: Apple e Google têm regras para links de compra de assinatura fora da loja, e elas mudam por país. Confira as regras para o Brasil na época do envio para revisão; pode ser preciso esconder o link numa das lojas.
+Quem assina pelo app tem o Premium ligado sozinho, nas colunas `store_premium_until` e `store_product`, sem mexer no `plan`. Os comandos acima continuam valendo para testes e cortesias: o Premium dado à mão e o comprado na loja não se apagam. Para ligar a cobrança: [assinaturas](assinaturas.md).
