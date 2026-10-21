@@ -1,6 +1,6 @@
 # Backend no Supabase
 
-O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e quatro Edge Functions: uma para ler a carteirinha de vacinação, uma para a ficha compartilhada, uma para excluir a conta e uma para receber as assinaturas do RevenueCat. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
+O backend é só o Supabase: autenticação por email, tabelas no Postgres protegidas por Row Level Security (RLS) e cinco Edge Functions: uma para ler a carteirinha de vacinação, uma para a ficha compartilhada, uma para excluir a conta, uma para receber as assinaturas do RevenueCat e uma para enviar o email de convite. O esquema está em `supabase/migrations/`, aplicado em ordem de data:
 
 1. `20260930120000_pets_and_tutors.sql`: tabelas, funções e RLS.
 2. `20261006120000_pet_profile.sql`: perfil do pet (tipo, raça, nascimento, peso) e o gatilho que só deixa o tutor principal excluir.
@@ -15,6 +15,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 11. `20261020120000_account_deletion.sql`: a função `delete_account` (só para a chave de serviço) e as chaves estrangeiras para `auth.users` passam a soltar o autor (`on delete set null`) ou apagar os links da ficha (`on delete cascade`). `pet_medication_doses.given_by` passa a aceitar vazio. Pode rodar mais de uma vez. Veja [exclusão de conta](autenticacao-e-navegacao.md#exclusão-de-conta).
 12. `20261021120000_store_subscriptions.sql`: colunas `store_premium_until`, `store_product` e `store_updated_at` em `account_plans`, gravadas pela função `revenuecat-webhook`. Pode rodar mais de uma vez. Veja [planos](planos.md#assinatura-pelas-lojas).
 13. `20261022120000_flea_tick_reminders.sql`: `pet_vaccines.kind` aceita `flea_tick` (pulgas e carrapatos) e ganha `remind_days` (7, 14 ou 30, padrão 7). Pode rodar mais de uma vez. Veja [saúde](saude.md).
+14. `20261023120000_tutor_invites.sql`: coluna `invited_at` em `pet_tutors`, gravada pela função `send-invite` a cada envio. Pode rodar mais de uma vez.
 
 ## Configuração do app
 
@@ -153,6 +154,17 @@ Os erros respondem `{error, message}` com a mensagem em português; o log guarda
 - Para cada conta, ela lê o estado atual em `GET /v1/subscribers/{id}` do RevenueCat, com `REVENUECAT_SECRET_API_KEY`, e grava em `account_plans` a validade do entitlement `premium` (`store_premium_until`) e o produto. Assim um evento atrasado ou fora de ordem não desfaz um mais novo.
 - Se o RevenueCat não responde ou o banco falha, devolve erro, e o RevenueCat tenta de novo mais tarde. Conta excluída (`23503`) é ignorada.
 - A resposta e o log trazem só contagens e códigos: nenhum id ou email.
+
+## Edge Function `send-invite`
+
+`supabase/functions/send-invite/index.ts`, com "Verify JWT" ligado ([guia](../guias/convites.md)). Recebe `{tutor_id}` de quem está logado e:
+
+- confere que o vínculo existe, é de tutor e está pendente, e que quem chama é o tutor principal do pet;
+- recusa um reenvio a menos de 2 minutos do anterior (`invited_at`);
+- envia, pelo SMTP do Hostinger (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`), de "Bowie <contato@bowieapp.pet>", o email "{nome} convidou você para cuidar do Bowie no Bowie", com os passos para aceitar e o botão "Baixar o Bowie" (`INVITE_URL`, padrão `https://bowieapp.pet`);
+- grava `invited_at`.
+
+Os erros respondem `{error, message}` em português; o log guarda só o tipo da falha, sem endereços.
 
 ## Aplicando o esquema
 

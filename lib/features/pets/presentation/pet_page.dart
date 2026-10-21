@@ -281,6 +281,31 @@ class _PetPageState extends ConsumerState<PetPage> {
               contentPadding: EdgeInsets.zero,
               title: Text(tutor.email),
               subtitle: Text(_label(tutor)),
+              trailing: owner && tutor.role == PetRole.tutor
+                  ? PopupMenuButton<_TutorAction>(
+                      tooltip: 'Opções para ${tutor.email}',
+                      icon: const Icon(LucideIcons.ellipsisVertical),
+                      onSelected: (action) => switch (action) {
+                        _TutorAction.resend => _resend(tutor),
+                        _TutorAction.remove => _remove(details, tutor),
+                      },
+                      itemBuilder: (context) => [
+                        if (tutor.status == TutorStatus.pending)
+                          const PopupMenuItem(
+                            value: _TutorAction.resend,
+                            child: Text('Reenviar convite'),
+                          ),
+                        PopupMenuItem(
+                          value: _TutorAction.remove,
+                          child: Text(
+                            tutor.status == TutorStatus.pending
+                                ? 'Cancelar convite'
+                                : 'Remover tutor',
+                          ),
+                        ),
+                      ],
+                    )
+                  : null,
             ),
             if (owner &&
                 tutor.role == PetRole.tutor &&
@@ -549,19 +574,94 @@ class _PetPageState extends ConsumerState<PetPage> {
       _inviting = true;
       _error = null;
     });
+    final messenger = ScaffoldMessenger.of(context);
     try {
-      await ref
+      final tutor = await ref
           .read(petRepositoryProvider)
           .inviteTutor(petId: details.pet.id, email: _email.text, byUser: user);
       _email.clear();
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Convite registrado')));
+      try {
+        await ref.read(syncServiceProvider).sendInvite(tutor.id);
+        messenger.showSnackBar(
+          SnackBar(content: Text('Convite enviado para ${tutor.email}')),
+        );
+      } on AppFailure catch (error) {
+        // The invitation is kept; the email can go later.
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Convite registrado, mas o email não foi enviado. '
+              '${error.message} Depois, toque em ⋮ e "Reenviar convite".',
+            ),
+          ),
+        );
+      }
     } on AppFailure catch (error) {
       if (mounted) setState(() => _error = error.message);
     } finally {
       if (mounted) setState(() => _inviting = false);
+    }
+  }
+
+  Future<void> _resend(PetTutor tutor) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(syncServiceProvider).sendInvite(tutor.id);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Convite reenviado para ${tutor.email}')),
+      );
+    } on AppFailure catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text(error.message)));
+    }
+  }
+
+  Future<void> _remove(PetDetails details, PetTutor tutor) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+    final pending = tutor.status == TutorStatus.pending;
+    final of = ofPet(details.pet);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          pending ? 'Cancelar o convite?' : 'Remover ${tutor.email}?',
+        ),
+        content: Text(
+          pending
+              ? '${tutor.email} não vai mais poder aceitar o convite para '
+                    'cuidar $of.'
+              : '${tutor.email} deixa de ter acesso aos registros $of no '
+                    'app. O que já foi registrado continua no histórico. Para '
+                    'voltar, é preciso um novo convite.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Voltar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: context.colors.danger),
+            child: Text(pending ? 'Cancelar convite' : 'Remover'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref
+          .read(petRepositoryProvider)
+          .removeTutor(petId: details.pet.id, tutorId: tutor.id, byUser: user);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            pending ? 'Convite cancelado' : '${tutor.email} foi removido',
+          ),
+        ),
+      );
+    } on AppFailure catch (error) {
+      if (mounted) setState(() => _error = error.message);
     }
   }
 
@@ -798,3 +898,5 @@ String formatWeight(double kg) {
       : rounded.toStringAsFixed(1);
   return text.replaceAll('.', ',');
 }
+
+enum _TutorAction { resend, remove }

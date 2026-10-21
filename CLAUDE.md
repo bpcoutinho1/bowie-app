@@ -20,7 +20,7 @@ design/brand/app-icon/ ícone 1024, foreground adaptativo Android, splash
 scripts/               outline-wordmark.py (regenera o logo em curvas), make-splash.py (lockup com tagline e imagens do splash)
 lib/                   app Flutter (veja docs/funcionamento/visao-geral.md)
 supabase/migrations/   esquema do banco e políticas de RLS
-supabase/functions/    Edge Functions (read-vaccine-card, pet-share, delete-account, revenuecat-webhook)
+supabase/functions/    Edge Functions (read-vaccine-card, pet-share, delete-account, revenuecat-webhook, send-invite)
 web-share/             página pública da ficha compartilhada (GitHub Pages, scripts/build-web-share.sh)
 ```
 

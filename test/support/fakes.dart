@@ -155,6 +155,14 @@ class FakeRemote implements PetRemoteApi {
   Future<Uint8List?> downloadPhoto(String path) async => photos[path];
 
   /// Mirrors transfer_pet on the server.
+  final invitesSent = <String>[];
+
+  @override
+  Future<void> sendInvite(String tutorId) async {
+    calls.add('invite');
+    invitesSent.add(tutorId);
+  }
+
   @override
   Future<void> transferPet({
     required String petId,
