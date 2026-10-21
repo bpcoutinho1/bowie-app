@@ -8,11 +8,13 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/ui/choice_field.dart';
 import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_names.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/diary/presentation/event_photos.dart';
+import 'package:bowie/features/health/presentation/dose_kind_icon.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 
@@ -89,6 +91,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
   final _notes = TextEditingController();
   var _proofs = <EventPhoto>[];
   late DoseKind _kind;
+  late int _remindDays;
   late DateTime _appliedOn;
   DateTime? _nextDueOn;
   var _details = false;
@@ -104,6 +107,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
     final today = ref.read(healthRepositoryProvider).today;
     if (dose != null) {
       _kind = dose.kind;
+      _remindDays = dose.remindDays;
       _name.text = dose.name;
       _appliedOn = dose.appliedOn;
       _nextDueOn = dose.nextDueOn;
@@ -120,6 +124,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
       ].any((value) => value != null);
     } else {
       _kind = widget.kind ?? DoseKind.vaccine;
+      _remindDays = defaultReminderDays;
       _name.text = widget.name ?? '';
       _appliedOn = today;
       _nextDueOn = addMonths(today, defaultIntervalMonths(_kind));
@@ -155,6 +160,8 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
         title: Text(
           _editing
               ? 'Editar registro'
+              : _kind == DoseKind.fleaTick
+              ? 'Pulgas e carrapatos'
               : 'Registrar ${_kind.label.toLowerCase()}',
         ),
       ),
@@ -167,22 +174,22 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
           BowieSpacing.s8,
         ),
         children: [
-          SegmentedButton<DoseKind>(
-            showSelectedIcon: false,
-            segments: [
+          ChoiceField<DoseKind>(
+            label: 'Tipo',
+            value: _kind,
+            enabled: !_editing,
+            options: [
               for (final kind in DoseKind.values)
-                ButtonSegment(value: kind, label: Text(kind.label)),
+                ChoiceOption(
+                  value: kind,
+                  label: kind.label,
+                  icon: doseKindIcon(kind),
+                ),
             ],
-            selected: {_kind},
-            onSelectionChanged: _editing
-                ? null
-                : (selection) => setState(() {
-                    _kind = selection.first;
-                    _nextDueOn = addMonths(
-                      _appliedOn,
-                      defaultIntervalMonths(_kind),
-                    );
-                  }),
+            onChanged: (kind) => setState(() {
+              _kind = kind;
+              _nextDueOn = addMonths(_appliedOn, defaultIntervalMonths(kind));
+            }),
           ),
           gap,
           RawAutocomplete<String>(
@@ -200,10 +207,16 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
                 focusNode: focusNode,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
-                  labelText: _kind == DoseKind.vaccine
-                      ? 'Nome da vacina'
-                      : 'Nome do vermífugo',
-                  helperText: 'Escolha da lista ou digite outro.',
+                  labelText: switch (_kind) {
+                    DoseKind.vaccine => 'Nome da vacina',
+                    DoseKind.dewormer => 'Nome do vermífugo',
+                    DoseKind.fleaTick => 'Nome do produto',
+                  },
+                  helperText: _kind == DoseKind.fleaTick
+                      ? 'Ex.: coleira Seresto, Bravecto. Escolha da lista ou '
+                            'digite outro.'
+                      : 'Escolha da lista ou digite outro.',
+                  helperMaxLines: 2,
                 ),
               );
             },
@@ -255,9 +268,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
           ),
           gap,
           _DateField(
-            label: _kind == DoseKind.vaccine
-                ? 'Revacinar em'
-                : 'Próxima dose em',
+            label: _kind.dueLabel,
             value: nextDue,
             onTap: () async {
               final picked = await _pickDate(
@@ -292,6 +303,20 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
               style: BowieType.caption.copyWith(color: colors.textMuted),
             ),
           ],
+          gap,
+          ChoiceField<int>(
+            label: 'Lembrete no celular',
+            value: _remindDays,
+            options: [
+              for (final days in reminderDayOptions)
+                ChoiceOption(
+                  value: days,
+                  label: '$days dias antes',
+                  icon: LucideIcons.bellRing,
+                ),
+            ],
+            onChanged: (days) => setState(() => _remindDays = days),
+          ),
           const SizedBox(height: BowieSpacing.s2),
           if (!_details)
             Align(
@@ -299,20 +324,26 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
               child: TextButton.icon(
                 onPressed: () => setState(() => _details = true),
                 icon: const Icon(LucideIcons.plus),
-                label: const Text('Produto, lote e veterinário'),
+                label: Text(
+                  _kind == DoseKind.fleaTick
+                      ? 'Lote, veterinário e observações'
+                      : 'Produto, lote e veterinário',
+                ),
               ),
             )
           else ...[
             gap,
-            TextField(
-              controller: _product,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Produto e fabricante',
-                hintText: 'Ex.: Vanguard Plus, Zoetis',
+            if (_kind != DoseKind.fleaTick) ...[
+              TextField(
+                controller: _product,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Produto e fabricante',
+                  hintText: 'Ex.: Vanguard Plus, Zoetis',
+                ),
               ),
-            ),
-            gap,
+              gap,
+            ],
             TextField(
               controller: _lot,
               decoration: const InputDecoration(
@@ -341,9 +372,11 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
           const SizedBox(height: BowieSpacing.s6),
           EventPhotosField(
             title: 'Comprovante',
-            helper:
-                'Recomendado. Fotografe a etiqueta do frasco e o carimbo do '
-                'veterinário: hotéis e creches costumam pedir essa prova.',
+            helper: _kind == DoseKind.fleaTick
+                ? 'Recomendado. Fotografe a embalagem ou a coleira: hotéis e '
+                      'creches costumam pedir essa prova.'
+                : 'Recomendado. Fotografe a etiqueta do frasco e o carimbo do '
+                      'veterinário: hotéis e creches costumam pedir essa prova.',
             max: maxProofPhotos,
             photos: _proofs,
             onChanged: (photos) => setState(() {
@@ -419,6 +452,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
               notes: _notes.text,
               keptProofs: [for (final photo in _proofs) ?photo.path],
               newProofs: [for (final photo in _proofs) ?photo.bytes],
+              remindDays: _remindDays,
             ),
             byUser: user,
           );

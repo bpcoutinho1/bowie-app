@@ -12,9 +12,9 @@ import 'package:bowie/core/ui/empty_state.dart';
 import 'package:bowie/core/ui/notifications_button.dart';
 import 'package:bowie/features/health/domain/health_note.dart';
 import 'package:bowie/features/health/domain/medication.dart';
-import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/features/health/domain/vaccine_status.dart';
 import 'package:bowie/features/health/presentation/health_notes_section.dart';
+import 'package:bowie/features/health/presentation/dose_kind_icon.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/medications_section.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
@@ -151,14 +151,14 @@ class _Vaccines extends ConsumerWidget {
               const SizedBox(height: BowieSpacing.s6),
             ],
             Text(
-              'Vacinas e vermífugos ${ofPet(pet)}',
+              'Vacinas, vermífugos e antipulgas ${ofPet(pet)}',
               style: BowieType.title3.copyWith(color: colors.text),
             ),
             const SizedBox(height: BowieSpacing.s3),
             if (groups.isEmpty)
               Text(
-                'Nenhuma vacina registrada ainda. Toque em "Registrar vacina" '
-                'ou leia a carteirinha pelo ícone no topo.',
+                'Nenhuma vacina registrada ainda. Toque em "Registrar" ou '
+                'leia a carteirinha pelo ícone no topo.',
                 style: BowieType.body.copyWith(color: colors.textMuted),
               ),
             for (final group in groups) ...[
@@ -188,12 +188,7 @@ class _GroupCard extends StatelessWidget {
         padding: const EdgeInsets.all(BowieSpacing.s4),
         child: Row(
           children: [
-            Icon(
-              group.kind == DoseKind.vaccine
-                  ? LucideIcons.syringe
-                  : LucideIcons.pill,
-              color: colors.categoryVaccines,
-            ),
+            Icon(doseKindIcon(group.kind), color: colors.categoryVaccines),
             const SizedBox(width: BowieSpacing.s3),
             Expanded(
               child: Column(

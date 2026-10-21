@@ -2,7 +2,7 @@ import 'dart:math';
 
 /// Limits of the plans (docs/produto/planos.md).
 const freePetLimit = 1;
-const premiumPetLimit = 5;
+const premiumPetLimit = 10;
 
 /// Photos read by the AI, for the life of the account.
 const freeAiPhotos = 3;

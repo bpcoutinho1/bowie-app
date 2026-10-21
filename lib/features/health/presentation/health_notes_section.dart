@@ -114,6 +114,12 @@ Future<void> showHealthAddSheet(BuildContext context, String petId) async {
                 ),
               ),
               option(
+                LucideIcons.scanText,
+                'Ler a carteirinha com IA',
+                'Fotografe e o app preenche vacinas e vermífugos',
+                '/saude/carteirinha?pet=$petId',
+              ),
+              option(
                 LucideIcons.pill,
                 'Medicação',
                 'Remédio com dose, horários e duração',
@@ -124,6 +130,12 @@ Future<void> showHealthAddSheet(BuildContext context, String petId) async {
                 'Vacina ou vermífugo',
                 'Dose aplicada e quando vence',
                 '/saude/doses/nova?pet=$petId',
+              ),
+              option(
+                LucideIcons.bug,
+                'Contra pulgas e carrapatos',
+                'Coleira, comprimido ou pipeta, e quando trocar',
+                '/saude/doses/nova?pet=$petId&tipo=flea_tick',
               ),
               option(
                 healthNoteIcon(HealthNoteKind.allergy),

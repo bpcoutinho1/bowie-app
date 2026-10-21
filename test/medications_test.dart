@@ -356,8 +356,10 @@ void main() {
     await tester.tap(find.text('Registrar'));
     await settle();
     for (final option in [
+      'Ler a carteirinha com IA',
       'Medicação',
       'Vacina ou vermífugo',
+      'Contra pulgas e carrapatos',
       'Alergia',
       'Alimentação',
       'Cuidado especial',

@@ -121,7 +121,7 @@ void main() {
       row(trialEndsAt: '2026-11-01T00:00:00Z', ai: 9),
       now,
     );
-    expect(trial.petLimit, 5);
+    expect(trial.petLimit, 10);
     expect(trial.aiPhotosLeft, isNull);
   });
 

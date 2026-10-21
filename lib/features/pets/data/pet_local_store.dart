@@ -61,7 +61,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 11,
+      version: 12,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -76,6 +76,7 @@ class PetLocalStore {
         if (from < 9) await _addHealthNotes(db);
         if (from < 10) await _addVaccineProofs(db);
         if (from < 11) await _addEventFiles(db);
+        if (from < 12) await _addReminderDays(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -96,6 +97,7 @@ class PetLocalStore {
         await _addHealthNotes(db);
         await _addVaccineProofs(db);
         await _addEventFiles(db);
+        await _addReminderDays(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -130,6 +132,15 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 12: how many days before the due date each dose reminds.
+  static Future<void> _addReminderDays(DatabaseExecutor db) async {
+    if (!await _hasTable(db, 'pet_vaccines')) return;
+    await db.execute(
+      'ALTER TABLE pet_vaccines ADD COLUMN remind_days INTEGER NOT NULL '
+      'DEFAULT $defaultReminderDays',
+    );
   }
 
   /// Version 11: PDFs in diary entries.

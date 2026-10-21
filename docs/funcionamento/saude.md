@@ -1,19 +1,20 @@
-# Saúde: cuidados, vacinas, vermífugos e medicações
+# Saúde: cuidados, vacinas, vermífugos, antipulgas e medicações
 
 O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/saude.md`](../produto/saude.md).
 
 ## Modelo
 
-**`VaccineDose`** (`lib/features/health/domain/vaccine_dose.dart`): uma dose aplicada, como está na carteirinha. Vacinas e vermífugos usam o mesmo registro.
+**`VaccineDose`** (`lib/features/health/domain/vaccine_dose.dart`): uma dose aplicada, como está na carteirinha. Vacinas, vermífugos e antipulgas usam o mesmo registro.
 
 | Campo | Descrição |
 | --- | --- |
 | `id`, `pet_id` | UUID da dose e do pet. |
-| `kind` | `vaccine` (vacina) ou `dewormer` (vermífugo). |
-| `name` | "V10", "Raiva", nome do vermífugo. 1 a 80 caracteres. |
+| `kind` | `vaccine` (vacina), `dewormer` (vermífugo) ou `flea_tick` (pulgas e carrapatos). No app, `DoseKind.code`; `dueLabel` dá "Revacinar em", "Próxima dose em" ou "Trocar em". |
+| `name` | "V10", "Raiva", nome do vermífugo, "Coleira Seresto". 1 a 80 caracteres. |
 | `applied_on` | Dia da aplicação. Não pode ser no futuro. |
 | `next_due_on` | "Revacinar em" na carteirinha. Precisa ser depois da aplicação. Define o status. |
 | `product`, `lot`, `veterinarian`, `notes` | Opcionais: produto e fabricante, lote, veterinário (nome e CRMV), observações. |
+| `remind_days` | 7, 14 ou 30: quantos dias antes do vencimento o celular avisa (`reminderDayOptions`). Linhas antigas, sem o campo, valem 7. Local: versão 12 do banco do celular. Servidor: migração `20261022120000_flea_tick_reminders.sql`. |
 | `proof_paths` | Fotos do comprovante, até 2 (`maxProofPhotos`), em JSON (`["<petId>/<uuid>.jpg"]`). `hasProof` diz se há alguma. |
 | `updated_by` | Quem salvou a última versão (inclusive a exclusão). |
 | `updated_at`, `deleted_at` | Como nos pets. Excluir marca `deleted_at`. |
@@ -51,7 +52,7 @@ No topo da aba Saúde, "Importante sobre Bowie" lista os registros com ícone (a
 
 | Rota | Tela |
 | --- | --- |
-| `/saude` | `HealthPage`: vacinas e vermífugos do pet escolhido. Com mais de um pet, um seletor no topo troca de pet. Sem vacinas, convida a registrar a primeira. |
+| `/saude` | `HealthPage`: vacinas, vermífugos e antipulgas do pet escolhido. Com mais de um pet, um seletor no topo troca de pet. Sem vacinas, convida a registrar a primeira. |
 | `/saude/carteirinha?pet=` | `CardReadingPage`: ler a carteirinha por foto (veja abaixo). Abre pelo ícone de leitura no topo da aba Saúde ou pelo botão "Ler a carteirinha" quando o pet ainda não tem vacinas. |
 | `/saude/doses/nova?pet=&tipo=&nome=` | `DoseFormPage`: registrar. `tipo` e `nome` são preenchidos quando se registra uma nova dose a partir do histórico. |
 | `/saude/doses/:id` | `DoseHistoryPage`: todas as doses daquela vacina, a mais nova primeiro, e o botão "Registrar nova dose". |
@@ -59,19 +60,21 @@ No topo da aba Saúde, "Importante sobre Bowie" lista os registros com ícone (a
 | `/saude/notas/nova?pet=&tipo=` | `HealthNoteFormPage`: cuidado especial, alergia ou alimentação (`tipo` = `special_care`, `allergy` ou `diet`), num campo que abre a lista dos três. Título com sugestões e detalhes. |
 | `/saude/notas/:id` | `HealthNoteFormPage`: editar ou excluir. |
 
-O botão "Registrar" da aba abre `showHealthAddSheet`: "O que você quer registrar?", com Medicação, Vacina ou vermífugo, Alergia, Alimentação e Cuidado especial.
+O botão "Registrar" da aba abre `showHealthAddSheet`: "O que você quer registrar?", com Ler a carteirinha com IA (abre `/saude/carteirinha`), Medicação, Vacina ou vermífugo, Contra pulgas e carrapatos (`/saude/doses/nova?tipo=flea_tick`), Alergia, Alimentação e Cuidado especial.
 
 No formulário:
 
-- O nome sugere vacinas comuns para cães (V8, V10, Raiva, Giardíase, Tosse dos canis, Gripe canina, Leishmaniose) ou gatos (V3, V4, V5, Raiva, FeLV), e vermífugos. Dá para digitar outro.
-- "Aplicada em" começa em hoje. A próxima dose começa em +1 ano para vacinas e +3 meses para vermífugos; os atalhos "+1 ano", "+6 meses" e "+3 meses" recalculam a partir da aplicação.
-- Produto, lote, veterinário e observações ficam recolhidos em "Produto, lote e veterinário".
+- O tipo é um `ChoiceField` (Vacina, Vermífugo, Pulgas e carrapatos), travado na edição.
+- O nome sugere vacinas comuns para cães (V8, V10, Raiva, Giardíase, Tosse dos canis, Gripe canina, Leishmaniose) ou gatos (V3, V4, V5, Raiva, FeLV), vermífugos e antipulgas (Coleira Seresto, Bravecto, NexGard, Simparic e outros, por espécie). Dá para digitar outro.
+- "Aplicada em" começa em hoje. A próxima dose começa em +1 ano para vacinas e +3 meses para vermífugos e antipulgas; os atalhos "+1 ano", "+6 meses" e "+3 meses" recalculam a partir da aplicação. No antipulgas, o campo se chama "Trocar em".
+- "Lembrete no celular": 7, 14 ou 30 dias antes.
+- Produto, lote, veterinário e observações ficam recolhidos em "Produto, lote e veterinário" (no antipulgas, "Lote, veterinário e observações": o nome já é o produto).
 
 A aba **Início** mostra, em cada pet, a vacina mais urgente com o mesmo selo de status.
 
 ## Leitura da carteirinha
 
-A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md). A tela tem três etapas:
+A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md). Abre pelo ícone de leitura no topo da aba Saúde, pela primeira opção do "Registrar" ("Ler a carteirinha com IA") e pelo convite da aba quando o pet não tem vacinas. A leitura reconhece vacinas, vermífugos e antipulgas (`kind` `flea_tick`). Precisa da Edge Function `read-vaccine-card` publicada, com o segredo `ANTHROPIC_API_KEY` ([guia](../guias/publicar-leitura-da-carteirinha.md)). A tela tem três etapas:
 
 1. **Fotos.** "Tirar foto" (câmera) ou "Da galeria" (várias de uma vez), até 4 fotos por leitura, com miniaturas que dá para remover. As fotos chegam redimensionadas para no máximo 2000 px, em JPEG com qualidade 85 (`ImagePickerPhotos`, `lib/features/health/data/photo_picker.dart`). O formato é conferido pelos primeiros bytes: JPEG, PNG e WebP passam; outros (como HEIC) mostram um aviso.
 2. **Leitura.** Na primeira vez, um diálogo pede consentimento antes de qualquer foto sair do celular ("Enviar as fotos para leitura?"). O aceite fica guardado no aparelho (`PrefsReadingConsent`, chave `card_reading_consent_v1`). `SupabaseCardReader` (`lib/features/health/data/card_reader.dart`) chama a Edge Function `read-vaccine-card` com as fotos em base64 e espera até 160 s. A tela mostra "Lendo a carteirinha de Bowie" e um botão "Cancelar", que descarta a resposta quando ela chegar. Erros voltam como mensagens em português (sem internet, servidor ocupado, foto ilegível).

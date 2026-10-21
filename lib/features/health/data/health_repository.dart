@@ -26,6 +26,7 @@ class DoseInput {
     this.notes,
     this.keptProofs = const [],
     this.newProofs = const [],
+    this.remindDays = defaultReminderDays,
   });
 
   final String petId;
@@ -44,6 +45,9 @@ class DoseInput {
 
   /// Proof photos taken or chosen now.
   final List<Uint8List> newProofs;
+
+  /// 7, 14 or 30 days before the due date.
+  final int remindDays;
 }
 
 /// Proof photos per dose: the vial sticker and the stamp.
@@ -166,7 +170,16 @@ class HealthRepository {
 
   VaccineDose _build(String? id, DoseInput input, AppUser byUser) {
     final name = input.name.trim();
-    if (name.isEmpty) throw const AppFailure('Digite o nome da vacina.');
+    if (name.isEmpty) {
+      throw AppFailure(switch (input.kind) {
+        DoseKind.vaccine => 'Digite o nome da vacina.',
+        DoseKind.dewormer => 'Digite o nome do vermífugo.',
+        DoseKind.fleaTick => 'Digite o nome do produto.',
+      });
+    }
+    if (!reminderDayOptions.contains(input.remindDays)) {
+      throw const AppFailure('Escolha o lembrete: 7, 14 ou 30 dias antes.');
+    }
     if (name.length > 80) {
       throw const AppFailure('Use no máximo 80 caracteres no nome.');
     }
@@ -176,14 +189,20 @@ class HealthRepository {
       throw const AppFailure('Informe a data da aplicação.');
     }
     if (due == null) {
-      throw const AppFailure('Informe quando é a próxima dose.');
+      throw AppFailure(
+        input.kind == DoseKind.fleaTick
+            ? 'Informe quando trocar.'
+            : 'Informe quando é a próxima dose.',
+      );
     }
     if (dayOf(applied).isAfter(today)) {
       throw const AppFailure('A data da aplicação não pode estar no futuro.');
     }
     if (!dayOf(due).isAfter(dayOf(applied))) {
-      throw const AppFailure(
-        'A próxima dose precisa ser depois da data da aplicação.',
+      throw AppFailure(
+        input.kind == DoseKind.fleaTick
+            ? 'A troca precisa ser depois da data da aplicação.'
+            : 'A próxima dose precisa ser depois da data da aplicação.',
       );
     }
 
@@ -198,6 +217,7 @@ class HealthRepository {
       lot: _optional(input.lot, 'o lote'),
       veterinarian: _optional(input.veterinarian, 'o veterinário'),
       notes: _optional(input.notes, 'as observações', max: 500),
+      remindDays: input.remindDays,
       updatedBy: byUser.id,
       updatedAt: _now().toUtc(),
     );

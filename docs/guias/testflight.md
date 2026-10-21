@@ -46,7 +46,7 @@ A versão que aparece para os testadores (ex.: 0.1.0) vem de `version:` no `pubs
 1. **TestFlight → Test Information**:
    - Beta App Description: o que testar. Ex.: "Cadastre seu pet, registre as vacinas lendo a carteirinha, use o diário, a lista de compras e os contatos."
    - Feedback Email: o seu email.
-   - Privacy Policy URL: https://github.com/bpcoutinho1/bowie-app/blob/main/docs/legal/politica-de-privacidade.md
+   - Privacy Policy URL: https://bowieapp.pet/privacidade/
    - Sign-In Information: email e senha de uma **conta de teste** criada no app, com um pet de exemplo. Sem isso, a Apple recusa o build.
 2. **External Testing** → **+** → crie um grupo (ex.: "Amigos do Bowie"), adicione o build e envie para revisão.
 3. Aprovado, convide por email ou ative o **Public Link** e mande por WhatsApp.

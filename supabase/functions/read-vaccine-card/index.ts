@@ -22,7 +22,7 @@ Como a carteirinha é organizada:
 - Cada linha é uma dose: "Data" (aplicação) e "Revacinar em" (próxima dose), escritos à mão no formato dd/mm/aa.
 - Há uma etiqueta adesiva do frasco com produto, fabricante, "Part." (lote), "Fabr." (fabricação) e "Venc." (validade do frasco).
 - Há um carimbo do veterinário com nome e CRMV, muitas vezes com assinatura por cima.
-- Algumas carteirinhas têm páginas de vermífugo (data, produto, peso) e de peso (data, peso).
+- Algumas carteirinhas têm páginas de vermífugo (data, produto, peso), de antipulgas ou ectoparasitas (coleira, comprimido ou pipeta contra pulgas e carrapatos, com data e próxima aplicação) e de peso (data, peso). Vermífugo: kind = "dewormer". Antipulgas: kind = "flea_tick", com o nome do produto ("Bravecto", "Coleira Seresto").
 
 Regras:
 1. O vencimento da dose (next_due_on) é SEMPRE o "Revacinar em" escrito à mão. NUNCA use o "Venc." da etiqueta: ele é a validade do frasco, não a data da próxima dose.
@@ -63,7 +63,7 @@ const OUTPUT_SCHEMA = {
         additionalProperties: false,
         required: [...DOSE_FIELDS, "photo", "uncertain_fields"],
         properties: {
-          kind: { type: "string", enum: ["vaccine", "dewormer"] },
+          kind: { type: "string", enum: ["vaccine", "dewormer", "flea_tick"] },
           name: { type: "string" },
           applied_on: { type: "string", description: "AAAA-MM-DD ou vazio" },
           next_due_on: { type: "string", description: "AAAA-MM-DD ou vazio" },
@@ -95,7 +95,7 @@ const OUTPUT_SCHEMA = {
 };
 
 const Dose = z.object({
-  kind: z.enum(["vaccine", "dewormer"]),
+  kind: z.enum(["vaccine", "dewormer", "flea_tick"]),
   name: z.string(),
   applied_on: z.string(),
   next_due_on: z.string(),

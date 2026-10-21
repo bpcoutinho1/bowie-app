@@ -31,7 +31,7 @@ sequenceDiagram
 **Edge Function `pet-share`** (`supabase/functions/pet-share/index.ts`), pública ("Verify JWT" desligado):
 
 - Recebe `POST {token}`. Com token inválido, vencido, cancelado ou de pet excluído, responde 404 com a mesma mensagem, para não revelar se o token existe.
-- Lê com a chave de serviço (`SUPABASE_SERVICE_ROLE_KEY`, que o Supabase já dá à função): pet, vacinas (agrupadas por nome, com status pelos mesmos 30 dias do app e comprovantes), cuidados, remédios em uso (sem fim ou com fim a partir de hoje, no fuso de São Paulo), e o tutor principal: nome e celular do `user_metadata` da conta, ou o email quando não há celular. Na ficha `vet`, também o diário (até 200 registros, com contato, fotos e PDFs).
+- Lê com a chave de serviço (`SUPABASE_SERVICE_ROLE_KEY`, que o Supabase já dá à função): pet, vacinas (agrupadas por nome, com status pelos mesmos 30 dias do app e comprovantes), cuidados, remédios em uso (sem fim ou com fim a partir de hoje, no fuso de São Paulo), o tutor principal e os outros tutores que já aceitaram o convite (até 10, em `other_tutors`): nome e celular do `user_metadata` de cada conta, ou o email quando não há celular. Na ficha `vet`, também o diário (até 200 registros, com contato, fotos e PDFs).
 - Fotos e PDFs vão como links assinados do Storage, de 1 hora.
 - Grava `last_viewed_at`. O log tem só o id do link e o tipo de ficha.
 - Responde com `Cache-Control: no-store` e CORS aberto (a página está em outro domínio).
@@ -43,6 +43,8 @@ sequenceDiagram
 - O token vem depois do `#` no endereço, então não chega ao servidor do GitHub Pages; ele só vai no corpo do POST para a função.
 - Monta a página com `textContent` (nada vindo do servidor vira HTML). Ícones Lucide embutidos.
 - Usa os tokens de `design/tokens/tokens.css`, Figtree servida junto (sem Google Fonts) e o tema claro ou escuro do sistema. Tem botão "Imprimir" e estilo de impressão.
+- Logo depois do tutor principal vem "Outro tutor" (ou "Outros tutores"), com ligar e WhatsApp, para quando o principal não atende.
+- Antipulgas aparecem junto com as vacinas, marcados "(pulgas e carrapatos)" e com "Trocar em" no lugar de "Próxima".
 - `noindex` e `no-referrer`.
 
 `scripts/build-web-share.sh` monta o site em `_site/` (página, tokens, fontes, logos e `config.js` com `SUPABASE_URL`). O workflow `.github/workflows/ficha-pages.yml` roda o script e publica no GitHub Pages a cada mudança em `web-share/` na `main`, ou pelo botão "Run workflow". Configuração em [publicar a ficha](../guias/ficha-compartilhada.md).

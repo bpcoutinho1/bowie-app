@@ -19,8 +19,9 @@ Hotéis, creches e veterinários pedem as mesmas informações toda vez: vacinas
 | Dados do pet (foto, espécie, sexo, raça, idade, peso) | Sim | Sim |
 | Importante: cuidados especiais, alergias, alimentação | Sim | Sim |
 | Contato do tutor principal (nome e celular, com ligar e WhatsApp) | Sim | Sim |
+| Contato dos outros tutores, para quando o principal não atende (decisão de 21 de outubro de 2026) | Sim | Sim |
 | Remédios em uso | Sim | Sim |
-| Vacinas e vermífugos, com status e comprovante | Sim | Sim |
+| Vacinas, vermífugos e antipulgas, com status e comprovante | Sim | Sim |
 | Diário com fotos e arquivos (PDF) | Não | Sim |
 
 Os PDFs do diário entram automaticamente na ficha do veterinário.

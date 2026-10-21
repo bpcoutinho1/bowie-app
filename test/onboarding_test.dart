@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqflite/sqflite.dart';
@@ -16,12 +17,15 @@ import 'package:bowie/features/home/presentation/home_page.dart';
 import 'package:bowie/features/onboarding/domain/pet_checklist.dart';
 import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
+import 'package:bowie/features/pets/data/pet_sync_controller.dart';
+import 'package:bowie/features/pets/data/pet_sync_service.dart';
 import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/reminders/presentation/reminder_providers.dart';
 
 import 'reminders_test.dart' show FakeGateway;
+import 'support/fakes.dart';
 
 void main() {
   const bruno = AppUser(
@@ -75,8 +79,13 @@ void main() {
       addTearDown(tester.view.reset);
     }
 
-    Widget app({required Widget home, GoRouter? router}) {
+    Widget app({
+      required Widget home,
+      GoRouter? router,
+      List<Override> extra = const [],
+    }) {
       final overrides = [
+        ...extra,
         petLocalStoreProvider.overrideWithValue(store),
         petPhotoStoreProvider.overrideWithValue(PetPhotoStore(dir)),
         currentUserProvider.overrideWithValue(bruno),
@@ -111,6 +120,68 @@ void main() {
       await settle(tester);
       expect(find.text('Boas-vindas ao Bowie'), findsOneWidget);
       expect(find.text('Cadastrar meu pet'), findsOneWidget);
+    });
+
+    testWidgets('right after sign in, it waits for the pets on the server', (
+      tester,
+    ) async {
+      await setUpData(tester);
+      // Bowie is on the server, not yet on this phone.
+      final remote = FakeRemote();
+      // Another phone, with its own database.
+      final elsewhere = (await tester.runAsync(
+        () => PetLocalStore.open(databasePath: '${dir.path}/elsewhere.db'),
+      ))!;
+      addTearDown(() => tester.runAsync(elsewhere.close));
+      await tester.runAsync(() async {
+        final there = PetSyncService(
+          store: elsewhere,
+          remote: remote,
+          isSignedIn: () => true,
+          network: FakeNetwork(),
+        );
+        await PetRepository(elsewhere, now: () => today).createPet(
+          profile: PetProfile(
+            name: 'Bowie',
+            species: PetSpecies.dog,
+            sex: PetSex.male,
+            birthDate: DateTime(2021, 5, 4),
+          ),
+          owner: bruno,
+        );
+        await there.sync();
+      });
+      await tester.pumpWidget(
+        app(
+          home: const HomePage(),
+          extra: [
+            networkStatusProvider.overrideWithValue(FakeNetwork()),
+            petRemoteApiProvider.overrideWithValue(remote),
+            syncServiceProvider.overrideWithValue(
+              PetSyncService(
+                store: store,
+                remote: remote,
+                isSignedIn: () => true,
+                network: FakeNetwork(),
+              ),
+            ),
+          ],
+        ),
+      );
+      await settle(tester);
+      expect(find.text('Buscando os seus pets'), findsOneWidget);
+      expect(find.text('Boas-vindas ao Bowie'), findsNothing);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomePage)),
+      );
+      await tester.runAsync(
+        () => container.read(syncControllerProvider.notifier).sync(),
+      );
+      await settle(tester);
+      expect(find.text('Buscando os seus pets'), findsNothing);
+      expect(find.text('Boas-vindas ao Bowie'), findsNothing);
+      expect(find.text('Bowie'), findsWidgets);
     });
 
     testWidgets('the path goes from the pet to the vaccines to the end', (

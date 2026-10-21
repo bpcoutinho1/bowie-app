@@ -18,6 +18,7 @@ const BUCKET = "pet-photos";
 const URL_SECONDS = 60 * 60;
 const DUE_SOON_DAYS = 30;
 const MAX_EVENTS = 200;
+const MAX_OTHER_TUTORS = 10;
 
 const Body = z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{32,64}$/) });
 
@@ -158,7 +159,7 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (!pet || pet.deleted_at) return json(404, GONE);
 
-  const [vaccines, notes, meds, owner, events] = await Promise.all([
+  const [vaccines, notes, meds, owner, others, events] = await Promise.all([
     admin
       .from("pet_vaccines")
       .select("kind, name, applied_on, next_due_on, product, lot, veterinarian, proof_paths")
@@ -183,6 +184,16 @@ Deno.serve(async (req) => {
       .is("deleted_at", null)
       .limit(1)
       .maybeSingle(),
+    // The other tutors, for when the main one does not answer.
+    admin
+      .from("pet_tutors")
+      .select("user_id, email")
+      .eq("pet_id", petId)
+      .eq("role", "tutor")
+      .eq("status", "accepted")
+      .not("user_id", "is", null)
+      .is("deleted_at", null)
+      .limit(MAX_OTHER_TUTORS),
     vet
       ? admin
         .from("pet_events")
@@ -193,7 +204,10 @@ Deno.serve(async (req) => {
         .limit(MAX_EVENTS)
       : Promise.resolve({ data: [] as Record<string, unknown>[] }),
   ]);
-  if (vaccines.error || notes.error || meds.error || owner.error || ("error" in events && events.error)) {
+  if (
+    vaccines.error || notes.error || meds.error || owner.error || others.error ||
+    ("error" in events && events.error)
+  ) {
     console.error(`pet-share failed reading share=${share.id}`);
     return json(500, { error: "server", message: "Não foi possível abrir a ficha agora. Tente de novo em alguns minutos." });
   }
@@ -254,19 +268,22 @@ Deno.serve(async (req) => {
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
     .map(medication);
 
-  let tutor: { name: string | null; phone: string | null; email: string | null } | null = null;
-  if (owner.data) {
+  type Contact = { name: string | null; phone: string | null; email: string | null };
+  // Name and phone from the account; the email only when there is no phone
+  // to call.
+  const contactOf = async (row: { user_id: string | null; email: string }): Promise<Contact> => {
     let name: string | null = null;
     let phone: string | null = null;
-    if (owner.data.user_id) {
-      const { data } = await admin.auth.admin.getUserById(owner.data.user_id);
+    if (row.user_id) {
+      const { data } = await admin.auth.admin.getUserById(row.user_id);
       const meta = data?.user?.user_metadata ?? {};
       name = typeof meta.name === "string" && meta.name.trim() ? meta.name.trim() : null;
       phone = typeof meta.phone === "string" && meta.phone.trim() ? meta.phone.trim() : null;
     }
-    // The email only when there is no phone to call.
-    tutor = { name, phone, email: phone ? null : owner.data.email };
-  }
+    return { name, phone, email: phone ? null : row.email };
+  };
+  const tutor = owner.data ? await contactOf(owner.data) : null;
+  const otherTutors = await Promise.all((others.data ?? []).map(contactOf));
 
   let eventList: unknown[] | undefined;
   if (vet) {
@@ -314,6 +331,7 @@ Deno.serve(async (req) => {
     medications: medList,
     vaccines: vaccineList,
     tutor,
+    other_tutors: otherTutors,
     ...(vet ? { events: eventList } : {}),
   });
 });

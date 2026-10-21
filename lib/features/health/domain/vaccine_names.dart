@@ -6,6 +6,28 @@ List<String> doseSuggestions(PetSpecies? species, DoseKind kind) {
   if (kind == DoseKind.dewormer) {
     return const ['Vermífugo', 'Drontal', 'Milbemax', 'Endogard', 'Vermivet'];
   }
+  if (kind == DoseKind.fleaTick) {
+    return switch (species) {
+      PetSpecies.cat => const [
+        'Coleira Seresto',
+        'Bravecto Transdermal',
+        'Revolution',
+        'Frontline Plus',
+        'Advocate',
+        'Credeli Cat',
+      ],
+      _ => const [
+        'Coleira Seresto',
+        'Coleira Scalibor',
+        'Bravecto',
+        'NexGard',
+        'NexGard Spectra',
+        'Simparic',
+        'Credeli',
+        'Frontline Plus',
+      ],
+    };
+  }
   return switch (species) {
     PetSpecies.cat => const [
       'V3 (tríplice felina)',
@@ -30,4 +52,5 @@ List<String> doseSuggestions(PetSpecies? species, DoseKind kind) {
 int defaultIntervalMonths(DoseKind kind) => switch (kind) {
   DoseKind.vaccine => 12,
   DoseKind.dewormer => 3,
+  DoseKind.fleaTick => 3,
 };

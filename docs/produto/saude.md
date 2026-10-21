@@ -1,10 +1,10 @@
 # Saúde
 
-Três áreas: o que é importante saber sobre o pet (cuidados especiais, alergias e alimentação), vacinas e vermífugos, e medicamentos. Os incidentes (sintomas, consultas, exames) ficam no [diário](diario.md). Todos os tutores do pet podem registrar e editar tudo.
+Três áreas: o que é importante saber sobre o pet (cuidados especiais, alergias e alimentação), vacinas, vermífugos e antipulgas, e medicamentos. Os incidentes (sintomas, consultas, exames) ficam no [diário](diario.md). Todos os tutores do pet podem registrar e editar tudo.
 
 O app registra informações e **não faz diagnóstico**. Em incidentes, o texto é neutro e prático. Para sintomas graves, o app orienta procurar um veterinário.
 
-A aba tem **um só botão, "Registrar"**, que pergunta o que registrar: medicação, vacina ou vermífugo, alergia, alimentação ou cuidado especial.
+A aba tem **um só botão, "Registrar"**, que pergunta o que registrar: ler a carteirinha com IA, medicação, vacina ou vermífugo, contra pulgas e carrapatos, alergia, alimentação ou cuidado especial.
 
 ## Importante sobre o pet
 
@@ -18,9 +18,9 @@ O que quem cuida do pet precisa saber antes de tudo. Aparece no topo da Saúde, 
 
 Cada registro tem um título (obrigatório, com sugestões) e detalhes (opcionais). A ordem é: cuidados especiais, alergias, alimentação.
 
-## Vacinas e vermífugos
+## Vacinas, vermífugos e antipulgas
 
-Vacinas e vermífugos seguem **as mesmas regras** de registro, status e lembrete.
+Vacinas, vermífugos e a proteção contra pulgas e carrapatos (coleira como a Seresto, comprimido ou pipeta) seguem **as mesmas regras** de registro, status, comprovante e lembrete (decisão de 21 de outubro de 2026).
 
 ### Registro
 
@@ -28,10 +28,11 @@ Cada dose registrada tem:
 
 | Campo | Obrigatório | Observação |
 | --- | --- | --- |
-| Tipo | Sim | Vacina ou vermífugo. |
-| Nome | Sim | Ex.: V10, antirrábica, nome do vermífugo. |
+| Tipo | Sim | Vacina, vermífugo ou pulgas e carrapatos. |
+| Nome | Sim | Ex.: V10, antirrábica, nome do vermífugo, coleira Seresto. |
 | Data da aplicação | Sim | |
-| Data de vencimento | Sim | Quando a próxima dose deve ser dada ("Revacinar em" na carteirinha). |
+| Data de vencimento | Sim | Quando a próxima dose deve ser dada: "Revacinar em" (vacina), "Próxima dose em" (vermífugo) ou "Trocar em" (antipulgas). Atalhos +1 ano, +6 meses e +3 meses. |
+| Lembrete | Sim | 7, 14 ou 30 dias antes do vencimento. Começa em 7. |
 | Produto e fabricante | Não | Ex.: Vanguard Plus, Zoetis. |
 | Lote | Não | "Part." na etiqueta do frasco. |
 | Veterinário | Não | Nome e CRMV. |
@@ -63,7 +64,7 @@ O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e íc
 
 ### Lembrete
 
-- Notificação no celular **7 dias antes** do vencimento, às 9h. Já existe como lembrete agendado no celular (veja [notificações](notificacoes.md#lembretes-no-celular)).
+- Notificação no celular **7, 14 ou 30 dias antes** do vencimento, como escolhido no registro, às 9h. Vale o escolhido na dose mais recente. Já existe como lembrete agendado no celular (veja [notificações](notificacoes.md#lembretes-no-celular)).
 - Vai para todos os tutores do pet. Não dá para desligar, como as demais [notificações](notificacoes.md).
 - O lembrete precisa funcionar mesmo que ninguém abra o app nesses dias.
 

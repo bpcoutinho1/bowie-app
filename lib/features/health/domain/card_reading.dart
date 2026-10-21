@@ -32,7 +32,7 @@ class ReadDose {
 
   factory ReadDose.fromJson(Map<String, dynamic> json) {
     return ReadDose(
-      kind: json['kind'] == 'dewormer' ? DoseKind.dewormer : DoseKind.vaccine,
+      kind: DoseKind.fromCode(json['kind'] as String?) ?? DoseKind.vaccine,
       name: _text(json['name']) ?? '',
       appliedOn: _day(json['applied_on']),
       nextDueOn: _day(json['next_due_on']),

@@ -7,7 +7,7 @@ Decidido com o fundador em 17 de outubro de 2026. **Nada é cobrado nesta etapa*
 | | Grátis | Premium |
 | --- | --- | --- |
 | Preço | R$ 0 | R$ 9,90 por mês ou R$ 99,90 por ano |
-| Pets | 1 | Até 5 |
+| Pets | 1 | Até 10 |
 | Saúde, remédios, diário, compras, contatos | Tudo | Tudo |
 | Comprovante de vacina | Incluído | Incluído |
 | Ficha compartilhada | Incluída | Incluída |
@@ -26,6 +26,7 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 - **O limite de 10 arquivos vale para o diário.** Os comprovantes de vacina não contam: ficam sempre no plano grátis.
 - **30 dias de Premium grátis** para toda conta nova, **sem cartão**. Ao fim, a conta volta para o grátis; quem quiser continuar com o Premium (por exemplo, por ter mais de um pet) assina.
 - **Nada fica refém.** Quem volta para o grátis continua vendo e baixando tudo o que registrou e enviou. O que muda é só o que dá para adicionar: um segundo pet, novas leituras por IA além do limite, novos arquivos além do limite.
+- **Premium com até 10 pets** (decisão de 21 de outubro de 2026, antes eram 5).
 - **Pagamento pelas lojas** (decisão de 20 de outubro de 2026): só pela App Store e pelo Google Play, por meio do RevenueCat. Sem cobrança por fora da loja. Com o Small Business Program, a Apple fica com 15%.
 
 ## Antes de cobrar

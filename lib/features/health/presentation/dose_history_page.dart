@@ -134,7 +134,7 @@ class _DoseCard extends StatelessWidget {
                     style: BowieType.bodyStrong.copyWith(color: colors.text),
                   ),
                   Text(
-                    '${dose.kind == DoseKind.vaccine ? 'Revacinar em' : 'Próxima dose em'} '
+                    '${dose.kind.dueLabel} '
                     '${formatDayBr(dose.nextDueOn)}',
                     style: BowieType.callout.copyWith(color: colors.textMuted),
                   ),
