@@ -161,7 +161,7 @@ Os erros respondem `{error, message}` com a mensagem em português; o log guarda
 
 - confere que o vínculo existe, é de tutor e está pendente, e que quem chama é o tutor principal do pet;
 - recusa um reenvio a menos de 2 minutos do anterior (`invited_at`);
-- envia, pelo SMTP do Hostinger (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`), de "Bowie <contato@bowieapp.pet>", o email "{nome} convidou você para cuidar do Bowie no Bowie", com os passos para aceitar e o botão "Baixar o Bowie" (`INVITE_URL`, padrão `https://bowieapp.pet`);
+- envia, pelo SMTP do Hostinger (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`), de "Bowie <no-reply@bowieapp.pet>", com respostas indo para `contato@bowieapp.pet` (`REPLY_TO`), o email "{nome} convidou você para cuidar do Bowie no Bowie", com os passos para aceitar e o botão "Baixar o Bowie" (`INVITE_URL`, padrão `https://bowieapp.pet`);
 - grava `invited_at`.
 
 Os erros respondem `{error, message}` em português; o log guarda só o tipo da falha, sem endereços.

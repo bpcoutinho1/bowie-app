@@ -85,7 +85,7 @@ Depois da transferência:
 - O código chama o tutor principal de `owner`. Na interface e na documentação, use "tutor principal".
 - Nome e celular ficam na conta do Supabase (`user_metadata`), e por enquanto só a própria pessoa os vê: a lista de tutores do pet ainda mostra o email. A ficha compartilhada usa o nome e o celular do tutor principal.
 - Contas criadas antes do nome e do celular veem "Complete o seu cadastro" no Início até preencher em "Minha conta".
-- O email de convite sai da função `send-invite` ([guia](../guias/convites.md)), com o nome de quem convidou, o pet e os passos para aceitar. O link vai para a página de download configurada (`INVITE_URL`); a página própria com os botões das lojas ainda não existe.
+- O email de convite sai de `no-reply@bowieapp.pet` (as respostas vão para `contato@bowieapp.pet`, que fica para o contato com as pessoas; decisão de 23 de outubro de 2026), pela função `send-invite` ([guia](../guias/convites.md)), com o nome de quem convidou, o pet e os passos para aceitar. O link vai para a página de download configurada (`INVITE_URL`); a página própria com os botões das lojas ainda não existe.
 - A expiração de 30 dias e a saída do tutor por conta própria ainda não existem.
 - Hoje o convidado precisa tocar em "Accept" no app para aceitar. Pela regra acima, o cadastro com o email do convite já basta.
 - A exclusão da conta já segue a regra acima: a pessoa escolhe quem fica com cada pet que tem outros tutores (o app já sugere um). Os links da ficha que ela criou deixam de funcionar.
