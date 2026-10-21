@@ -69,7 +69,7 @@ Também dá para editar pelo **Table Editor → account_plans**: clique duas vez
 | --- | --- |
 | Grátis, com 1 pet | "Adicionar pet" abre "Bowie Premium": "No plano grátis, a conta tem 1 pet." |
 | Grátis, 3 fotos já lidas | A leitura da carteirinha abre "Bowie Premium" antes de enviar as fotos |
-| Grátis, 10 envios no diário | Salvar um registro com foto ou PDF novo abre "Bowie Premium" |
+| Grátis, 5 envios no diário | Salvar um registro com foto ou PDF novo abre "Bowie Premium" |
 | Premium ou teste | Até 10 pets, leitura e diário sem limite |
 | Premium com 10 pets | "Limite do plano: o Premium tem até 10 pets por conta." |
 

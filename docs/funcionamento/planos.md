@@ -21,7 +21,7 @@ A regra de produto está em [planos e preço](../produto/planos.md). Nada é cob
 
 `lib/features/plans/`:
 
-- `AccountPlan`: o nível (`free`, `trial` ou `premium`) a partir da linha. O teste conta como Premium. Limites: 1 pet no grátis e 10 no Premium; 3 fotos lidas pela IA e 10 envios ao diário no grátis.
+- `AccountPlan`: o nível (`free`, `trial` ou `premium`) a partir da linha. O teste conta como Premium. Limites: 1 pet no grátis e 10 no Premium; 3 fotos lidas pela IA e 5 envios ao diário no grátis.
 - `PlanRepository.current` lê a linha a cada verificação e guarda a última no celular. Sem internet, usa a guardada; sem nenhuma, `AccountPlan.unknown`, que não bloqueia nada. Se o servidor responde mas a conta não tem linha, ela fica no grátis (o padrão).
 - Atenção: a coluna `plan` diz `free` também durante o teste de 30 dias. Quem está no teste tem o Premium até `trial_ends_at`.
 - `ensureCanAddPet` (todos os botões de novo pet e o salvar do formulário): conta os pets em que a pessoa é tutor principal; os pets em que ela é convidada não contam.

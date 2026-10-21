@@ -8,7 +8,7 @@ const premiumPetLimit = 10;
 const freeAiPhotos = 3;
 
 /// Photos and PDFs sent to the diary, for the life of the account.
-const freeDiaryFiles = 10;
+const freeDiaryFiles = 5;
 
 enum PlanTier { free, trial, premium }
 

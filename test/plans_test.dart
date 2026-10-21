@@ -183,7 +183,7 @@ void main() {
     );
     expect(
       quotaReason(Quota.diaryFiles, 1, 3),
-      'Restam 1 dos 10 envios de fotos e PDFs no diário do plano grátis. '
+      'Restam 1 dos 5 envios de fotos e PDFs no diário do plano grátis. '
       'Tire 2 fotos ou arquivos ou assine o Premium, que não tem limite.',
     );
   });
@@ -283,10 +283,10 @@ void main() {
     });
 
     testWidgets('the diary says how many sends are left', (tester) async {
-      await pump(tester, row(diary: 8));
+      await pump(tester, row(diary: 3));
       await tapAndSettle(tester, 'Enviar 3');
       expect(find.text('Bowie Premium'), findsOneWidget);
-      expect(find.textContaining('Restam 2 dos 10 envios'), findsOneWidget);
+      expect(find.textContaining('Restam 2 dos 5 envios'), findsOneWidget);
     });
 
     Future<void> pumpAccount(
