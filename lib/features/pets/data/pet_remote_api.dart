@@ -62,6 +62,10 @@ abstract class PetRemoteApi {
   /// Makes the tutor row [tutorId] the main tutor of [petId]; the current
   /// main tutor becomes a regular tutor. Runs on the server in one step.
   Future<void> transferPet({required String petId, required String tutorId});
+
+  /// Emails the invitation of the pending tutor row [tutorId], from the
+  /// server (the `send-invite` Edge Function).
+  Future<void> sendInvite(String tutorId);
 }
 
 /// Private bucket for pet profile photos.
@@ -202,6 +206,36 @@ class SupabasePetApi implements PetRemoteApi {
       return await _client.storage.from(petPhotosBucket).download(path);
     } catch (_) {
       return null;
+    }
+  }
+
+  @override
+  Future<void> sendInvite(String tutorId) async {
+    try {
+      await _client.functions
+          .invoke('send-invite', body: {'tutor_id': tutorId})
+          .timeout(const Duration(seconds: 30));
+    } on FunctionsFetchException {
+      throw const AppFailure(
+        'Para enviar o convite, conecte-se à internet.',
+        retryable: true,
+      );
+    } on FunctionException catch (error) {
+      final details = error.details;
+      final message = details is Map ? details['message'] : null;
+      throw AppFailure(
+        message is String && message.isNotEmpty
+            ? message
+            : error.status == 404
+            ? 'O envio de convites ainda não foi configurado no servidor.'
+            : 'Não foi possível enviar o email agora. Tente de novo.',
+        retryable: error.status >= 500,
+      );
+    } on TimeoutException {
+      throw const AppFailure(
+        'O servidor demorou para responder. Tente de novo.',
+        retryable: true,
+      );
     }
   }
 

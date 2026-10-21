@@ -106,7 +106,7 @@ Validações:
 - Só o tutor principal pode convidar ("Só o tutor principal pode convidar pessoas.").
 - A pessoa não pode já estar no pet ("Essa pessoa já faz parte deste pet.").
 
-Cria um `PetTutor` com `role = tutor`, `status = pending` e `user_id` vazio. O app não envia email: o convite aparece para a outra pessoa quando ela sincroniza.
+Cria um `PetTutor` com `role = tutor`, `status = pending` e `user_id` vazio. O convite aparece para a outra pessoa quando ela sincroniza, e um email avisa (veja [convite por email](#convite-por-email)).
 
 ### Aceitar convite
 
@@ -116,7 +116,7 @@ Tela: card "Convites" em `/pets`, botão "Aceitar". A aba Início também mostra
 - Muda `status` para `accepted` e preenche `user_id`.
 - O pet passa a aparecer na lista.
 
-Não há como recusar um convite, remover um tutor ou sair de um pet pela interface.
+O tutor principal cancela convites e remove tutores (veja [convite por email](#convite-por-email)). Ainda não há como recusar um convite ou sair de um pet pela interface.
 
 ## O que cada tela mostra
 
@@ -143,9 +143,16 @@ As duas telas recarregam sozinhas sempre que o banco local muda, seja por ação
 | Criar pet | Qualquer usuário autenticado | App e RLS |
 | Editar pet | Vínculo `accepted` | `PetRepository` e RLS |
 | Excluir pet | Tutor principal | `PetRepository` e gatilho `pets_protect_deletion` |
-| Convidar | Dono | `PetRepository` e RLS |
+| Convidar, reenviar o convite, cancelar e remover tutores | Dono | `PetRepository`, RLS e a função `send-invite` |
 | Trocar ou remover a foto | Vínculo `accepted` | `PetRepository` e políticas do Storage |
 | Transferir | Tutor principal, para um tutor `accepted` | `PetRepository` e função `transfer_pet` |
 | Aceitar convite | Dono da conta com o email convidado | `PetRepository` e RLS |
 
 As regras no aparelho dão retorno imediato. As regras do servidor (veja [Backend no Supabase](backend-supabase.md)) são as que valem.
+
+## Convite por email
+
+- `PetRepository.inviteTutor` cria o vínculo pendente no celular e devolve a linha. Em seguida, `PetSyncService.sendInvite` sincroniza (para a linha chegar ao servidor) e chama a Edge Function `send-invite` ([backend](backend-supabase.md#edge-function-send-invite)). Sem internet, o convite fica registrado e o app avisa que o email não foi enviado.
+- Na tela do pet, o tutor principal vê um ⋮ ao lado de cada tutor: "Reenviar convite" e "Cancelar convite" nos pendentes; "Remover tutor" nos que aceitaram. Cancelar e remover pedem confirmação.
+- `PetRepository.removeTutor` (só o tutor principal, nunca o próprio tutor principal) marca `deleted_at` no vínculo. A mudança sincroniza: a pessoa removida deixa de ver o pet nos celulares dela, e o que ela registrou continua no histórico. O mesmo email pode ser convidado de novo.
+

@@ -118,6 +118,22 @@ class PetSyncService {
     await sync();
   }
 
+  /// Emails the invitation of [tutorId]. The row goes to the server first,
+  /// so the function finds it.
+  Future<void> sendInvite(String tutorId) async {
+    final api = remote;
+    if (api == null || !isSignedIn()) {
+      throw const AppFailure('Este app ainda não está conectado ao servidor.');
+    }
+    if (!await network.isOnline) {
+      throw const AppFailure('Para enviar o convite, conecte-se à internet.');
+    }
+    final before = await sync();
+    if (before is SyncWaiting) throw AppFailure(before.message);
+    if (before is SyncFailed) throw AppFailure(before.message);
+    await api.sendInvite(tutorId);
+  }
+
   /// Pushes pets, then tutor rows, then photos, doses, shopping items,
   /// contacts and diary entries, so the server always knows what a row
   /// depends on (the pet, the person's membership, the contact) first.

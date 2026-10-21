@@ -27,6 +27,7 @@ class PetTutor {
     String? userId,
     TutorStatus? status,
     DateTime? updatedAt,
+    DateTime? deletedAt,
     bool clearUserId = false,
   }) {
     return PetTutor(
@@ -37,7 +38,7 @@ class PetTutor {
       role: role,
       status: status ?? this.status,
       updatedAt: updatedAt ?? this.updatedAt,
-      deletedAt: deletedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 

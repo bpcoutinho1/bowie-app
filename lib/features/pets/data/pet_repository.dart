@@ -254,7 +254,8 @@ class PetRepository {
     );
   }
 
-  Future<void> inviteTutor({
+  /// The pending tutor row; the email goes with [PetSyncService.sendInvite].
+  Future<PetTutor> inviteTutor({
     required String petId,
     required String email,
     required AppUser byUser,
@@ -283,6 +284,33 @@ class PetRepository {
       updatedAt: _timestamp,
     );
     await _store.saveTutor(tutor);
+    return tutor;
+  }
+
+  /// The main tutor cancels a pending invitation or removes a tutor. The row
+  /// keeps [PetTutor.deletedAt], so the removal syncs: the person stops seeing
+  /// the pet on every phone. What they recorded stays in the pet's history.
+  Future<void> removeTutor({
+    required String petId,
+    required String tutorId,
+    required AppUser byUser,
+  }) async {
+    final details = await _requireOwner(
+      petId,
+      byUser,
+      message: 'Só o tutor principal pode remover tutores.',
+    );
+    final tutor = details.tutors
+        .where((tutor) => tutor.id == tutorId && tutor.deletedAt == null)
+        .firstOrNull;
+    if (tutor == null) {
+      throw const AppFailure('Esta pessoa não faz mais parte deste pet.');
+    }
+    if (tutor.role == PetRole.owner) {
+      throw const AppFailure('O tutor principal não pode ser removido.');
+    }
+    final now = _timestamp;
+    await _store.saveTutor(tutor.copyWith(updatedAt: now, deletedAt: now));
   }
 
   Future<void> acceptInvite({

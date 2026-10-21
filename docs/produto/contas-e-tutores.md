@@ -41,9 +41,9 @@ Regra geral: **todos podem editar tudo** nos registros do pet. O que fica só co
 3. O link leva a uma página com dois botões, um para baixar na App Store (iOS) e outro no Google Play (Android).
 4. **Se a pessoa ainda não tem conta:** o email a convida a se cadastrar como tutora. Enquanto ela não se cadastra, o vínculo continua pendente, e o tutor principal vê "Pendente" ao lado do email dela.
 5. **Ao se cadastrar** com o mesmo email do convite, ela passa a ser tutora do pet, com as permissões acima.
-6. **Se a pessoa já tem conta:** não há email. O convite chega só na [central de notificações](notificacoes.md) do app, com o botão "Aceitar". O vínculo só fica ativo depois desse toque.
+6. **Se a pessoa já tem conta:** o convite aparece na aba Pets, com o botão "Aceitar". O vínculo só fica ativo depois desse toque. Enquanto a [central de notificações](notificacoes.md) não existe, ela também recebe o email (decisão de 23 de outubro de 2026).
 
-O convite pendente expira em **30 dias**. Depois disso, o tutor principal pode reenviá-lo.
+O convite pendente expira em **30 dias**. Depois disso, o tutor principal pode reenviá-lo. Na tela do pet, o ⋮ ao lado de cada tutor tem "Reenviar convite" e "Cancelar convite" (pendente) ou "Remover tutor" (aceito), por exemplo quando um casal se separa (decisão de 23 de outubro de 2026).
 
 O email é o que liga o convite à pessoa: o cadastro precisa usar o mesmo email que recebeu o convite.
 
@@ -85,7 +85,8 @@ Depois da transferência:
 - O código chama o tutor principal de `owner`. Na interface e na documentação, use "tutor principal".
 - Nome e celular ficam na conta do Supabase (`user_metadata`), e por enquanto só a própria pessoa os vê: a lista de tutores do pet ainda mostra o email. A ficha compartilhada usa o nome e o celular do tutor principal.
 - Contas criadas antes do nome e do celular veem "Complete o seu cadastro" no Início até preencher em "Minha conta".
-- Ainda não existem email de convite, remoção e saída de tutor.
+- O email de convite sai da função `send-invite` ([guia](../guias/convites.md)), com o nome de quem convidou, o pet e os passos para aceitar. O link vai para a página de download configurada (`INVITE_URL`); a página própria com os botões das lojas ainda não existe.
+- A expiração de 30 dias e a saída do tutor por conta própria ainda não existem.
 - Hoje o convidado precisa tocar em "Accept" no app para aceitar. Pela regra acima, o cadastro com o email do convite já basta.
 - A exclusão da conta já segue a regra acima: a pessoa escolhe quem fica com cada pet que tem outros tutores (o app já sugere um). Os links da ficha que ela criou deixam de funcionar.
 - No banco atual não há política de exclusão (`delete`). O papel (`role`) de um vínculo só muda pela função `transfer_pet` (veja [backend](../funcionamento/backend-supabase.md#transferência-do-pet)).
