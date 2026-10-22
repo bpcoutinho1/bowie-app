@@ -18,6 +18,7 @@ sed '/fonts.googleapis.com/d' design/tokens/tokens.css > "$out/tokens.css"
 cp assets/fonts/Figtree-Regular.ttf assets/fonts/Figtree-SemiBold.ttf \
   assets/fonts/Figtree-ExtraBold.ttf assets/fonts/OFL.txt "$out/fonts/"
 for logo in bowie-wordmark bowie-wordmark-negative bowie-symbol \
+  bowie-lockup-horizontal bowie-lockup-horizontal-negative \
   bowie-lockup-vertical-tagline bowie-lockup-vertical-tagline-negative; do
   cp "design/brand/logo/$logo.svg" "$out/brand/"
 done
