@@ -4,7 +4,7 @@ O que precisa existir para os primeiros testes com outras pessoas e, depois, par
 
 | Item | Situação | Observação |
 | --- | --- | --- |
-| Conta Apple Developer | Pendente | US$ 99 por ano. Necessária para o TestFlight (testes no iPhone) e para a App Store. A aprovação pode levar alguns dias. |
+| Conta Apple Developer | Ativa (Individual), em conversão | US$ 99 por ano. Hoje a loja mostra o nome do Bruno como desenvolvedor. A conversão para Organização, em nome da Arca Lab (CNPJ e D-U-N-S), foi pedida à Apple em 22 de outubro de 2026. **O app só é publicado na App Store depois da conversão**; até lá, só TestFlight. Depois dela: aceitar de novo o Paid Apps Agreement, cadastrar banco e dados fiscais da empresa, fazer o cadastro de pessoa jurídica na StoneX, conferir o Small Business Program e trocar o controlador dos dados na política de privacidade e nos termos. |
 | Conta Google Play Console | Pendente | US$ 25, pagamento único. Necessária para o teste interno e para o Google Play. |
 | Projeto no Supabase | Criado | Conferir a **região do servidor** (veja abaixo). |
 | Domínio | Comprado | `bowieapp.pet`, no Hostinger: landing page no domínio principal e a ficha compartilhada em `ficha.bowieapp.pet`. Passo a passo em [domínio](../guias/dominio.md). |
