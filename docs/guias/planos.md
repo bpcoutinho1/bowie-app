@@ -4,7 +4,7 @@ Enquanto a assinatura não está no app, o plano de cada conta é mudado à mão
 
 ## 1. Banco (uma vez)
 
-No SQL Editor do Supabase, rode `supabase/migrations/20261019120000_account_plans.sql` (Copy raw file no GitHub, colar, Run). Ela cria a tabela `account_plans`, dá a cada conta nova 30 dias de Premium e coloca as contas que já existem no plano grátis (o teste delas conta a partir de quando foram criadas).
+No SQL Editor do Supabase, rode `supabase/migrations/20261019120000_account_plans.sql` (Copy raw file no GitHub, colar, Run). Ela cria a tabela `account_plans` e coloca as contas que já existem no plano grátis. Depois, rode também `supabase/migrations/20261024120000_no_trial.sql`: com ela, contas novas começam no grátis, sem teste do Premium.
 
 ## 2. Mudar o plano
 
@@ -12,7 +12,7 @@ No SQL Editor, troque `seu@email.com` pelo email da conta e rode o comando do qu
 
 **Ver o plano da conta**
 
-A coluna `plan` diz `free` também durante o teste de 30 dias: toda conta nova nasce assim. A última coluna desta consulta mostra o plano que o app usa de fato.
+A coluna `plan` diz `free` também durante um teste do Premium dado à mão (`trial_ends_at` no futuro). A última coluna desta consulta mostra o plano que o app usa de fato.
 
 ```sql
 select email, plan, premium_until, trial_ends_at, ai_photos_used, diary_files_used,
@@ -38,14 +38,14 @@ update account_plans set plan = 'premium', premium_until = '2026-12-31', updated
 where email = 'seu@email.com';
 ```
 
-**Voltar para o grátis (e encerrar o teste de 30 dias)**
+**Voltar para o grátis (e encerrar um teste)**
 
 ```sql
 update account_plans set plan = 'free', premium_until = null, trial_ends_at = now(), updated_at = now()
 where email = 'seu@email.com';
 ```
 
-**Dar 30 dias de teste de novo**
+**Dar 30 dias de teste do Premium (cortesia)**
 
 ```sql
 update account_plans set trial_ends_at = now() + interval '30 days', updated_at = now()
@@ -58,8 +58,6 @@ where email = 'seu@email.com';
 update account_plans set ai_photos_used = 0, diary_files_used = 0, updated_at = now()
 where email = 'seu@email.com';
 ```
-
-Para testar o grátis numa conta nova, rode "Voltar para o grátis": sem isso, ela está no teste e pode cadastrar até 10 pets.
 
 Também dá para editar pelo **Table Editor → account_plans**: clique duas vezes na célula (`plan`, `trial_ends_at`, os contadores), mude e salve.
 
@@ -75,7 +73,7 @@ Também dá para editar pelo **Table Editor → account_plans**: clique duas vez
 
 Os pets que a conta já tem continuam todos lá: o limite só impede de cadastrar mais.
 
-No topo de "Minha conta", o cartão do plano mostra o que o app leu ("Conta: Teste grátis do Premium", "Acaba em: 18/11/2026"). Se aparecer "Não foi possível ver o plano" com internet, a migração não foi rodada ou o app é de antes dela (refaça o build depois do `git pull`).
+No topo de "Minha conta", o cartão do plano mostra o que o app leu ("Conta: Grátis"; com um teste dado à mão, "Conta: Teste grátis do Premium" e "Acaba em: 18/11/2026"). Se aparecer "Não foi possível ver o plano" com internet, a migração não foi rodada ou o app é de antes dela (refaça o build depois do `git pull`).
 
 ## 4. Assinatura pelas lojas
 

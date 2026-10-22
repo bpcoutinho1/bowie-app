@@ -24,14 +24,14 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 - **O limite de leitura conta fotos, não leituras.** Uma leitura com 2 páginas gasta 2 das 3 fotos do plano grátis.
 - **O limite de 5 arquivos conta envios, não arquivos guardados** (decisão de 18 de outubro de 2026; o limite passou de 10 para 5 em 21 de outubro de 2026): são 5 envios na vida da conta. Apagar uma foto ou um PDF não devolve o envio.
 - **O limite de 5 arquivos vale para o diário.** Os comprovantes de vacina não contam: ficam sempre no plano grátis.
-- **30 dias de Premium grátis** para toda conta nova, **sem cartão**. Ao fim, a conta volta para o grátis; quem quiser continuar com o Premium (por exemplo, por ter mais de um pet) assina.
+- **Sem teste do Premium** (decisão de 22 de outubro de 2026; antes, toda conta nova tinha 30 dias de Premium grátis): a conta nova começa no plano grátis, com os limites dele. Quem quiser mais pets, leitura por IA ou arquivos sem limite assina. Um teste ainda pode ser dado à mão, como cortesia ([guia](../guias/planos.md)).
 - **Nada fica refém.** Quem volta para o grátis continua vendo e baixando tudo o que registrou e enviou. O que muda é só o que dá para adicionar: um segundo pet, novas leituras por IA além do limite, novos arquivos além do limite.
 - **Premium com até 10 pets** (decisão de 21 de outubro de 2026, antes eram 5).
 - **Pagamento pelas lojas** (decisão de 20 de outubro de 2026): só pela App Store e pelo Google Play, por meio do RevenueCat. Sem cobrança por fora da loja. Com o Small Business Program, a Apple fica com 15%.
 
 ## Antes de cobrar
 
-Já existe: o plano de cada conta no banco (`account_plans`), o teste de 30 dias, os contadores e os limites no app, com a tela "Bowie Premium". O plano é mudado à mão no Supabase para testes ([guia](../guias/planos.md)). Falta:
+Já existe: o plano de cada conta no banco (`account_plans`), os contadores e os limites no app, com a tela "Bowie Premium". O plano é mudado à mão no Supabase para testes ([guia](../guias/planos.md)). Falta:
 
 - Conferir os limites também no servidor (na função `read-vaccine-card` e no envio de arquivos), e não só no app.
 - Ligar a assinatura pela App Store: o código está pronto e falta a configuração ([guia](../guias/assinaturas.md)). O Google Play vem com o app de Android.
