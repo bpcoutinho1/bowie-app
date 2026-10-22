@@ -11,11 +11,12 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 7. `20261012120000_medications.sql`: medicações (`pet_medications`) e doses dadas (`pet_medication_doses`). Pode rodar mais de uma vez.
 8. `20261013120000_diary_photos.sql`: coluna `photo_paths` em `pet_events`. Os arquivos vão para o bucket `pet-photos`, na pasta do pet. Pode rodar mais de uma vez.
 9. `20261014120000_notes_proofs_files_shares.sql`: cuidados, alergias e alimentação (`pet_health_notes`) comprovantes das vacinas (`pet_vaccines.proof_paths`), PDFs do diário (`pet_events.files`; o bucket `pet-photos` passa a aceitar `application/pdf` e até 10 MB) e links da ficha compartilhada (`pet_shares`). Pode rodar mais de uma vez.
-10. `20261019120000_account_plans.sql`: planos (`account_plans`), o teste de 30 dias para contas novas e `consume_quota`. Pode rodar mais de uma vez. Veja [planos](planos.md).
+10. `20261019120000_account_plans.sql`: planos (`account_plans`), o teste de 30 dias para contas novas (desligado pela migração 15) e `consume_quota`. Pode rodar mais de uma vez. Veja [planos](planos.md).
 11. `20261020120000_account_deletion.sql`: a função `delete_account` (só para a chave de serviço) e as chaves estrangeiras para `auth.users` passam a soltar o autor (`on delete set null`) ou apagar os links da ficha (`on delete cascade`). `pet_medication_doses.given_by` passa a aceitar vazio. Pode rodar mais de uma vez. Veja [exclusão de conta](autenticacao-e-navegacao.md#exclusão-de-conta).
 12. `20261021120000_store_subscriptions.sql`: colunas `store_premium_until`, `store_product` e `store_updated_at` em `account_plans`, gravadas pela função `revenuecat-webhook`. Pode rodar mais de uma vez. Veja [planos](planos.md#assinatura-pelas-lojas).
 13. `20261022120000_flea_tick_reminders.sql`: `pet_vaccines.kind` aceita `flea_tick` (pulgas e carrapatos) e ganha `remind_days` (7, 14 ou 30, padrão 7). Pode rodar mais de uma vez. Veja [saúde](saude.md).
 14. `20261023120000_tutor_invites.sql`: coluna `invited_at` em `pet_tutors`, gravada pela função `send-invite` a cada envio. Pode rodar mais de uma vez.
+15. `20261024120000_no_trial.sql`: contas novas começam no plano grátis, sem teste do Premium (`trial_ends_at` passa a ter padrão `now()`). Pode rodar mais de uma vez.
 
 ## Configuração do app
 

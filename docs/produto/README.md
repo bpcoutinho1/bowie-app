@@ -18,7 +18,7 @@ Quem decide o conteúdo desta seção é o Bruno Coutinho, fundador do produto. 
 8. [Leitura da carteirinha](carteirinha-de-vacinacao.md): como o app lê a foto da carteirinha, com o exemplo do Bowie.
 9. [Notificações](notificacoes.md): a central de notificações (sino), convites e avisos entre tutores.
 8a. [Primeiro uso](primeiro-uso.md): o caminho guiado para cadastrar o pet e as vacinas, e a ficha no Início.
-8b. [Planos e preço](planos.md): grátis e Premium, teste de 30 dias, quem paga.
+8b. [Planos e preço](planos.md): grátis e Premium (sem teste), quem paga.
 9a. [Ficha compartilhada](ficha-compartilhada.md): link e QR code com a ficha do pet para hotéis, creches e veterinários.
 9b. [Bowie Biz](bowie-biz.md): a parte para os prestadores, começando por um painel web.
 10. [Dados, sincronização e privacidade](dados-e-privacidade.md): uso sem internet, sincronização entre tutores e LGPD.
