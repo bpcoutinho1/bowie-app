@@ -45,6 +45,7 @@ sequenceDiagram
 - Usa os tokens de `design/tokens/tokens.css`, Figtree servida junto (sem Google Fonts) e o tema claro ou escuro do sistema. Tem botão "Imprimir" e estilo de impressão.
 - Logo depois do tutor principal vem "Outro tutor" (ou "Outros tutores"), com ligar e WhatsApp, para quando o principal não atende.
 - Antipulgas aparecem junto com as vacinas, marcados "(pulgas e carrapatos)" e com "Trocar em" no lugar de "Próxima".
-- `noindex` e `no-referrer`.
+- Fora dos buscadores e dos robôs de IA: `<meta name="robots">` com `noindex, nofollow, noarchive, nosnippet, noimageindex` (e `noai`, `noimageai`), um `robots.txt` que bloqueia todos os robôs (com os de IA citados um a um: GPTBot, ClaudeBot, Google-Extended, CCBot, PerplexityBot e outros) e o cabeçalho `X-Robots-Tag` nas respostas da função. Além disso, os dados nunca estão na página: chegam por um POST com o código que fica depois do `#`, que robôs não veem. `no-referrer` evita vazar o endereço.
+- O topo mostra o logo horizontal do Bowie (símbolo e nome), na versão negativa no tema escuro.
 
 `scripts/build-web-share.sh` monta o site em `_site/` (página, tokens, fontes, logos e `config.js` com `SUPABASE_URL`). O workflow `.github/workflows/ficha-pages.yml` roda o script e publica no GitHub Pages a cada mudança em `web-share/` na `main`, ou pelo botão "Run workflow". Configuração em [publicar a ficha](../guias/ficha-compartilhada.md).

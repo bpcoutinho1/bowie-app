@@ -34,8 +34,10 @@ function json(status: number, body: unknown) {
     headers: {
       ...CORS,
       "Content-Type": "application/json",
-      // Health data: never kept by a proxy or the browser cache.
+      // Health data: never kept by a proxy or the browser cache, never
+      // indexed by search engines or AI crawlers.
       "Cache-Control": "no-store",
+      "X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
     },
   });
 }
