@@ -19,6 +19,7 @@ O que a agenda de **Contatos** faz hoje. As regras de produto estão em [`docs/p
 - Entrada: card "Contatos" no topo da aba **Pets**.
 - `/pets/contatos` (`ContactsPage`): seletor de casa (o mesmo de Compras, `HouseSelector`), lista agrupada por tipo, busca a partir de seis contatos, botão de ligar em cada um. Tocar abre uma folha com ligar, WhatsApp (celulares: 11 dígitos começando com 9), email, mapa e "Editar contato".
 - `/pets/contatos/novo?casa=` e `/pets/contatos/:id` (`ContactFormPage`): tipo em chips com ícone, nome, telefone, email, endereço e observações. Editando, há "Excluir contato".
+- "Importar da agenda do celular", no formulário, chama `PhoneContactPicker` (`lib/features/contacts/data/phone_contact_picker.dart`). `NativePhoneContactPicker` usa o pacote `flutter_native_contact_picker` (versão fixa 0.0.12), que abre o seletor do sistema (`CNContactPickerViewController` no iOS, `ACTION_PICK` no Android): sem permissão de contatos e sem nada no `Info.plist`. O nome e o telefone preenchem os campos; o telefone passa por `normalizePhone` e `formatPhone`. Um número que começa com `+` e não é `+55` fica como veio, com um aviso. Se a agenda não abre, um aviso pede para preencher à mão.
 
 Os links abrem com `url_launcher`: `tel:`, `https://wa.me/55<número>`, `mailto:` e o Google Maps. Se o celular não conseguir abrir, o app avisa.
 

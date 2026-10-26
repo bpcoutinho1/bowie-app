@@ -3,6 +3,7 @@
 //
 // Deploy: docs/guias/publicar-leitura-da-carteirinha.md (Supabase dashboard,
 // function name "read-vaccine-card", "Verify JWT" on, secret ANTHROPIC_API_KEY).
+// Only Premium accounts (or a trial still running) can read.
 //
 // The rules in SYSTEM come from docs/produto/carteirinha-de-vacinacao.md.
 
@@ -184,6 +185,23 @@ function failure(status: number, code: string, message: string) {
   return json(status, { error: code, message });
 }
 
+type PlanRow = {
+  plan: string | null;
+  premium_until: string | null;
+  store_premium_until: string | null;
+  trial_ends_at: string | null;
+} | null;
+
+/** Premium set by hand, bought in a store, or a trial still running: the
+ * same rule as the app (lib/features/plans/domain/account_plan.dart). */
+function isPremium(row: PlanRow, now: number): boolean {
+  if (!row) return false;
+  const after = (value: string | null) => value !== null && Date.parse(value) > now;
+  return (row.plan === "premium" && (row.premium_until === null || after(row.premium_until))) ||
+    after(row.store_premium_until) ||
+    after(row.trial_ends_at);
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return failure(405, "method_not_allowed", "Use POST.");
@@ -199,6 +217,17 @@ Deno.serve(async (req) => {
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError || !auth.user) {
     return failure(401, "unauthorized", "Entre na sua conta para ler a carteirinha.");
+  }
+
+  // The reading is part of Premium (docs/produto/planos.md): the API is only
+  // spent for people who pay. RLS lets each person read their own plan.
+  const { data: plan } = await supabase
+    .from("account_plans")
+    .select("plan, premium_until, store_premium_until, trial_ends_at")
+    .eq("user_id", auth.user.id)
+    .maybeSingle();
+  if (!isPremium(plan, Date.now())) {
+    return failure(403, "premium_required", "A leitura da carteirinha por IA é do Premium.");
   }
 
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");

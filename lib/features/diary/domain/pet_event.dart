@@ -7,6 +7,7 @@ enum EventKind {
   symptom('symptom', 'Sintoma'),
   vetVisit('vet_visit', 'Consulta'),
   exam('exam', 'Exame'),
+  weight('weight', 'Peso'),
   other('other', 'Outro');
 
   const EventKind(this.wire, this.label);
@@ -60,6 +61,7 @@ class PetEvent {
     this.time,
     this.notes,
     this.contactId,
+    this.weightKg,
     this.photoPaths = const [],
     this.files = const [],
     this.updatedBy,
@@ -82,6 +84,9 @@ class PetEvent {
 
   /// A contact of the pet's house: the vet, the lab.
   final String? contactId;
+
+  /// The weight, in kg, of a [EventKind.weight] entry. Null otherwise.
+  final double? weightKg;
 
   /// Photos in the private bucket `pet-photos`, `<pet id>/<photo id>.jpg`,
   /// kept on the phone too (PetPhotoStore). Up to [maxEventPhotos].
@@ -110,6 +115,7 @@ class PetEvent {
       time: time,
       notes: notes,
       contactId: contactId,
+      weightKg: weightKg,
       photoPaths: photoPaths,
       files: files,
       updatedBy: updatedBy ?? this.updatedBy,
@@ -128,6 +134,7 @@ class PetEvent {
       'occurs_time': time,
       'notes': notes,
       'contact_id': contactId,
+      'weight_kg': weightKg,
       'photo_paths': jsonEncode(photoPaths),
       'files': jsonEncode([for (final file in files) file.toJson()]),
       'updated_by': updatedBy,
@@ -143,6 +150,7 @@ class PetEvent {
     final photos = rawPhotos is String ? jsonDecode(rawPhotos) : rawPhotos;
     final rawFiles = row['files'];
     final files = rawFiles is String ? jsonDecode(rawFiles) : rawFiles;
+    final weight = row['weight_kg'];
     return PetEvent(
       id: row['id']! as String,
       petId: row['pet_id']! as String,
@@ -153,6 +161,12 @@ class PetEvent {
       time: time == null || time.length < 5 ? null : time.substring(0, 5),
       notes: row['notes'] as String?,
       contactId: row['contact_id'] as String?,
+      // Postgres numeric may arrive as a string.
+      weightKg: weight is num
+          ? weight.toDouble()
+          : weight is String
+          ? double.tryParse(weight)
+          : null,
       photoPaths: [
         for (final path in (photos as List?) ?? const [])
           if (path is String) path,
@@ -202,5 +216,30 @@ List<String> eventSuggestions(EventKind kind) => switch (kind) {
     'Raio-X',
     'Ecocardiograma',
   ],
+  EventKind.weight => const [],
   EventKind.other => const ['Banho e tosa', 'Adestramento', 'Fisioterapia'],
 };
+
+/// One weighing, for the chart.
+class WeightPoint {
+  const WeightPoint(this.day, this.kg);
+
+  final DateTime day;
+  final double kg;
+}
+
+/// The pet's weighings, the oldest first. Two on the same day: the last saved.
+List<WeightPoint> weightHistory(Iterable<PetEvent> events) {
+  final byDay = <DateTime, PetEvent>{};
+  for (final event in events) {
+    final kg = event.weightKg;
+    if (event.deletedAt != null || event.kind != EventKind.weight) continue;
+    if (kg == null) continue;
+    final kept = byDay[event.occursOn];
+    if (kept == null || event.updatedAt.isAfter(kept.updatedAt)) {
+      byDay[event.occursOn] = event;
+    }
+  }
+  final days = byDay.keys.toList()..sort();
+  return [for (final day in days) WeightPoint(day, byDay[day]!.weightKg!)];
+}

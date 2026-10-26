@@ -102,6 +102,7 @@ class _Vaccines extends ConsumerWidget {
         const <HealthNote>[];
     final today = ref.watch(healthRepositoryProvider).today;
     final colors = context.colors;
+    final reads = ref.watch(canReadCardsProvider).asData?.value ?? true;
 
     return groups.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -113,23 +114,40 @@ class _Vaccines extends ConsumerWidget {
           return EmptyState(
             icon: LucideIcons.syringe,
             title: 'Nenhuma vacina registrada ainda',
-            message:
-                'Fotografe a carteirinha ${ofPet(pet)} e o app registra as '
-                'vacinas e os vermífugos para você conferir.',
+            message: reads
+                ? 'Fotografe a carteirinha ${ofPet(pet)} e o app registra as '
+                      'vacinas e os vermífugos para você conferir.'
+                : 'Registre as vacinas ${ofPet(pet)} para receber um aviso '
+                      'antes de cada uma vencer.',
             action: Column(
               children: [
-                FilledButton.icon(
-                  onPressed: () =>
-                      context.push('/saude/carteirinha?pet=${pet.id}'),
-                  icon: const Icon(LucideIcons.scanText),
-                  label: const Text('Ler a carteirinha'),
-                ),
-                const SizedBox(height: BowieSpacing.s3),
-                TextButton(
-                  onPressed: () =>
-                      context.push('/saude/doses/nova?pet=${pet.id}'),
-                  child: const Text('Registrar à mão'),
-                ),
+                if (reads) ...[
+                  FilledButton.icon(
+                    onPressed: () =>
+                        context.push('/saude/carteirinha?pet=${pet.id}'),
+                    icon: const Icon(LucideIcons.scanText),
+                    label: const Text('Ler a carteirinha'),
+                  ),
+                  const SizedBox(height: BowieSpacing.s3),
+                  TextButton(
+                    onPressed: () =>
+                        context.push('/saude/doses/nova?pet=${pet.id}'),
+                    child: const Text('Registrar à mão'),
+                  ),
+                ] else ...[
+                  FilledButton.icon(
+                    onPressed: () =>
+                        context.push('/saude/doses/nova?pet=${pet.id}'),
+                    icon: const Icon(LucideIcons.pencilLine),
+                    label: const Text('Registrar uma vacina'),
+                  ),
+                  const SizedBox(height: BowieSpacing.s3),
+                  TextButton(
+                    onPressed: () =>
+                        context.push('/saude/carteirinha?pet=${pet.id}'),
+                    child: const Text('Ler a carteirinha com IA (Premium)'),
+                  ),
+                ],
               ],
             ),
           );

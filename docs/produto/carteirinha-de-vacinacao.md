@@ -10,6 +10,7 @@ Decisão do fundador (6 de outubro de 2026): a leitura usa **IA na nuvem**, porq
 - Antes do primeiro envio, o app pede consentimento explícito: a foto sai do aparelho para ser lida (LGPD).
 - O resultado volta como uma lista de doses para a pessoa conferir antes de salvar.
 - A IA é a da Anthropic, que não usa os dados enviados pela API para treinar modelos. As fotos não ficam guardadas no servidor do Bowie.
+- A leitura é um recurso do **Premium** (decisão de 26 de outubro de 2026, veja [planos](planos.md)). No plano grátis, as vacinas são registradas à mão, e a tela de leitura apresenta o Premium.
 
 O que o código faz hoje está em [`docs/funcionamento/saude.md`](../funcionamento/saude.md#leitura-da-carteirinha).
 

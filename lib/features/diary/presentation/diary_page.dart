@@ -211,6 +211,7 @@ IconData eventIcon(EventKind kind) => switch (kind) {
   EventKind.symptom => LucideIcons.thermometer,
   EventKind.vetVisit => LucideIcons.stethoscope,
   EventKind.exam => LucideIcons.microscope,
+  EventKind.weight => LucideIcons.weight,
   EventKind.other => LucideIcons.notebookPen,
 };
 

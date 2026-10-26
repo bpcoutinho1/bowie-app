@@ -17,6 +17,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 13. `20261022120000_flea_tick_reminders.sql`: `pet_vaccines.kind` aceita `flea_tick` (pulgas e carrapatos) e ganha `remind_days` (7, 14 ou 30, padrão 7). Pode rodar mais de uma vez. Veja [saúde](saude.md).
 14. `20261023120000_tutor_invites.sql`: coluna `invited_at` em `pet_tutors`, gravada pela função `send-invite` a cada envio. Pode rodar mais de uma vez.
 15. `20261024120000_no_trial.sql`: contas novas começam no plano grátis, sem teste do Premium (`trial_ends_at` passa a ter padrão `now()`). Pode rodar mais de uma vez.
+16. `20261026120000_weight_and_pet_dates.sql`: pesagens no diário (`pet_events.kind` aceita `weight` e ganha `weight_kg`, obrigatório nas pesagens, de 0,1 a 150) e a data de cadastro de cada pet (`pets.created_at`: os pets que já existiam ganham a data mais antiga que o servidor tem deles; o gatilho `pets_keep_created_at` marca a data na criação e não deixa mudar). Pode rodar mais de uma vez. Veja [diário](diario.md#peso) e [primeiro uso e lembretes](primeiro-uso-e-lembretes.md#vacinas-que-faltam-no-sino).
 
 ## Configuração do app
 
@@ -124,10 +125,10 @@ Bucket privado `pet-photos`, até 5 MB por arquivo, só JPEG, PNG e WebP. Cada f
 }
 ```
 
-- **Quem pode chamar:** só usuários logados. A função confere o token com `auth.getUser()` e responde 401 sem ele.
+- **Quem pode chamar:** só usuários logados com o Premium (ou um teste ainda valendo). A função confere o token com `auth.getUser()` e responde 401 sem ele. Depois lê a linha da conta em `account_plans` com a sessão de quem chama (o RLS deixa cada pessoa ler a própria) e responde 403 (`premium_required`) fora do Premium, antes de chamar a API: a mesma regra de `AccountPlan` (o `plan = 'premium'` até `premium_until`, o da loja até `store_premium_until` ou o teste até `trial_ends_at`).
 - **IA:** chama a API da Anthropic (modelo `claude-opus-5-5`, esforço alto) com saída estruturada por JSON Schema, para a resposta sempre ter esse formato. Com o modelo sobrecarregado, a API usa um modelo reserva automaticamente (`fallbacks: "default"`). As regras de leitura (o "Revacinar em" e não o "Venc." da etiqueta, anos com dois dígitos, linhas vazias) estão no prompt e vêm de [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md).
 - **Conferência:** a resposta é validada com zod. Datas impossíveis viram `""` e entram em `uncertain_fields`; uma próxima dose antes da aplicação também. Pesos fora de 0 a 150 kg são descartados. `photo` é a foto em que está a dose (a partir de 1, na ordem enviada; cada imagem vai precedida de "Foto N:"), ou `null` se vier fora do intervalo. O app usa esse número para guardar a página certa como comprovante.
-- **Erros:** sempre `{error, message}`, com `message` em português para o app mostrar. 400 (pedido inválido), 401, 422 (foto ilegível ou recusada), 502 (falha da IA), 503 (sem chave configurada ou limite de uso).
+- **Erros:** sempre `{error, message}`, com `message` em português para o app mostrar. 400 (pedido inválido), 401, 403 (fora do Premium), 422 (foto ilegível ou recusada), 502 (falha da IA), 503 (sem chave configurada ou limite de uso).
 - **Privacidade:** as fotos não são gravadas. O log só tem o id do usuário e contagens (fotos, doses, pesos).
 - **Segredo:** `ANTHROPIC_API_KEY`, guardado em Edge Functions → Secrets. Nunca vai para o app nem para o repositório.
 

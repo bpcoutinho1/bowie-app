@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -14,22 +15,34 @@ import 'package:bowie/core/text.dart';
 import 'package:bowie/core/ui/choice_field.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/contacts/presentation/contacts_providers.dart';
+import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/diary/data/diary_repository.dart';
+import 'package:bowie/features/diary/data/weight_sync.dart';
 import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/diary/presentation/diary_providers.dart';
 import 'package:bowie/features/diary/presentation/diary_page.dart';
 import 'package:bowie/features/diary/presentation/event_files.dart';
 import 'package:bowie/features/diary/presentation/event_photos.dart';
+import 'package:bowie/features/pets/domain/weight.dart';
 import 'package:bowie/features/plans/data/plan_repository.dart';
 import 'package:bowie/features/plans/presentation/plan_providers.dart';
 
 /// Records or schedules a diary entry, or edits one when [eventId] is given.
 class EventFormPage extends ConsumerWidget {
-  const EventFormPage({super.key, this.petId, this.eventId, this.day});
+  const EventFormPage({
+    super.key,
+    this.petId,
+    this.eventId,
+    this.day,
+    this.kind,
+  });
 
   final String? petId;
   final String? eventId;
   final DateTime? day;
+
+  /// The kind a new entry starts with, as "Registrar peso" on the pet's page.
+  final EventKind? kind;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +52,7 @@ class EventFormPage extends ConsumerWidget {
       if (petId == null) {
         return const _Message('Escolha um pet na aba Diário.');
       }
-      return _EventForm(petId: petId, day: day);
+      return _EventForm(petId: petId, day: day, kind: kind);
     }
     return switch (ref.watch(petEventProvider(eventId))) {
       AsyncData(value: final PetEvent event) => _EventForm(
@@ -68,11 +81,12 @@ class _Message extends StatelessWidget {
 }
 
 class _EventForm extends ConsumerStatefulWidget {
-  const _EventForm({required this.petId, this.event, this.day});
+  const _EventForm({required this.petId, this.event, this.day, this.kind});
 
   final String petId;
   final PetEvent? event;
   final DateTime? day;
+  final EventKind? kind;
 
   @override
   ConsumerState<_EventForm> createState() => _EventFormState();
@@ -82,6 +96,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
   final _title = TextEditingController();
   final _titleFocus = FocusNode();
   final _notes = TextEditingController();
+  final _weight = TextEditingController();
   var _photos = <EventPhoto>[];
   var _files = <EventFileItem>[];
   late EventKind _kind;
@@ -104,6 +119,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
       _day = event.occursOn;
       _notes.text = event.notes ?? '';
       _contactId = event.contactId;
+      if (event.weightKg case final kg?) _weight.text = formatWeight(kg);
       _photos = [for (final path in event.photoPaths) EventPhoto.saved(path)];
       _files = [for (final file in event.files) EventFileItem.saved(file)];
       final time = event.time;
@@ -116,7 +132,10 @@ class _EventFormState extends ConsumerState<_EventForm> {
     } else {
       _day = widget.day ?? today;
       // A future day is usually an appointment; today, often a symptom.
-      _kind = _day.isAfter(today) ? EventKind.vetVisit : EventKind.symptom;
+      _kind =
+          widget.kind ??
+          (_day.isAfter(today) ? EventKind.vetVisit : EventKind.symptom);
+      if (_kind == EventKind.weight && _day.isAfter(today)) _day = today;
     }
   }
 
@@ -125,6 +144,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
     _title.dispose();
     _titleFocus.dispose();
     _notes.dispose();
+    _weight.dispose();
     super.dispose();
   }
 
@@ -133,6 +153,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
     final colors = context.colors;
     final today = ref.watch(diaryRepositoryProvider).today;
     final scheduled = _day.isAfter(today);
+    final weighing = _kind == EventKind.weight;
     final contacts =
         ref.watch(petContactsProvider(widget.petId)).asData?.value ??
         const <Contact>[];
@@ -146,6 +167,8 @@ class _EventFormState extends ConsumerState<_EventForm> {
         title: Text(
           _editing
               ? 'Editar registro'
+              : weighing
+              ? 'Registrar peso'
               : scheduled
               ? 'Agendar'
               : 'Registrar no diário',
@@ -173,6 +196,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
                     EventKind.symptom => 'Diarreia, vômito, tosse, coceira',
                     EventKind.vetVisit => 'Veterinário ou outro profissional',
                     EventKind.exam => 'Sangue, imagem e outros resultados',
+                    EventKind.weight => 'Controle o peso do seu pet',
                     EventKind.other => 'Qualquer outro registro',
                   },
                 ),
@@ -188,55 +212,71 @@ class _EventFormState extends ConsumerState<_EventForm> {
             ),
           ],
           gap,
-          RawAutocomplete<String>(
-            textEditingController: _title,
-            focusNode: _titleFocus,
-            optionsBuilder: (value) {
-              final query = foldText(value.text.trim());
-              return eventSuggestions(_kind).where(
-                (option) => query.isEmpty || foldText(option).contains(query),
-              );
-            },
-            fieldViewBuilder: (context, controller, focusNode, _) => TextField(
-              controller: controller,
-              focusNode: focusNode,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: switch (_kind) {
-                  EventKind.symptom => 'O que aconteceu?',
-                  EventKind.vetVisit => 'Tipo de consulta',
-                  EventKind.exam => 'Qual exame?',
-                  EventKind.other => 'O que é?',
-                },
-                helperText: 'Escolha da lista ou digite outro.',
+          if (weighing)
+            TextField(
+              controller: _weight,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
-            ),
-            optionsViewBuilder: (context, onSelected, options) => Align(
-              alignment: Alignment.topLeft,
-              child: Material(
-                color: colors.surface,
-                elevation: 4,
-                borderRadius: BorderRadius.circular(BowieRadius.md),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxHeight: 260,
-                    maxWidth: 360,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+              ],
+              decoration: const InputDecoration(
+                labelText: 'Peso (kg)',
+                hintText: 'Ex.: 23,5',
+              ),
+            )
+          else
+            RawAutocomplete<String>(
+              textEditingController: _title,
+              focusNode: _titleFocus,
+              optionsBuilder: (value) {
+                final query = foldText(value.text.trim());
+                return eventSuggestions(_kind).where(
+                  (option) => query.isEmpty || foldText(option).contains(query),
+                );
+              },
+              fieldViewBuilder: (context, controller, focusNode, _) =>
+                  TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      labelText: switch (_kind) {
+                        EventKind.symptom => 'O que aconteceu?',
+                        EventKind.vetVisit => 'Tipo de consulta',
+                        EventKind.exam => 'Qual exame?',
+                        EventKind.weight || EventKind.other => 'O que é?',
+                      },
+                      helperText: 'Escolha da lista ou digite outro.',
+                    ),
                   ),
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    children: [
-                      for (final option in options)
-                        ListTile(
-                          title: Text(option),
-                          onTap: () => onSelected(option),
-                        ),
-                    ],
+              optionsViewBuilder: (context, onSelected, options) => Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  color: colors.surface,
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(BowieRadius.md),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxHeight: 260,
+                      maxWidth: 360,
+                    ),
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      children: [
+                        for (final option in options)
+                          ListTile(
+                            title: Text(option),
+                            onTap: () => onSelected(option),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           gap,
           Row(
             children: [
@@ -249,19 +289,21 @@ class _EventFormState extends ConsumerState<_EventForm> {
                   onTap: _pickDay,
                 ),
               ),
-              const SizedBox(width: BowieSpacing.s3),
-              Expanded(
-                flex: 2,
-                child: _PickerField(
-                  label: 'Horário',
-                  value: _time == null ? 'Opcional' : _formatTime(_time!),
-                  icon: LucideIcons.clock,
-                  onTap: _pickTime,
-                  onClear: _time == null
-                      ? null
-                      : () => setState(() => _time = null),
+              if (!weighing) ...[
+                const SizedBox(width: BowieSpacing.s3),
+                Expanded(
+                  flex: 2,
+                  child: _PickerField(
+                    label: 'Horário',
+                    value: _time == null ? 'Opcional' : _formatTime(_time!),
+                    icon: LucideIcons.clock,
+                    onTap: _pickTime,
+                    onClear: _time == null
+                        ? null
+                        : () => setState(() => _time = null),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: BowieSpacing.s2),
@@ -269,34 +311,36 @@ class _EventFormState extends ConsumerState<_EventForm> {
             describeDay(_day, today) + (scheduled ? ' · agendado' : ''),
             style: BowieType.caption.copyWith(color: colors.textMuted),
           ),
-          gap,
-          DropdownButtonFormField<String?>(
-            initialValue:
-                contacts.any((c) => c.id == _contactId) || _contactId == null
-                ? _contactId
-                : null,
-            decoration: InputDecoration(
-              labelText: 'Profissional ou local',
-              helperText: contacts.isEmpty
-                  ? 'Cadastre veterinários e clínicas em Pets → Contatos.'
-                  : currentContact != null &&
-                        !contacts.any((c) => c.id == _contactId)
-                  ? '${currentContact.name} não está mais nos contatos.'
+          if (!weighing) ...[
+            gap,
+            DropdownButtonFormField<String?>(
+              initialValue:
+                  contacts.any((c) => c.id == _contactId) || _contactId == null
+                  ? _contactId
                   : null,
-            ),
-            items: [
-              const DropdownMenuItem<String?>(
-                value: null,
-                child: Text('Nenhum'),
+              decoration: InputDecoration(
+                labelText: 'Profissional ou local',
+                helperText: contacts.isEmpty
+                    ? 'Cadastre veterinários e clínicas em Pets → Contatos.'
+                    : currentContact != null &&
+                          !contacts.any((c) => c.id == _contactId)
+                    ? '${currentContact.name} não está mais nos contatos.'
+                    : null,
               ),
-              for (final contact in contacts)
-                DropdownMenuItem<String?>(
-                  value: contact.id,
-                  child: Text('${contact.name} · ${contact.category.label}'),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Nenhum'),
                 ),
-            ],
-            onChanged: (value) => setState(() => _contactId = value),
-          ),
+                for (final contact in contacts)
+                  DropdownMenuItem<String?>(
+                    value: contact.id,
+                    child: Text('${contact.name} · ${contact.category.label}'),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _contactId = value),
+            ),
+          ],
           gap,
           TextField(
             controller: _notes,
@@ -310,28 +354,31 @@ class _EventFormState extends ConsumerState<_EventForm> {
                 EventKind.vetVisit =>
                   'O que foi dito, remédios, próximos passos',
                 EventKind.exam => 'Jejum, preparo, resultado',
+                EventKind.weight => 'Onde pesou, mudança na ração',
                 EventKind.other => null,
               },
             ),
           ),
-          gap,
-          EventPhotosField(
-            photos: _photos,
-            onChanged: (photos) => setState(() {
-              _photos = photos;
-              _error = null;
-            }),
-            onError: (message) => setState(() => _error = message),
-          ),
-          gap,
-          EventFilesField(
-            files: _files,
-            onChanged: (files) => setState(() {
-              _files = files;
-              _error = null;
-            }),
-            onError: (message) => setState(() => _error = message),
-          ),
+          if (!weighing) ...[
+            gap,
+            EventPhotosField(
+              photos: _photos,
+              onChanged: (photos) => setState(() {
+                _photos = photos;
+                _error = null;
+              }),
+              onError: (message) => setState(() => _error = message),
+            ),
+            gap,
+            EventFilesField(
+              files: _files,
+              onChanged: (files) => setState(() {
+                _files = files;
+                _error = null;
+              }),
+              onError: (message) => setState(() => _error = message),
+            ),
+          ],
           if (_error != null) ...[
             const SizedBox(height: BowieSpacing.s3),
             Text(
@@ -364,17 +411,29 @@ class _EventFormState extends ConsumerState<_EventForm> {
     );
   }
 
+  /// "Peso atual" on the pet's profile follows the latest weighing.
+  Future<void> _applyLatestWeight(AppUser user) => applyLatestWeight(
+    diary: ref.read(diaryRepositoryProvider),
+    pets: ref.read(petRepositoryProvider),
+    petId: widget.petId,
+    byUser: user,
+  );
+
   String _formatTime(TimeOfDay time) =>
       '${time.hour.toString().padLeft(2, '0')}:'
       '${time.minute.toString().padLeft(2, '0')}';
 
   Future<void> _pickDay() async {
     final today = ref.read(diaryRepositoryProvider).today;
+    // A weighing is of today or before.
+    final last = _kind == EventKind.weight
+        ? today
+        : DateTime(today.year + 5, 12, 31);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _day,
+      initialDate: _day.isAfter(last) ? last : _day,
       firstDate: DateTime(2000),
-      lastDate: DateTime(today.year + 5, 12, 31),
+      lastDate: last,
     );
     if (picked != null) setState(() => _day = picked);
   }
@@ -390,10 +449,13 @@ class _EventFormState extends ConsumerState<_EventForm> {
   Future<void> _save() async {
     final user = ref.read(currentUserProvider);
     if (user == null) return;
-    // New photos and PDFs count in the free plan; kept ones do not.
-    final sent =
-        _photos.where((photo) => photo.bytes != null).length +
-        _files.where((file) => file.fresh != null).length;
+    final weighing = _kind == EventKind.weight;
+    // New photos and PDFs count in the free plan; kept ones do not. A
+    // weighing takes none.
+    final sent = weighing
+        ? 0
+        : _photos.where((photo) => photo.bytes != null).length +
+              _files.where((file) => file.fresh != null).length;
     if (!await ensureQuota(context, Quota.diaryFiles, sent) || !mounted) {
       return;
     }
@@ -402,26 +464,30 @@ class _EventFormState extends ConsumerState<_EventForm> {
       _error = null;
     });
     try {
-      final today = ref.read(diaryRepositoryProvider).today;
-      await ref
-          .read(diaryRepositoryProvider)
-          .saveEvent(
-            id: widget.event?.id,
-            input: EventInput(
-              petId: widget.petId,
-              kind: _kind,
-              title: _title.text,
-              occursOn: _day,
-              time: _time == null ? null : _formatTime(_time!),
-              notes: _notes.text,
-              keptPhotos: [for (final photo in _photos) ?photo.path],
-              newPhotos: [for (final photo in _photos) ?photo.bytes],
-              keptFiles: [for (final file in _files) ?file.saved],
-              newFiles: [for (final file in _files) ?file.fresh],
-              contactId: _contactId,
-            ),
-            byUser: user,
-          );
+      final diary = ref.read(diaryRepositoryProvider);
+      final today = diary.today;
+      await diary.saveEvent(
+        id: widget.event?.id,
+        input: EventInput(
+          petId: widget.petId,
+          kind: _kind,
+          title: _title.text,
+          occursOn: _day,
+          weightKg: weighing ? parseWeight(_weight.text) : null,
+          time: _time == null ? null : _formatTime(_time!),
+          notes: _notes.text,
+          keptPhotos: [for (final photo in _photos) ?photo.path],
+          newPhotos: [for (final photo in _photos) ?photo.bytes],
+          keptFiles: [for (final file in _files) ?file.saved],
+          newFiles: [for (final file in _files) ?file.fresh],
+          contactId: _contactId,
+        ),
+        byUser: user,
+      );
+      // The weight changed, or an entry stopped being a weighing.
+      if (weighing || widget.event?.kind == EventKind.weight) {
+        await _applyLatestWeight(user);
+      }
       if (!mounted) return;
       unawaited(consumeQuota(context, Quota.diaryFiles, sent));
       ref.read(diaryDayProvider.notifier).select(_day);
@@ -430,6 +496,8 @@ class _EventFormState extends ConsumerState<_EventForm> {
           content: Text(
             _editing
                 ? 'Registro atualizado'
+                : weighing
+                ? 'Peso registrado'
                 : _day.isAfter(today)
                 ? 'Agendado para ${formatDayLong(_day)}'
                 : 'Registrado no diário',
@@ -474,6 +542,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
       await ref
           .read(diaryRepositoryProvider)
           .deleteEvent(id: event.id, byUser: user);
+      if (event.kind == EventKind.weight) await _applyLatestWeight(user);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,

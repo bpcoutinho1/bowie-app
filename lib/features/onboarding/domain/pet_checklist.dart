@@ -18,11 +18,18 @@ class ChecklistItem {
 
 /// The essentials of the sheet, in the order worth doing them. Medications,
 /// allergies and exams are extras: they never count against the sheet.
-List<ChecklistItem> petChecklist(Pet pet, {required bool hasVaccines}) => [
+/// Without the AI reading (free plan), vaccines open the form by hand.
+List<ChecklistItem> petChecklist(
+  Pet pet, {
+  required bool hasVaccines,
+  bool readsCards = true,
+}) => [
   ChecklistItem(
     label: 'Vacinas',
     done: hasVaccines,
-    route: '/saude/carteirinha?pet=${pet.id}',
+    route: readsCards
+        ? '/saude/carteirinha?pet=${pet.id}'
+        : '/saude/doses/nova?pet=${pet.id}',
   ),
   ChecklistItem(
     label: 'Foto',

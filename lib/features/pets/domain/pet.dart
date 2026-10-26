@@ -37,6 +37,7 @@ class Pet {
     this.birthDateEstimated = false,
     this.weightKg,
     this.photoPath,
+    this.createdAt,
     this.deletedAt,
   });
 
@@ -57,6 +58,10 @@ class Pet {
   /// Where the profile photo is in the private bucket `pet-photos`:
   /// `<pet id>/<photo id>.jpg`. The phone keeps a copy (see PetPhotoStore).
   final String? photoPath;
+
+  /// When the pet was registered, as the server keeps it. Null for a pet that
+  /// came from the server before the app kept this.
+  final DateTime? createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
 
@@ -85,6 +90,7 @@ class Pet {
       birthDateEstimated: birthDateEstimated ?? this.birthDateEstimated,
       weightKg: clearWeight ? null : weightKg ?? this.weightKg,
       photoPath: clearPhoto ? null : photoPath ?? this.photoPath,
+      createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
     );
@@ -101,6 +107,8 @@ class Pet {
       'birth_date_estimated': birthDateEstimated,
       'weight_kg': weightKg,
       'photo_path': photoPath,
+      // The server sets it on insert; sending none keeps what it has.
+      if (createdAt != null) 'created_at': createdAt!.toUtc().toIso8601String(),
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'deleted_at': deletedAt?.toUtc().toIso8601String(),
     };
@@ -121,6 +129,7 @@ class Pet {
       birthDateEstimated: _bool(row['birth_date_estimated']),
       weightKg: weight == null ? null : (weight as num).toDouble(),
       photoPath: row['photo_path'] as String?,
+      createdAt: _optionalDate(row['created_at']),
       updatedAt: DateTime.parse(row['updated_at']! as String).toUtc(),
       deletedAt: _optionalDate(row['deleted_at']),
     );

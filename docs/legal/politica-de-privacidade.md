@@ -1,6 +1,6 @@
 # Política de Privacidade do Bowie
 
-Última atualização: 20 de outubro de 2026. Versão de teste (TestFlight).
+Última atualização: 26 de outubro de 2026. Versão de teste (TestFlight).
 
 O Bowie é um app para registrar a vida do seu cão ou gato e dividir o cuidado com outras pessoas. Esta política explica quais dados o app guarda, para quê, com quem eles são compartilhados e como você exerce os seus direitos, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018).
 
@@ -16,7 +16,7 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 **Dos seus pets**
 - Cadastro: nome, tipo (cão ou gato), sexo, raça, data de nascimento (ou idade aproximada), peso e foto.
 - Saúde: vacinas e vermífugos (datas, produto, lote e veterinário).
-- Diário: sintomas, consultas, exames e agendamentos, com as observações, as fotos e os arquivos PDF que você registrar.
+- Diário: sintomas, consultas, exames, pesagens e agendamentos, com as observações, as fotos e os arquivos PDF que você registrar.
 - Quem cuida do pet: o email das pessoas que você convida como tutoras.
 
 **Da sua casa**
@@ -25,7 +25,8 @@ O controlador dos dados é **Bruno Coutinho**, pessoa física, criador do Bowie.
 
 **O que o Bowie não coleta**
 - Não usa publicidade, não vende dados e não usa ferramentas de rastreamento ou de análise de terceiros.
-- Não acessa os seus contatos do celular, a sua localização nem outras fotos além das que você escolher.
+- Não lê a agenda de contatos do celular. Se você usar "Importar da agenda do celular", o próprio sistema abre a agenda e entrega ao app só o nome e o telefone do contato que você escolher, para você conferir e salvar.
+- Não acessa a sua localização nem outras fotos além das que você escolher.
 - Os lembretes (vacina perto de vencer, aniversário) são agendados no próprio celular. Nada é enviado a outro serviço para isso.
 - O Face ID (ou a digital) é verificado pelo próprio celular. O Bowie só recebe a resposta "liberado" ou "não liberado".
 

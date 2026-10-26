@@ -8,6 +8,7 @@ import 'package:bowie/app/providers.dart';
 import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/features/contacts/data/contacts_repository.dart';
+import 'package:bowie/features/contacts/data/phone_contact_picker.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
 import 'package:bowie/features/contacts/presentation/contact_actions.dart';
 import 'package:bowie/features/contacts/presentation/contacts_providers.dart';
@@ -103,6 +104,12 @@ class _ContactFormState extends ConsumerState<_ContactForm> {
           BowieSpacing.s8,
         ),
         children: [
+          OutlinedButton.icon(
+            onPressed: _saving ? null : _import,
+            icon: const Icon(LucideIcons.bookUser),
+            label: const Text('Importar da agenda do celular'),
+          ),
+          gap,
           Text(
             'Tipo',
             style: BowieType.bodyStrong.copyWith(color: colors.text),
@@ -189,6 +196,49 @@ class _ContactFormState extends ConsumerState<_ContactForm> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  /// Fills the name and the phone from the agenda. The person still chooses
+  /// the kind and saves.
+  Future<void> _import() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final PickedContact? picked;
+    try {
+      picked = await ref.read(phoneContactPickerProvider).pick();
+    } on ContactPickerException {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Não foi possível abrir a agenda. Preencha o contato à mão.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (picked == null || !mounted) return;
+    final phone = picked.phone;
+    // "+1 415…" would pass for a Brazilian number once the "+" goes.
+    final foreign =
+        phone != null &&
+        phone.startsWith('+') &&
+        !phone.replaceAll(RegExp(r'[\s().-]'), '').startsWith('+55');
+    final digits = phone == null || foreign ? null : normalizePhone(phone);
+    setState(() {
+      _error = null;
+      if (picked!.name.isNotEmpty) _name.text = picked.name;
+      _phone.text = digits != null ? formatPhone(digits) : phone ?? '';
+    });
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          phone == null
+              ? 'Nome preenchido. Este contato não tem telefone na agenda.'
+              : digits == null
+              ? 'Confira o telefone: use um número do Brasil com DDD.'
+              : 'Nome e telefone preenchidos. Confira o tipo e salve.',
+        ),
       ),
     );
   }

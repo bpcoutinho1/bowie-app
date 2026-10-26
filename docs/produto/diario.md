@@ -11,11 +11,12 @@ O app registra informações e **não faz diagnóstico**. Para sintomas, o texto
 | Sintoma | Diarreia, vômito, tosse, coceira, falta de apetite, machucado |
 | Consulta | Consulta de rotina, retorno, emergência, cirurgia |
 | Exame | Exame de sangue, ultrassonografia, exame de fezes, exame de urina, raio-X |
+| Peso | "Controle o peso do seu pet": a data, o peso em kg e observações ([veja abaixo](#peso)) |
 | Outro | Banho e tosa, adestramento, fisioterapia |
 
 | Campo | Obrigatório | Observação |
 | --- | --- | --- |
-| Tipo | Sim | Um dos quatro acima. |
+| Tipo | Sim | Um dos cinco acima. |
 | Título | Sim | Sugestões conforme o tipo; dá para digitar outro. |
 | Dia | Sim | Padrão: o dia escolhido no calendário (hoje, se nenhum). |
 | Horário | Não | Útil para consultas e exames. |
@@ -23,6 +24,16 @@ O app registra informações e **não faz diagnóstico**. Para sintomas, o texto
 | Observações | Não | Campo aberto. |
 | Fotos | Não | Até 4, da câmera ou da galeria. Ex.: fotografar fezes com sangue ou uma diarreia diferente, para comparar depois e mostrar ao veterinário. |
 | Arquivos | Não | Até 5 PDFs de até 10 MB cada, em qualquer tipo de registro. Ex.: o resultado do hemograma, uma receita, o laudo de um raio X. Entram automaticamente na ficha compartilhada com o veterinário. |
+
+## Peso
+
+Decisão do fundador (26 de outubro de 2026): o peso é registrado no diário, em "Registrar" → **Peso**, e a página do pet mostra a evolução num gráfico.
+
+- O registro de peso tem só **dia**, **peso (kg)** e **observações** (ex.: "pesado na clínica", "mudou a ração"). Sem horário, contato, fotos nem arquivos.
+- O peso é de hoje ou de um dia que já passou: não se agenda pesagem.
+- Um peso por dia: registrar de novo no mesmo dia pelo perfil ou pela carteirinha troca o daquele dia.
+- O **"Peso atual"** do perfil é sempre a pesagem mais recente. Mudar o "Peso atual" na página do pet também vira a pesagem de hoje no diário. O peso lido na carteirinha entra como pesagem no dia da medição.
+- Na página do pet, embaixo de "Peso atual", o gráfico **"Evolução do peso"**: o tempo no eixo horizontal (as datas das pesagens) e o peso no vertical (kg), com um resumo em texto ("+2,5 kg desde 01/06/2026") e o botão "Registrar peso". Sem pesagens, só o botão.
 
 ## Passado e futuro
 

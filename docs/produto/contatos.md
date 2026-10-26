@@ -17,6 +17,13 @@ A agenda é **por casa**, como a [lista de compras](compras.md): todos da casa v
 | Endereço | Não | Abre no mapa. |
 | Observações | Não | Horário de atendimento, especialidade, CRMV. |
 
+## Importar da agenda
+
+Decisão do fundador (26 de outubro de 2026): no formulário, **"Importar da agenda do celular"** abre a agenda do próprio celular. A pessoa escolhe um contato (e o número, se ele tiver mais de um), e o app preenche o nome e o telefone. Depois, ela confere o tipo e salva.
+
+- O app usa o seletor do sistema (iOS e Android): ele **não pede permissão** para ler a agenda e só recebe o contato escolhido. Nada da agenda é guardado além do que a pessoa salva.
+- O telefone vem no formato do app, "(11) 98765-4321", sem o +55. Um número de fora do Brasil fica como está, com um aviso para conferir.
+
 ## Tela
 
 - Fica na aba **Pets**, no card "Contatos".

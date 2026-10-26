@@ -55,7 +55,7 @@ Definidas em `lib/app/router.dart`. A função `redirectFor` leva o usuário par
 | `/pets/:id` | `PetPage` com id (detalhes) | `AuthGate.ready` |
 | `/conta` | `AccountPage` ("Minha conta", pelo ícone de pessoa na aba Pets): o plano, nome, celular, email, "Sair da conta" e "Excluir minha conta" | `AuthGate.ready` |
 | `/conta/excluir` | `DeleteAccountPage`: exclusão definitiva da conta | `AuthGate.ready` |
-| `/notificacoes` | `NotificationsPage` (aberta pelo sino, ainda vazia) | `AuthGate.ready` |
+| `/notificacoes` | `NotificationsPage` (aberta pelo sino): por enquanto, os avisos de vacinas que faltam ([veja](primeiro-uso-e-lembretes.md#vacinas-que-faltam-no-sino)) | `AuthGate.ready` |
 
 Em `ready`, quem estiver em `/login`, `/confirmar-email`, `/recuperar-senha`, `/unlock` ou `/loading` é levado para `/inicio` (`homeLocation`). Nos outros estados, qualquer rota leva para a tela do estado.
 
@@ -95,7 +95,7 @@ Depois do desbloqueio, o app mostra quatro abas na parte de baixo (`AppShell`, e
 - **Compras**: tela de "Em construção".
 - **Pets**: lista de pets, convites, sincronização e "Sair".
 
-O sino no topo das abas abre `/notificacoes`, ainda vazia.
+O sino no topo das abas abre `/notificacoes`. Com avisos, ganha um marcador com o número deles ([vacinas que faltam](primeiro-uso-e-lembretes.md#vacinas-que-faltam-no-sino)).
 
 ## Login e cadastro (`LoginPage`)
 

@@ -15,6 +15,11 @@ import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/breeds.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
+import 'package:bowie/features/pets/domain/weight.dart';
+import 'package:bowie/core/ui/bowie_card.dart';
+import 'package:bowie/features/diary/domain/pet_event.dart';
+import 'package:bowie/features/diary/presentation/diary_providers.dart';
+import 'package:bowie/features/pets/presentation/weight_chart.dart';
 import 'package:bowie/features/pets/domain/pet_age.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 import 'package:bowie/features/pets/presentation/pet_photo.dart';
@@ -59,6 +64,10 @@ class _PetPageState extends ConsumerState<PetPage> {
   String? _transferringTo;
   var _unknownBirthDate = false;
   var _seeded = false;
+
+  /// The weight the field was filled with, to follow a new weighing in the
+  /// diary while the field was not touched.
+  double? _seededWeight;
   var _saving = false;
   var _inviting = false;
   var _deleting = false;
@@ -90,8 +99,12 @@ class _PetPageState extends ConsumerState<PetPage> {
         _birthDate = birth;
       }
     }
-    final weight = pet.weightKg;
-    if (weight != null) _weight.text = formatWeight(weight);
+    _seedWeight(pet.weightKg);
+  }
+
+  void _seedWeight(double? weight) {
+    _seededWeight = weight;
+    _weight.text = weight == null ? '' : formatWeight(weight);
   }
 
   @override
@@ -102,6 +115,11 @@ class _PetPageState extends ConsumerState<PetPage> {
         : ref.watch(petDetailsProvider(petId));
     if (asyncDetails case AsyncData(value: final value?) when !_seeded) {
       _seed(value.pet);
+    } else if (asyncDetails case AsyncData(value: final value?)
+        when value.pet.weightKg != _seededWeight &&
+            _weight.text ==
+                (_seededWeight == null ? '' : formatWeight(_seededWeight!))) {
+      _seedWeight(value.pet.weightKg);
     }
 
     return Scaffold(
@@ -254,6 +272,7 @@ class _PetPageState extends ConsumerState<PetPage> {
             hintText: 'Ex.: 23,5',
           ),
         ),
+        if (details != null) _WeightHistory(pet: details.pet),
         if (_error != null) ...[
           const SizedBox(height: BowieSpacing.s3),
           Text(
@@ -419,8 +438,10 @@ class _PetPageState extends ConsumerState<PetPage> {
     final repository = ref.read(petRepositoryProvider);
     try {
       final profile = _profile();
+      final weight = profile.weightKg;
       if (details == null) {
         final pet = await repository.createPet(profile: profile, owner: user);
+        if (weight != null) await _recordWeight(pet.id, weight, user);
         await _savePhoto(pet.id, user);
         if (!mounted) return;
         context.go(
@@ -434,6 +455,9 @@ class _PetPageState extends ConsumerState<PetPage> {
           profile: profile,
           byUser: user,
         );
+        if (weight != null && roundWeight(weight) != details.pet.weightKg) {
+          await _recordWeight(details.pet.id, weight, user);
+        }
         await _savePhoto(details.pet.id, user);
         if (!mounted) return;
         ScaffoldMessenger.of(
@@ -445,6 +469,18 @@ class _PetPageState extends ConsumerState<PetPage> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// A new "Peso atual" is also today's weighing in the diary, so the chart
+  /// has it.
+  Future<void> _recordWeight(String petId, double kg, AppUser user) async {
+    final diary = ref.read(diaryRepositoryProvider);
+    await diary.recordWeight(
+      petId: petId,
+      weightKg: kg,
+      day: diary.today,
+      byUser: user,
+    );
   }
 
   Future<void> _savePhoto(String petId, AppUser user) async {
@@ -879,24 +915,54 @@ class _BreedField extends StatelessWidget {
   }
 }
 
-/// "23,5" or "23.5" in kg. Empty means no weight.
-double? parseWeight(String text) {
-  final value = text.trim().replaceAll(',', '.');
-  if (value.isEmpty) return null;
-  final weight = double.tryParse(value);
-  if (weight == null) {
-    throw const AppFailure('Digite o peso em kg, por exemplo 23,5.');
-  }
-  return weight;
-}
-
-/// 23.0 → "23"; 23.5 → "23,5".
-String formatWeight(double kg) {
-  final rounded = (kg * 10).round() / 10;
-  final text = rounded == rounded.roundToDouble()
-      ? rounded.toStringAsFixed(0)
-      : rounded.toStringAsFixed(1);
-  return text.replaceAll('.', ',');
-}
-
 enum _TutorAction { resend, remove }
+
+/// Under "Peso atual": the chart of the weighings in the diary, and the way to
+/// add one.
+class _WeightHistory extends ConsumerWidget {
+  const _WeightHistory({required this.pet});
+
+  final Pet pet;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final events = ref.watch(petEventsProvider(pet.id)).asData?.value;
+    if (events == null) return const SizedBox.shrink();
+    final points = weightHistory(events);
+    final colors = context.colors;
+    final add = TextButton.icon(
+      onPressed: () => context.push('/diario/novo?pet=${pet.id}&tipo=peso'),
+      icon: const Icon(LucideIcons.plus),
+      label: const Text('Registrar peso'),
+    );
+    if (points.isEmpty) {
+      return Align(alignment: Alignment.centerLeft, child: add);
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s4),
+      child: BowieCard(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            BowieSpacing.s4,
+            BowieSpacing.s4,
+            BowieSpacing.s4,
+            BowieSpacing.s2,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Evolução do peso',
+                style: BowieType.bodyStrong.copyWith(color: colors.text),
+              ),
+              const SizedBox(height: BowieSpacing.s1),
+              WeightChart(points: points, petName: pet.name),
+              const SizedBox(height: BowieSpacing.s2),
+              Align(alignment: Alignment.centerLeft, child: add),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

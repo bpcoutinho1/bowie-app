@@ -4,6 +4,7 @@ Decisões que ainda precisam ser tomadas. Quando uma for decidida, mova a respos
 
 ## Saúde
 
+- [ ] Quais vacinas são essenciais para gatos no aviso de vacinas que faltam? Hoje o app usa Raiva e V3, V4 ou V5 ([notificações](notificacoes.md#vacinas-que-faltam)). A FeLV entra?
 
 ## Bowie Biz
 

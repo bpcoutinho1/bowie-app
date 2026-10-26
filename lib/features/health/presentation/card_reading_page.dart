@@ -12,18 +12,23 @@ import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/error/app_failure.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
+import 'package:bowie/features/diary/data/weight_sync.dart';
+import 'package:bowie/features/diary/presentation/diary_providers.dart';
 import 'package:bowie/features/health/data/card_reader.dart';
 import 'package:bowie/features/health/data/health_repository.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/health/domain/card_reading.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
 import 'package:bowie/core/ui/choice_field.dart';
+import 'package:bowie/features/health/presentation/dose_form_page.dart';
 import 'package:bowie/features/health/presentation/dose_kind_icon.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
+import 'package:bowie/features/pets/domain/weight.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 import 'package:bowie/features/plans/data/plan_repository.dart';
 import 'package:bowie/features/plans/presentation/plan_providers.dart';
+import 'package:bowie/features/plans/presentation/premium_sheet.dart';
 
 /// Reads photos of the vaccine card in the cloud and lets the person review
 /// every dose before saving (docs/produto/carteirinha-de-vacinacao.md).
@@ -55,6 +60,9 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
   Widget build(BuildContext context) {
     final pet = ref.watch(petDetailsProvider(widget.petId)).asData?.value?.pet;
     final name = pet?.name ?? 'seu pet';
+    if (ref.watch(canReadCardsProvider).asData?.value == false) {
+      return _PremiumOnly(petId: widget.petId, petName: name);
+    }
     return PopScope(
       canPop: _stage == _Stage.photos && _photos.isEmpty,
       onPopInvokedWithResult: (didPop, _) async {
@@ -517,13 +525,24 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
           );
       dosesSaved = true;
       if (weight != null) {
-        await ref
-            .read(petRepositoryProvider)
-            .updateWeight(
-              petId: widget.petId,
-              weightKg: weight.weightKg,
-              byUser: user,
-            );
+        // A weighing in the diary, on the day the card says; the profile
+        // follows the most recent one.
+        final diary = ref.read(diaryRepositoryProvider);
+        final measured = weight.measuredOn;
+        await diary.recordWeight(
+          petId: widget.petId,
+          weightKg: weight.weightKg,
+          day: measured == null || measured.isAfter(diary.today)
+              ? diary.today
+              : measured,
+          byUser: user,
+        );
+        await applyLatestWeight(
+          diary: diary,
+          pets: ref.read(petRepositoryProvider),
+          petId: widget.petId,
+          byUser: user,
+        );
       }
       if (!mounted) return;
       final parts = [
@@ -587,6 +606,72 @@ class _CardReadingPageState extends ConsumerState<CardReadingPage> {
       ),
     );
     return discard == true;
+  }
+}
+
+/// On the free plan the AI does not read: the Premium, or the form by hand.
+class _PremiumOnly extends StatelessWidget {
+  const _PremiumOnly({required this.petId, required this.petName});
+
+  final String petId;
+  final String petName;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ler carteirinha')),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          BowieSpacing.s4,
+          BowieSpacing.s2,
+          BowieSpacing.s4,
+          BowieSpacing.s8,
+        ),
+        children: [
+          Icon(LucideIcons.scanText, size: 48, color: colors.text),
+          const SizedBox(height: BowieSpacing.s4),
+          Text(
+            'Leitura da carteirinha por IA',
+            style: BowieType.title2.copyWith(color: colors.text),
+          ),
+          const SizedBox(height: BowieSpacing.s2),
+          Text(
+            'Com o Premium, você fotografa a carteirinha de $petName e o app '
+            'encontra as vacinas, os vermífugos e o peso. Você confere tudo '
+            'antes de salvar.',
+            style: BowieType.body.copyWith(color: colors.textMuted),
+          ),
+          const SizedBox(height: BowieSpacing.s2),
+          Text(
+            'No plano grátis, você registra cada vacina à mão, em poucos '
+            'toques.',
+            style: BowieType.body.copyWith(color: colors.textMuted),
+          ),
+          const SizedBox(height: BowieSpacing.s6),
+          FilledButton.icon(
+            onPressed: () => showPremiumSheet(
+              context,
+              reason: 'A leitura da carteirinha por IA é do Premium.',
+            ),
+            icon: const Icon(LucideIcons.sparkles),
+            label: const Text('Conhecer o Premium'),
+          ),
+          const SizedBox(height: BowieSpacing.s3),
+          OutlinedButton.icon(
+            // Opened from the router or from the first-use path: the same
+            // Navigator works for both.
+            onPressed: () => Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(
+                builder: (_) => DoseFormPage(petId: petId),
+              ),
+            ),
+            icon: const Icon(LucideIcons.pencilLine),
+            label: const Text('Registrar à mão'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1035,14 +1120,6 @@ class _WeightCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String formatKg(double kg) {
-  final rounded = (kg * 10).round() / 10;
-  final text = rounded == rounded.roundToDouble()
-      ? rounded.toStringAsFixed(0)
-      : rounded.toStringAsFixed(1).replaceAll('.', ',');
-  return '$text kg';
 }
 
 class _Notice extends StatelessWidget {

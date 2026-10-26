@@ -10,6 +10,7 @@ import 'package:bowie/features/auth/presentation/account_page.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
+import 'package:bowie/features/health/presentation/card_reading_page.dart';
 import 'package:bowie/features/plans/data/plan_repository.dart';
 import 'package:bowie/features/plans/data/store_billing.dart';
 import 'package:bowie/features/plans/domain/account_plan.dart';
@@ -114,15 +115,15 @@ void main() {
 
   test('the free plan counts; Premium and the trial do not', () {
     final free = AccountPlan.fromRow(row(ai: 2, diary: 12), now);
-    expect(free.petLimit, 1);
-    expect(free.aiPhotosLeft, 1);
+    expect(free.petLimit, 2);
+    expect(free.canReadCards, isFalse, reason: 'the AI reading is Premium');
     expect(free.diaryFilesLeft, 0);
     final trial = AccountPlan.fromRow(
       row(trialEndsAt: '2026-11-01T00:00:00Z', ai: 9),
       now,
     );
     expect(trial.petLimit, 10);
-    expect(trial.aiPhotosLeft, isNull);
+    expect(trial.canReadCards, isTrue);
   });
 
   test('without internet, the last plan read; without it, no block', () async {
@@ -177,12 +178,12 @@ void main() {
 
   test('the messages say what is left and what to do', () {
     expect(
-      quotaReason(Quota.aiPhotos, 0, 2),
-      'Você já usou as 3 fotos lidas pela IA do plano grátis. Com o Premium, '
-      'não há limite.',
+      diaryFilesReason(0, 2),
+      'Você já usou os 5 envios de fotos e PDFs no diário do plano grátis. '
+      'Com o Premium, não há limite.',
     );
     expect(
-      quotaReason(Quota.diaryFiles, 1, 3),
+      diaryFilesReason(1, 3),
       'Restam 1 dos 5 envios de fotos e PDFs no diário do plano grátis. '
       'Tire 2 fotos ou arquivos ou assine o Premium, que não tem limite.',
     );
@@ -193,22 +194,28 @@ void main() {
     late PetLocalStore store;
     late FakePlanApi api;
 
-    Future<void> pump(WidgetTester tester, Map<String, dynamic> plan) async {
+    Future<void> pump(
+      WidgetTester tester,
+      Map<String, dynamic> plan, {
+      int pets = 1,
+    }) async {
       store = (await tester.runAsync(
         () => PetLocalStore.open(databasePath: inMemoryDatabasePath),
       ))!;
       addTearDown(() => tester.runAsync(store.close));
-      await tester.runAsync(
-        () => PetRepository(store, now: () => now).createPet(
-          profile: PetProfile(
-            name: 'Bowie',
-            species: PetSpecies.dog,
-            sex: PetSex.male,
-            birthDate: DateTime(2021, 5, 4),
+      for (final name in ['Bowie', 'Mia'].take(pets)) {
+        await tester.runAsync(
+          () => PetRepository(store, now: () => now).createPet(
+            profile: PetProfile(
+              name: name,
+              species: PetSpecies.dog,
+              sex: PetSex.male,
+              birthDate: DateTime(2021, 5, 4),
+            ),
+            owner: bruno,
           ),
-          owner: bruno,
-        ),
-      );
+        );
+      }
       api = FakePlanApi(plan);
       tester.view.physicalSize = const Size(1170, 2532);
       tester.view.devicePixelRatio = 3;
@@ -244,6 +251,10 @@ void main() {
                           ensureQuota(context, Quota.diaryFiles, 3),
                       child: const Text('Enviar 3'),
                     ),
+                    TextButton(
+                      onPressed: () => ensureQuota(context, Quota.aiPhotos, 1),
+                      child: const Text('Ler 1 foto'),
+                    ),
                   ],
                 ),
               ),
@@ -263,14 +274,30 @@ void main() {
       }
     }
 
-    testWidgets('on the free plan, the second pet shows the Premium', (
+    testWidgets('on the free plan, the second pet goes in', (tester) async {
+      await pump(tester, row());
+      await tapAndSettle(tester, 'Novo pet');
+      expect(find.text('Bowie Premium'), findsNothing);
+      expect(find.text('Pode cadastrar'), findsOneWidget);
+    });
+
+    testWidgets('on the free plan, the third pet shows the Premium', (
+      tester,
+    ) async {
+      await pump(tester, row(), pets: 2);
+      await tapAndSettle(tester, 'Novo pet');
+      expect(find.text('Bowie Premium'), findsOneWidget);
+      expect(find.textContaining('até 2 pets'), findsOneWidget);
+      expect(find.text('Pode cadastrar'), findsNothing);
+    });
+
+    testWidgets('on the free plan, the AI reading shows the Premium', (
       tester,
     ) async {
       await pump(tester, row());
-      await tapAndSettle(tester, 'Novo pet');
+      await tapAndSettle(tester, 'Ler 1 foto');
       expect(find.text('Bowie Premium'), findsOneWidget);
-      expect(find.textContaining('a conta tem 1 pet'), findsOneWidget);
-      expect(find.text('Pode cadastrar'), findsNothing);
+      expect(find.textContaining('por IA é do Premium'), findsOneWidget);
     });
 
     testWidgets('with Premium on in the dashboard, the second pet goes in', (
@@ -280,6 +307,28 @@ void main() {
       await tapAndSettle(tester, 'Novo pet');
       expect(find.text('Bowie Premium'), findsNothing);
       expect(find.text('Pode cadastrar'), findsOneWidget);
+    });
+
+    testWidgets('on the free plan, the card page offers Premium or by hand', (
+      tester,
+    ) async {
+      await pump(tester, row());
+      final context = tester.element(find.text('Novo pet'));
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const CardReadingPage(petId: 'any'),
+        ),
+      );
+      for (var i = 0; i < 6; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+      expect(find.text('Leitura da carteirinha por IA'), findsOneWidget);
+      expect(find.text('Conhecer o Premium'), findsOneWidget);
+      expect(find.text('Registrar à mão'), findsOneWidget);
+      expect(find.text('Tirar foto'), findsNothing);
     });
 
     testWidgets('the diary says how many sends are left', (tester) async {
@@ -337,7 +386,7 @@ void main() {
       await pumpAccount(tester, FakePlanApi(row(ai: 1)));
       expect(find.text('Conta'), findsOneWidget);
       expect(find.text('Grátis'), findsOneWidget);
-      expect(find.text('1 de 3'), findsOneWidget);
+      expect(find.text('Só no Premium'), findsOneWidget);
       expect(find.text('Mudar para Premium'), findsOneWidget);
     });
 

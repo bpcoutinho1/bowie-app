@@ -2,7 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bowie/app/providers.dart';
 import 'package:bowie/features/contacts/data/contacts_repository.dart';
+import 'package:bowie/features/contacts/data/phone_contact_picker.dart';
 import 'package:bowie/features/contacts/domain/contact.dart';
+
+/// The phone's agenda, to fill in a new contact.
+final phoneContactPickerProvider = Provider<PhoneContactPicker>(
+  (ref) => NativePhoneContactPicker(),
+);
 
 final contactsRepositoryProvider = Provider<ContactsRepository>((ref) {
   return ContactsRepository(ref.watch(petLocalStoreProvider));
