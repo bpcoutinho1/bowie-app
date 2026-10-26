@@ -114,8 +114,10 @@ class HomePage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Birthday(pet: pet),
-                      _NextVaccine(petId: pet.id),
+                      // Today's medicines come first: they are what the day
+                      // asks for. Then the vaccine, when there is one.
                       _TodayDoses(petId: pet.id),
+                      _NextVaccine(petId: pet.id),
                       _NextAppointment(petId: pet.id),
                     ],
                   ),
@@ -302,7 +304,8 @@ class _AddPetCard extends StatelessWidget {
   }
 }
 
-/// The most urgent vaccine of a pet, or an invitation to register one.
+/// The most urgent vaccine of a pet. Nothing while none is registered: the
+/// sheet progress and the bell ask for them.
 class _NextVaccine extends ConsumerWidget {
   const _NextVaccine({required this.petId});
 
@@ -312,18 +315,14 @@ class _NextVaccine extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groups = ref.watch(vaccineGroupsProvider(petId)).asData?.value;
     final today = ref.watch(healthRepositoryProvider).today;
-    final colors = context.colors;
-    if (groups == null) return const SizedBox.shrink();
-    if (groups.isEmpty) {
-      return Text(
-        'Nenhuma vacina registrada ainda. Registre na aba Saúde.',
-        style: BowieType.callout.copyWith(color: colors.textMuted),
-      );
-    }
+    if (groups == null || groups.isEmpty) return const SizedBox.shrink();
     final next = groups.first;
-    return StatusBadge(
-      status: next.statusOn(today),
-      text: '${next.name}: ${describeDue(next.latest.nextDueOn, today)}',
+    return Padding(
+      padding: const EdgeInsets.only(top: BowieSpacing.s2),
+      child: StatusBadge(
+        status: next.statusOn(today),
+        text: '${next.name}: ${describeDue(next.latest.nextDueOn, today)}',
+      ),
     );
   }
 }
@@ -340,7 +339,11 @@ class _SheetProgress extends ConsumerWidget {
     if (groups is! AsyncData<List<VaccineGroup>>) {
       return const SizedBox.shrink();
     }
-    final items = petChecklist(pet, hasVaccines: groups.value.isNotEmpty);
+    final items = petChecklist(
+      pet,
+      hasVaccines: groups.value.isNotEmpty,
+      readsCards: ref.watch(canReadCardsProvider).asData?.value ?? true,
+    );
     final done = items.where((item) => item.done).length;
     if (done == items.length) return const SizedBox.shrink();
     final colors = context.colors;

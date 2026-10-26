@@ -37,6 +37,13 @@ final planUsageProvider =
       return (plan: plan, pets: pets);
     });
 
+/// Whether the AI reads the vaccine card for this account (Premium and the
+/// trial). True while the plan is unknown: the server has the last word.
+final canReadCardsProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final usage = await ref.watch(planUsageProvider.future);
+  return usage.plan.canReadCards;
+});
+
 /// Pets the person is the main tutor of: only these count in their plan.
 Future<int> ownedPetCount(PetLocalStore store, AppUser user) async {
   final email = normalizeEmail(user.email);
@@ -77,8 +84,8 @@ Future<bool> ensureCanAddPet(BuildContext context) async {
     await showPremiumSheet(
       context,
       reason:
-          'No plano grátis, a conta tem $freePetLimit pet. Com o Premium, '
-          'você cadastra até $premiumPetLimit.',
+          'No plano grátis, a conta tem até $freePetLimit pets. Com o '
+          'Premium, você cadastra até $premiumPetLimit.',
     );
   }
   return false;
@@ -90,50 +97,43 @@ Future<void> openNewPet(BuildContext context, void Function() open) async {
 }
 
 /// True when the free plan still has room for [amount] more; otherwise
-/// explains it and returns false. Premium (and the trial) has no limit.
+/// explains it and returns false. Premium (and the trial) has no limit. The
+/// reading of the vaccine card by the AI is only in Premium.
 Future<bool> ensureQuota(BuildContext context, Quota quota, int amount) async {
   if (amount < 1) return true;
   final container = ProviderScope.containerOf(context, listen: false);
   final user = container.read(currentUserProvider);
   if (user == null) return true;
   final plan = await container.read(planRepositoryProvider).current(user.id);
-  final left = switch (quota) {
-    Quota.aiPhotos => plan.aiPhotosLeft,
-    Quota.diaryFiles => plan.diaryFilesLeft,
-  };
-  if (left == null || amount <= left) return true;
   if (!context.mounted) return false;
-  await showPremiumSheet(context, reason: quotaReason(quota, left, amount));
-  return false;
+  switch (quota) {
+    case Quota.aiPhotos:
+      if (plan.canReadCards) return true;
+      await showPremiumSheet(context, reason: aiReadingPremiumReason);
+      return false;
+    case Quota.diaryFiles:
+      final left = plan.diaryFilesLeft;
+      if (left == null || amount <= left) return true;
+      await showPremiumSheet(context, reason: diaryFilesReason(left, amount));
+      return false;
+  }
 }
 
-/// Why the free plan stops here, in the person's words.
-String quotaReason(Quota quota, int left, int amount) {
-  // "as 3 fotos" / "os 5 envios": the article follows the word.
-  final (total, what, the, ofThe, remove) = switch (quota) {
-    Quota.aiPhotos => (
-      freeAiPhotos,
-      'fotos lidas pela IA',
-      'as',
-      'das',
-      amount - left == 1 ? 'Remova 1 foto' : 'Remova ${amount - left} fotos',
-    ),
-    Quota.diaryFiles => (
-      freeDiaryFiles,
-      'envios de fotos e PDFs no diário',
-      'os',
-      'dos',
-      amount - left == 1
-          ? 'Tire 1 foto ou arquivo'
-          : 'Tire ${amount - left} fotos ou arquivos',
-    ),
-  };
+const aiReadingPremiumReason =
+    'A leitura da carteirinha por IA é do Premium. No plano grátis, você '
+    'registra as vacinas à mão.';
+
+/// Why the free plan stops sending files to the diary, in the person's words.
+String diaryFilesReason(int left, int amount) {
   if (left == 0) {
-    return 'Você já usou $the $total $what do plano grátis. Com o Premium, '
-        'não há limite.';
+    return 'Você já usou os $freeDiaryFiles envios de fotos e PDFs no diário '
+        'do plano grátis. Com o Premium, não há limite.';
   }
-  return 'Restam $left $ofThe $total $what do plano grátis. $remove ou '
-      'assine o Premium, que não tem limite.';
+  final remove = amount - left == 1
+      ? 'Tire 1 foto ou arquivo'
+      : 'Tire ${amount - left} fotos ou arquivos';
+  return 'Restam $left dos $freeDiaryFiles envios de fotos e PDFs no diário '
+      'do plano grátis. $remove ou assine o Premium, que não tem limite.';
 }
 
 /// Counts what was used, after it worked.

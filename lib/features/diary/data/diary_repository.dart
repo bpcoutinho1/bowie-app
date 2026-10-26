@@ -10,6 +10,7 @@ import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_photo_store.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/pets/domain/weight.dart';
 
 /// What a person fills in on the diary form.
 class EventInput {
@@ -21,6 +22,7 @@ class EventInput {
     this.time,
     this.notes,
     this.contactId,
+    this.weightKg,
     this.keptPhotos = const [],
     this.newPhotos = const [],
     this.keptFiles = const [],
@@ -34,6 +36,9 @@ class EventInput {
   final String? time;
   final String? notes;
   final String? contactId;
+
+  /// The weight of a [EventKind.weight] entry, in kg.
+  final double? weightKg;
 
   /// Photos the entry already had and still keeps.
   final List<String> keptPhotos;
@@ -103,6 +108,9 @@ class DiaryRepository {
     required AppUser byUser,
   }) async {
     await _requireMember(input.petId, byUser);
+    if (input.kind == EventKind.weight) {
+      return _saveWeight(id: id, input: input, byUser: byUser);
+    }
     final title = input.title.trim();
     if (title.isEmpty) throw const AppFailure('Conte o que aconteceu.');
     if (title.length > 80) {
@@ -219,6 +227,88 @@ class DiaryRepository {
       await photos?.delete(path);
     }
     return event;
+  }
+
+  /// A weighing: the day (today or before), the weight and notes. The title
+  /// says the weight, so other screens and older versions of the app read it.
+  Future<PetEvent> _saveWeight({
+    String? id,
+    required EventInput input,
+    required AppUser byUser,
+  }) async {
+    final kg = input.weightKg;
+    if (kg == null) throw const AppFailure('Informe o peso em kg.');
+    if (kg <= 0 || kg > maxWeightKg) {
+      throw const AppFailure('Informe um peso entre 0,1 e 150 kg.');
+    }
+    final day = input.occursOn;
+    if (day == null) throw const AppFailure('Escolha o dia.');
+    if (day.year < 2000) throw const AppFailure('Confira a data.');
+    if (dayOf(day).isAfter(today)) {
+      throw const AppFailure('O peso é de hoje ou de um dia que já passou.');
+    }
+    final notes = input.notes?.trim() ?? '';
+    if (notes.length > 1000) {
+      throw const AppFailure('Use no máximo 1000 caracteres nas observações.');
+    }
+    final previous = id == null ? null : await _store.getEvent(id);
+    // A weighing has no photos or files: an entry that changes kind loses them.
+    final removed = [
+      ...?previous?.photoPaths,
+      for (final file in previous?.files ?? const <EventFile>[]) file.path,
+    ];
+    final rounded = roundWeight(kg);
+    final event = PetEvent(
+      id: id ?? _ids.v4(),
+      petId: input.petId,
+      kind: EventKind.weight,
+      title: 'Peso: ${formatKg(rounded)}',
+      occursOn: dayOf(day),
+      notes: notes.isEmpty ? null : notes,
+      weightKg: rounded,
+      updatedBy: byUser.id,
+      updatedAt: _now().toUtc(),
+    );
+    await _store.saveEvent(event, remove: removed);
+    for (final path in removed) {
+      await photos?.delete(path);
+    }
+    return event;
+  }
+
+  /// Records the weight of [day], replacing a weighing already on that day.
+  /// Used when the weight comes from the pet's profile or a vaccine card.
+  Future<PetEvent> recordWeight({
+    required String petId,
+    required double weightKg,
+    required DateTime day,
+    required AppUser byUser,
+  }) async {
+    final sameDay = (await _store.listEvents(petId)).where(
+      (e) =>
+          e.deletedAt == null &&
+          e.kind == EventKind.weight &&
+          e.occursOn == dayOf(day),
+    );
+    final existing = sameDay.firstOrNull;
+    if (existing?.weightKg == roundWeight(weightKg)) return existing!;
+    return saveEvent(
+      id: existing?.id,
+      input: EventInput(
+        petId: petId,
+        kind: EventKind.weight,
+        title: '',
+        occursOn: day,
+        notes: existing?.notes,
+        weightKg: weightKg,
+      ),
+      byUser: byUser,
+    );
+  }
+
+  /// The most recent weighing of the pet, or null.
+  Future<WeightPoint?> latestWeight(String petId) async {
+    return weightHistory(await _store.listEvents(petId)).lastOrNull;
   }
 
   Future<void> deleteEvent({

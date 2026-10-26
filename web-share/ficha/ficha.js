@@ -99,7 +99,7 @@
     allergy: ['shield', 'Alergia', 'warn'],
     diet: ['utensils', 'Alimentação', 'muted'],
   };
-  const EVENT = { symptom: 'Sintoma', vet_visit: 'Consulta', exam: 'Exame', other: 'Outro' };
+  const EVENT = { symptom: 'Sintoma', vet_visit: 'Consulta', exam: 'Exame', weight: 'Peso', other: 'Outro' };
 
   function section(iconName, title, ...content) {
     return [h('h2', {}, icon(iconName), title), ...content];

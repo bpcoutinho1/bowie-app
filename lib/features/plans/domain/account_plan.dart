@@ -1,11 +1,8 @@
 import 'dart:math';
 
 /// Limits of the plans (docs/produto/planos.md).
-const freePetLimit = 1;
+const freePetLimit = 2;
 const premiumPetLimit = 10;
-
-/// Photos read by the AI, for the life of the account.
-const freeAiPhotos = 3;
 
 /// Photos and PDFs sent to the diary, for the life of the account.
 const freeDiaryFiles = 5;
@@ -78,10 +75,10 @@ class AccountPlan {
 
   int get petLimit => isPremium ? premiumPetLimit : freePetLimit;
 
-  /// Null means no limit.
-  int? get aiPhotosLeft =>
-      isPremium ? null : max(0, freeAiPhotos - aiPhotosUsed);
+  /// The vaccine card is read by the AI only in Premium (and the trial).
+  bool get canReadCards => isPremium;
 
+  /// Null means no limit.
   int? get diaryFilesLeft =>
       isPremium ? null : max(0, freeDiaryFiles - diaryFilesUsed);
 

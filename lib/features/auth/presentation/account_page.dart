@@ -327,11 +327,7 @@ class _PlanSection extends ConsumerWidget {
             count(usage.pets, freePetLimit),
             warn: usage.pets >= freePetLimit,
           ),
-          row(
-            'Fotos lidas pela IA',
-            count(plan.aiPhotosUsed, freeAiPhotos),
-            warn: plan.aiPhotosUsed >= freeAiPhotos,
-          ),
+          row('Leitura por IA', 'Só no Premium'),
           row(
             'Fotos e PDFs no diário',
             count(plan.diaryFilesUsed, freeDiaryFiles),
@@ -342,9 +338,8 @@ class _PlanSection extends ConsumerWidget {
           row('Conta', 'Teste grátis do Premium'),
           row('Acaba em', formatDayBr(plan.trialEndsAt!.toLocal())),
           note(
-            'Depois, a conta passa para o plano grátis: $freePetLimit pet, '
-            '$freeAiPhotos fotos lidas pela IA e $freeDiaryFiles envios ao '
-            'diário.',
+            'Depois, a conta passa para o plano grátis: até $freePetLimit '
+            'pets e $freeDiaryFiles envios ao diário, sem a leitura por IA.',
           ),
         ],
         PlanTier.premium => [

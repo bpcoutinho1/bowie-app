@@ -52,9 +52,9 @@ No topo da aba Saúde, "Importante sobre Bowie" lista os registros com ícone (a
 
 | Rota | Tela |
 | --- | --- |
-| `/saude` | `HealthPage`: vacinas, vermífugos e antipulgas do pet escolhido. Com mais de um pet, um seletor no topo troca de pet. Sem vacinas, convida a registrar a primeira. |
+| `/saude` | `HealthPage`: vacinas, vermífugos e antipulgas do pet escolhido. Com mais de um pet, um seletor no topo troca de pet. Sem vacinas, convida a registrar a primeira: no Premium, "Ler a carteirinha" primeiro; no grátis, "Registrar uma vacina" primeiro e a leitura como "(Premium)". |
 | `/saude/carteirinha?pet=` | `CardReadingPage`: ler a carteirinha por foto (veja abaixo). Abre pelo ícone de leitura no topo da aba Saúde ou pelo botão "Ler a carteirinha" quando o pet ainda não tem vacinas. |
-| `/saude/doses/nova?pet=&tipo=&nome=` | `DoseFormPage`: registrar. `tipo` e `nome` são preenchidos quando se registra uma nova dose a partir do histórico. |
+| `/saude/doses/nova?pet=&tipo=&nome=` | `DoseFormPage`: registrar. `tipo` e `nome` são preenchidos quando se registra uma nova dose a partir do histórico, e `nome` quando se registra uma vacina que falta a partir do sino. |
 | `/saude/doses/:id` | `DoseHistoryPage`: todas as doses daquela vacina, a mais nova primeiro, e o botão "Registrar nova dose". |
 | `/saude/doses/:id/editar` | `DoseFormPage`: editar ou excluir um registro. |
 | `/saude/notas/nova?pet=&tipo=` | `HealthNoteFormPage`: cuidado especial, alergia ou alimentação (`tipo` = `special_care`, `allergy` ou `diet`), num campo que abre a lista dos três. Título com sugestões e detalhes. |
@@ -74,7 +74,7 @@ A aba **Início** mostra, em cada pet, a vacina mais urgente com o mesmo selo de
 
 ## Leitura da carteirinha
 
-A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md). Abre pelo ícone de leitura no topo da aba Saúde, pela primeira opção do "Registrar" ("Ler a carteirinha com IA") e pelo convite da aba quando o pet não tem vacinas. A leitura reconhece vacinas, vermífugos e antipulgas (`kind` `flea_tick`). Precisa da Edge Function `read-vaccine-card` publicada, com o segredo `ANTHROPIC_API_KEY` ([guia](../guias/publicar-leitura-da-carteirinha.md)). A tela tem três etapas:
+A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-vacinacao.md`](../produto/carteirinha-de-vacinacao.md). Abre pelo ícone de leitura no topo da aba Saúde, pela primeira opção do "Registrar" ("Ler a carteirinha com IA") e pelo convite da aba quando o pet não tem vacinas. A leitura reconhece vacinas, vermífugos e antipulgas (`kind` `flea_tick`). Precisa da Edge Function `read-vaccine-card` publicada, com o segredo `ANTHROPIC_API_KEY` ([guia](../guias/publicar-leitura-da-carteirinha.md)). A leitura é do Premium: no plano grátis, a tela mostra "Leitura da carteirinha por IA", com "Conhecer o Premium" e "Registrar à mão" (veja [planos](planos.md#no-app)), e a função recusa a leitura com 403. No Premium, a tela tem três etapas:
 
 1. **Fotos.** "Tirar foto" (câmera) ou "Da galeria" (várias de uma vez), até 4 fotos por leitura, com miniaturas que dá para remover. As fotos chegam redimensionadas para no máximo 2000 px, em JPEG com qualidade 85 (`ImagePickerPhotos`, `lib/features/health/data/photo_picker.dart`). O formato é conferido pelos primeiros bytes: JPEG, PNG e WebP passam; outros (como HEIC) mostram um aviso.
 2. **Leitura.** Na primeira vez, um diálogo pede consentimento antes de qualquer foto sair do celular ("Enviar as fotos para leitura?"). O aceite fica guardado no aparelho (`PrefsReadingConsent`, chave `card_reading_consent_v1`). `SupabaseCardReader` (`lib/features/health/data/card_reader.dart`) chama a Edge Function `read-vaccine-card` com as fotos em base64 e espera até 160 s. A tela mostra "Lendo a carteirinha de Bowie" e um botão "Cancelar", que descarta a resposta quando ela chegar. Erros voltam como mensagens em português (sem internet, servidor ocupado, foto ilegível).
@@ -86,7 +86,7 @@ A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-
    - Tocar num registro abre a correção (bottom sheet). Ao confirmar, as dúvidas somem, porque a pessoa conferiu.
    - As fotos aparecem em miniatura no topo; tocar abre a foto com zoom para comparar.
    - Se a leitura achou peso, um item oferece atualizar o peso do perfil. Vem marcado quando o perfil não tem peso ou quando a medição é dos últimos 90 dias e diferente da atual.
-   - "Salvar N registros" grava tudo de uma vez (`HealthRepository.saveDoses`: se um registro for inválido, nada é salvo) e o peso (`PetRepository.updateWeight`). Sair com algo lido e não salvo pede confirmação.
+   - "Salvar N registros" grava tudo de uma vez (`HealthRepository.saveDoses`: se um registro for inválido, nada é salvo) e o peso, como uma pesagem no diário no dia da medição (`DiaryRepository.recordWeight`); o "Peso atual" do perfil passa a ser a pesagem mais recente (`applyLatestWeight`, veja [diário](diario.md#peso)). Sair com algo lido e não salvo pede confirmação.
 
 Nada é salvo sem passar pela revisão. Ao salvar, cada página que tem uma dose escolhida é guardada no celular e vira o comprovante dessas doses: a Edge Function diz em que foto está cada dose (`photo`, a partir de 1). Sem essa informação, só uma leitura de uma foto só tem comprovante. Páginas sem dose escolhida não são guardadas, e se nada for salvo as páginas são apagadas.
 

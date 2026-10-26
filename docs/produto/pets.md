@@ -29,11 +29,11 @@ Decisão do fundador (12 de outubro de 2026): o app avisa o aniversário do pet 
 
 ### Peso
 
-No MVP o cadastro guarda o peso atual. O histórico com datas, que vai alimentar o **gráfico de evolução do peso**, ainda não é gravado: entra junto com o gráfico.
+O cadastro guarda o peso atual, e o histórico fica no [diário](diario.md#peso): cada pesagem tem data, peso e observações. Embaixo de "Peso atual", a página do pet mostra o gráfico **"Evolução do peso"**, com as datas no eixo horizontal e o peso em kg no vertical (decisão de 26 de outubro de 2026).
 
-Junto com o gráfico vem um lembrete mensal para registrar o peso: "Que tal registrar o peso do Bowie este mês?". Ele aparece só na [central de notificações](notificacoes.md), sem push.
+Ainda vai entrar um lembrete mensal para registrar o peso: "Que tal registrar o peso do Bowie este mês?". Ele aparece só na [central de notificações](notificacoes.md), sem push.
 
-A [leitura da carteirinha](carteirinha-de-vacinacao.md) também importa as medições de peso que estiverem nela. O peso atual é sempre a medição mais recente, venha ela do cadastro ou da carteirinha.
+A [leitura da carteirinha](carteirinha-de-vacinacao.md) também importa as medições de peso que estiverem nela, como pesagens no diário. O peso atual é sempre a pesagem mais recente, venha ela do cadastro, do diário ou da carteirinha.
 
 ## Raças sugeridas
 

@@ -44,6 +44,18 @@ Decidido com o fundador em 17 de outubro de 2026. Estes já existem, como notifi
 - Tocar no lembrete abre a Saúde (vacina) ou a página do pet (aniversário).
 - A permissão é pedida no fim do [primeiro uso](primeiro-uso.md), depois de explicar para que serve.
 
+## Vacinas que faltam
+
+Decisão do fundador (26 de outubro de 2026). Os tutores, e principalmente o tutor principal, precisam cadastrar as vacinas do pet: é com elas que vêm os lembretes e a ficha para hotéis e veterinários.
+
+- **Quando:** a partir de 7 dias depois do cadastro do pet, se faltar alguma vacina essencial.
+- **Onde:** só dentro do app, no sino de avisos, com o número de avisos no sino. Não vira push.
+- **Texto:** "O Bowie ainda não tem todas as vacinas cadastradas." e o que falta: "Faltam: Raiva, V8 ou V10, Tosse dos canis e Giárdia." O botão registra a primeira que falta.
+- **Vacinas essenciais, em ordem de importância.** Cão: Raiva, V8 ou V10, Tosse dos canis e Giárdia. Gato: Raiva e V3, V4 ou V5 (proposta; a confirmar, veja [questões em aberto](questoes-em-aberto.md)).
+- Conta qualquer dose registrada da vacina, mesmo vencida: o vencimento já tem o próprio lembrete.
+- O aviso some sozinho quando as vacinas são registradas. "Não lembrar mais" apaga o aviso daquele pet naquele celular (um pet que não toma Giárdia, por exemplo).
+- Todos os tutores do pet veem o aviso.
+
 ## Notificação no app e push
 
 Só três eventos viram push no celular, além de aparecer na central:

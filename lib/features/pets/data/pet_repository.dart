@@ -75,7 +75,7 @@ class PetRepository {
   }) async {
     final timestamp = _timestamp;
     final pet = _apply(
-      Pet(id: _ids.v4(), name: '', updatedAt: timestamp),
+      Pet(id: _ids.v4(), name: '', createdAt: timestamp, updatedAt: timestamp),
       profile,
       timestamp,
     );

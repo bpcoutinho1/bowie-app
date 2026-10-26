@@ -61,7 +61,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 12,
+      version: 13,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -77,6 +77,7 @@ class PetLocalStore {
         if (from < 10) await _addVaccineProofs(db);
         if (from < 11) await _addEventFiles(db);
         if (from < 12) await _addReminderDays(db);
+        if (from < 13) await _addEventWeight(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -98,6 +99,7 @@ class PetLocalStore {
         await _addVaccineProofs(db);
         await _addEventFiles(db);
         await _addReminderDays(db);
+        await _addEventWeight(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -132,6 +134,15 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 13: the weight of a weighing in the diary, and when each pet
+  /// was registered.
+  static Future<void> _addEventWeight(DatabaseExecutor db) async {
+    if (await _hasTable(db, 'pet_events')) {
+      await db.execute('ALTER TABLE pet_events ADD COLUMN weight_kg REAL');
+    }
+    await db.execute('ALTER TABLE pets ADD COLUMN created_at TEXT');
   }
 
   /// Version 12: how many days before the due date each dose reminds.

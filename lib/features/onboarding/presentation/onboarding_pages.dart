@@ -17,6 +17,7 @@ import 'package:bowie/features/health/presentation/health_note_form_page.dart';
 import 'package:bowie/features/health/presentation/health_providers.dart';
 import 'package:bowie/features/health/presentation/medication_form_page.dart';
 import 'package:bowie/features/health/presentation/status_badge.dart';
+import 'package:bowie/features/plans/presentation/plan_providers.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/presentation/pet_page.dart';
 import 'package:bowie/features/reminders/presentation/reminder_providers.dart';
@@ -105,7 +106,7 @@ class WelcomeView extends StatelessWidget {
           2,
           LucideIcons.syringe,
           'As vacinas',
-          'Fotografe a carteirinha e o app preenche para você.',
+          'Registre em poucos toques. No Premium, o app lê a carteirinha.',
         ),
         step(
           3,
@@ -138,6 +139,8 @@ class OnboardingVaccinesPage extends ConsumerWidget {
     final today = ref.watch(healthRepositoryProvider).today;
     final name = pet?.name ?? 'seu pet';
     final done = groups.isNotEmpty;
+    // On the free plan, by hand comes first; the AI reading is Premium.
+    final reads = ref.watch(canReadCardsProvider).asData?.value ?? true;
     void next() => context.go('/boas-vindas/pronto?pet=$petId');
 
     return Scaffold(
@@ -191,7 +194,7 @@ class OnboardingVaccinesPage extends ConsumerWidget {
               icon: const Icon(LucideIcons.camera),
               label: const Text('Ler mais páginas da carteirinha'),
             ),
-          ] else ...[
+          ] else if (reads) ...[
             FilledButton.icon(
               onPressed: () => _open(context, CardReadingPage(petId: petId)),
               icon: const Icon(LucideIcons.camera),
@@ -202,6 +205,20 @@ class OnboardingVaccinesPage extends ConsumerWidget {
               onPressed: () => _open(context, DoseFormPage(petId: petId)),
               icon: const Icon(LucideIcons.pencilLine),
               label: const Text('Registrar à mão'),
+            ),
+            const SizedBox(height: BowieSpacing.s2),
+            TextButton(onPressed: next, child: const Text('Fazer depois')),
+          ] else ...[
+            FilledButton.icon(
+              onPressed: () => _open(context, DoseFormPage(petId: petId)),
+              icon: const Icon(LucideIcons.pencilLine),
+              label: const Text('Registrar uma vacina'),
+            ),
+            const SizedBox(height: BowieSpacing.s2),
+            OutlinedButton.icon(
+              onPressed: () => _open(context, CardReadingPage(petId: petId)),
+              icon: const Icon(LucideIcons.sparkles),
+              label: const Text('Ler a carteirinha com IA (Premium)'),
             ),
             const SizedBox(height: BowieSpacing.s2),
             TextButton(onPressed: next, child: const Text('Fazer depois')),

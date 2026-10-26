@@ -7,8 +7,8 @@ import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/breeds.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
+import 'package:bowie/features/pets/domain/weight.dart';
 import 'package:bowie/features/pets/domain/pet_age.dart';
-import 'package:bowie/features/pets/presentation/pet_page.dart';
 
 void main() {
   const owner = AppUser(id: 'owner-1', email: 'owner@example.com');

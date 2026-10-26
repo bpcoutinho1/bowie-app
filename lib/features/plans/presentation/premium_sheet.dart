@@ -166,10 +166,7 @@ class _PremiumSheetState extends ConsumerState<_PremiumSheet> {
           ],
           const SizedBox(height: BowieSpacing.s4),
           benefit(LucideIcons.pawPrint, 'Até $premiumPetLimit pets'),
-          benefit(
-            LucideIcons.scanLine,
-            'Leitura da carteirinha por IA sem limite',
-          ),
+          benefit(LucideIcons.scanLine, 'Leitura da carteirinha por IA'),
           benefit(LucideIcons.fileText, 'Fotos e PDFs no diário sem limite'),
           const SizedBox(height: BowieSpacing.s2),
           Text(

@@ -14,6 +14,7 @@ import 'package:bowie/core/dates.dart';
 import 'package:bowie/core/ui/bowie_logo.dart';
 import 'package:bowie/features/contacts/presentation/contact_form_page.dart';
 import 'package:bowie/features/contacts/presentation/contacts_page.dart';
+import 'package:bowie/features/diary/domain/pet_event.dart';
 import 'package:bowie/features/diary/presentation/diary_page.dart';
 import 'package:bowie/features/diary/presentation/event_form_page.dart';
 import 'package:bowie/features/health/domain/vaccine_dose.dart';
@@ -180,6 +181,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                       return EventFormPage(
                         petId: query['pet'],
                         day: day == null ? null : dayOf(day),
+                        kind: query['tipo'] == 'peso' ? EventKind.weight : null,
                       );
                     },
                   ),

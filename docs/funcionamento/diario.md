@@ -9,7 +9,7 @@ O que a aba **Diário** faz hoje. As regras de produto estão em [`docs/produto/
 | Campo | Descrição |
 | --- | --- |
 | `id`, `pet_id` | UUID do registro e do pet. |
-| `kind` | `symptom` (Sintoma), `vet_visit` (Consulta), `exam` (Exame) ou `other` (Outro). |
+| `kind` | `symptom` (Sintoma), `vet_visit` (Consulta), `exam` (Exame), `weight` (Peso) ou `other` (Outro). Um tipo desconhecido (de uma versão mais nova) vira `other`. |
 | `title` | 1 a 80 caracteres. Sugestões por tipo em `eventSuggestions`. |
 | `occurs_on` | O dia. De 2000 até o fim do ano daqui a 5 anos. |
 | `occurs_time` | Horário opcional, `HH:MM`. |
@@ -17,6 +17,7 @@ O que a aba **Diário** faz hoje. As regras de produto estão em [`docs/produto/
 | `photo_paths` | Até 4 fotos (`maxEventPhotos`), em JSON: caminhos `<id do pet>/<id da foto>.jpg` no bucket privado `pet-photos`, os mesmos da foto do pet. |
 | `files` | Até 5 PDFs (`maxEventFiles`), em JSON: `[{"path": "<id do pet>/<id>.pdf", "name": "Hemograma.pdf"}]`, no mesmo bucket. |
 | `contact_id` | Um contato da casa do pet (veja [contatos](contatos.md)). O repositório recusa contato de outra casa. |
+| `weight_kg` | Só nas pesagens (`weight`): de 0,1 a 150 kg, com uma casa decimal. Local: versão 13 do banco do celular. Servidor: migração `20261026120000_weight_and_pet_dates.sql`. |
 | `updated_by`, `updated_at`, `deleted_at` | Como nas vacinas. Excluir marca `deleted_at`. |
 
 `isScheduled(hoje)`: o dia é depois de hoje. `upcomingEvents` lista os agendados, o mais próximo primeiro. `sortEvents` ordena do dia mais recente para o mais antigo; dentro do dia, os com horário em ordem de horário.
@@ -31,7 +32,16 @@ O que a aba **Diário** faz hoje. As regras de produto estão em [`docs/produto/
 - Cada registro (`EventCard`) mostra tipo, "Agendado", horário, contato e o começo das observações. Com contato com telefone, um botão liga.
 - O botão principal diz "Registrar" ou "Agendar", conforme o dia escolhido.
 
-`/diario/novo?pet=&dia=` e `/diario/:id` (`EventFormPage`): tipo (um campo que abre a lista Sintoma, Consulta, Exame e Outro, cada um com ícone e exemplo), título com sugestões, dia, horário opcional (com botão para tirar), profissional ou local (lista de contatos da casa do pet), observações. Em "Sintoma", um texto lembra que o diário não faz diagnóstico. Editando, há "Excluir este registro".
+`/diario/novo?pet=&dia=&tipo=` e `/diario/:id` (`EventFormPage`): tipo (um campo que abre a lista Sintoma, Consulta, Exame, Peso e Outro, cada um com ícone e exemplo; `tipo=peso` já abre em Peso), título com sugestões, dia, horário opcional (com botão para tirar), profissional ou local (lista de contatos da casa do pet), observações. Em "Sintoma", um texto lembra que o diário não faz diagnóstico. Editando, há "Excluir este registro".
+
+## Peso
+
+- No formulário, o tipo **Peso** ("Controle o peso do seu pet") troca o título por "Peso (kg)" e esconde horário, contato, fotos e arquivos. O dia vai só até hoje.
+- `DiaryRepository.saveEvent` desvia para `_saveWeight`: confere o peso (0,1 a 150 kg) e o dia (não futuro), arredonda para uma casa e grava o título "Peso: 23,5 kg", para outras telas e versões antigas do app lerem. Um registro que vira pesagem perde fotos e arquivos.
+- `recordWeight` grava a pesagem de um dia, trocando a que já existe nesse dia. É usado pelo "Peso atual" da página do pet (pesagem de hoje, quando o valor muda) e pela leitura da carteirinha (no dia da medição).
+- `weightHistory` (em `pet_event.dart`) lista as pesagens da mais antiga para a mais nova, uma por dia. `applyLatestWeight` (`lib/features/diary/data/weight_sync.dart`) põe a mais recente no "Peso atual" do perfil; o formulário chama ao salvar ou excluir uma pesagem.
+- Página do pet: embaixo de "Peso atual", `WeightChart` (`lib/features/pets/presentation/weight_chart.dart`), desenhado com `CustomPaint`: datas no eixo horizontal (primeira e última, em proporção ao tempo), kg no vertical (três ou mais marcas, `weightTicks`), linha e pontos em `link`, grade em `border`. Acima, um resumo ("+2,5 kg desde 01/06/2026"); para leitores de tela, um rótulo com o número de pesagens, a primeira e a última. Abaixo, "Registrar peso" abre `/diario/novo?pet=&tipo=peso`. Se o "Peso atual" não foi mexido, ele acompanha uma pesagem nova.
+- Na ficha compartilhada com o veterinário, a pesagem aparece no diário como "Peso".
 
 Fotos (`lib/features/diary/presentation/event_photos.dart`):
 
