@@ -10,6 +10,7 @@
 | Data de nascimento | Sim | O app mostra a idade calculada ("5 anos", "8 meses"). Quem não sabe a data marca "Não sei a data exata" e informa a idade aproximada ("uns 3 anos"); o app calcula uma data estimada e mostra a idade como aproximada ("cerca de 3 anos"). |
 | Raça | Não | Sugestões conforme o tipo (lista abaixo), com opção de digitar outra. "Sem raça definida (SRD)" é a primeira opção. |
 | Peso atual | Não | Em kg, com uma casa decimal. |
+| Porte | Não | Só para cães. Calculado pelo peso, com opção de escolher à mão ([veja abaixo](#porte)). |
 | Foto | Não | Uma foto de perfil, da câmera ou da galeria. |
 
 A foto aparece translúcida no fundo dos cards em que se escolhe o pet (abas Início e Pets), atrás do nome e do resumo ("Cão · Macho · Border Collie · 5 anos"). Assim, quem tem mais de um pet reconhece cada um pela foto. No seletor de pets da aba Saúde, ela aparece pequena e redonda ao lado do nome.
@@ -34,6 +35,24 @@ O cadastro guarda o peso atual, e o histórico fica no [diário](diario.md#peso)
 Ainda vai entrar um lembrete mensal para registrar o peso: "Que tal registrar o peso do Bowie este mês?". Ele aparece só na [central de notificações](notificacoes.md), sem push.
 
 A [leitura da carteirinha](carteirinha-de-vacinacao.md) também importa as medições de peso que estiverem nela, como pesagens no diário. O peso atual é sempre a pesagem mais recente, venha ela do cadastro, do diário ou da carteirinha.
+
+### Porte
+
+Decisão do fundador (29 de outubro de 2026), a partir de feedback dos testes: para cães, o app mostra o **porte** logo abaixo do "Peso atual" ("Porte: Médio, pelo peso"). Gatos não têm porte.
+
+| Porte | Peso adulto | Exemplos |
+| --- | --- | --- |
+| Mini | Até 5 kg | Chihuahua, Pinscher, Yorkshire, Lulu da Pomerânia |
+| Pequeno | Acima de 5 até 10 kg | Shih Tzu, Pug, Dachshund, Bulldog Francês |
+| Médio | Acima de 10 até 25 kg | Beagle, Border Collie, Cocker Spaniel, Chow Chow, Pitbull |
+| Grande | Acima de 25 até 45 kg | Labrador, Golden Retriever, Pastor Alemão, Rottweiler |
+| Gigante | Acima de 45 kg | Dogue Alemão, São Bernardo, Terra-nova |
+
+- Os limites não deixam buracos entre as faixas: 10,5 kg é Médio, 25,4 kg é Grande.
+- O porte sai só do peso. O app não pergunta a altura.
+- **Filhotes:** antes de 1 ano, o peso ainda não diz o porte adulto. O app mostra "Definido quando adulto".
+- **À mão:** o padrão é "pelo peso", que muda sozinho quando o peso muda. O tutor pode escolher outro porte (um cão acima do peso, um filhote de raça grande); a escolha fica até ele voltar para "pelo peso".
+- O porte aparece também na **ficha compartilhada** ("Porte médio"), porque hotéis e creches separam os cães por porte. Não aparece no resumo do pet nos cards, que já tem informação demais.
 
 ## Raças sugeridas
 

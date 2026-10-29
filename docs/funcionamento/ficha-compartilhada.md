@@ -32,6 +32,7 @@ sequenceDiagram
 
 - Recebe `POST {token}`. Com token inválido, vencido, cancelado ou de pet excluído, responde 404 com a mesma mensagem, para não revelar se o token existe.
 - Lê com a chave de serviço (`SUPABASE_SERVICE_ROLE_KEY`, que o Supabase já dá à função): pet, vacinas (agrupadas por nome, com status pelos mesmos 30 dias do app e comprovantes), cuidados, remédios em uso (sem fim ou com fim a partir de hoje, no fuso de São Paulo), o tutor principal e os outros tutores que já aceitaram o convite (até 10, em `other_tutors`): nome e celular do `user_metadata` de cada conta, ou o email quando não há celular. Na ficha `vet`, também o diário (até 200 registros, com contato, fotos e PDFs).
+- Para cães, `pet.size` traz o porte já escrito ("Médio"): o escolhido à mão (`pets.size`) ou o do peso, pela mesma regra do app (`dogSize`); nada para filhotes de menos de 1 ano e para gatos. A página mostra "Porte médio" depois do peso.
 - Fotos e PDFs vão como links assinados do Storage, de 1 hora.
 - Grava `last_viewed_at`. O log tem só o id do link e o tipo de ficha.
 - Responde com `Cache-Control: no-store` e CORS aberto (a página está em outro domínio).

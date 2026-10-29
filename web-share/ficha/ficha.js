@@ -121,6 +121,7 @@
       pet.breed,
       age(pet.birth_date, data.today, pet.birth_date_estimated),
       pet.weight_kg ? String(pet.weight_kg).replace('.', ',') + ' kg' : null,
+      pet.size ? 'Porte ' + pet.size.toLowerCase() : null,
     ].filter(Boolean).join(' · ');
 
     const parts = [];

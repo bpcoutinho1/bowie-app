@@ -16,7 +16,7 @@ Hotéis, creches e veterinários pedem as mesmas informações toda vez: vacinas
 
 | | Hotel ou creche | Veterinário |
 | --- | --- | --- |
-| Dados do pet (foto, espécie, sexo, raça, idade, peso) | Sim | Sim |
+| Dados do pet (foto, espécie, sexo, raça, idade, peso e, para cães, o porte) | Sim | Sim |
 | Importante: cuidados especiais, alergias, alimentação | Sim | Sim |
 | Contato do tutor principal (nome e celular, com ligar e WhatsApp) | Sim | Sim |
 | Contato dos outros tutores, para quando o principal não atende (decisão de 21 de outubro de 2026) | Sim | Sim |
