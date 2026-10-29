@@ -56,6 +56,35 @@ function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
 }
 
+const SIZE_LABELS: Record<string, string> = {
+  mini: "Mini",
+  small: "Pequeno",
+  medium: "Médio",
+  large: "Grande",
+  giant: "Gigante",
+};
+
+/** "Médio": the size a tutor chose, or the one the weight says. Dogs under
+ * 1 year and cats have none. The same rule as the app
+ * (lib/features/pets/domain/dog_size.dart). */
+function dogSize(
+  pet: { species: string | null; size: string | null; weight_kg: number | string | null; birth_date: string | null },
+  on: string,
+): string | null {
+  if (pet.species !== "dog") return null;
+  if (pet.size && SIZE_LABELS[pet.size]) return SIZE_LABELS[pet.size];
+  if (pet.birth_date) {
+    const [y, m, d] = pet.birth_date.split("-").map(Number);
+    const [ty, tm, td] = on.split("-").map(Number);
+    const years = ty - y - (tm < m || (tm === m && td < d) ? 1 : 0);
+    if (years < 1) return null;
+  }
+  const kg = pet.weight_kg === null ? NaN : Number(pet.weight_kg);
+  if (!Number.isFinite(kg)) return null;
+  const code = kg <= 5 ? "mini" : kg <= 10 ? "small" : kg <= 25 ? "medium" : kg <= 45 ? "large" : "giant";
+  return SIZE_LABELS[code];
+}
+
 function fold(text: string): string {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 }
@@ -156,7 +185,7 @@ Deno.serve(async (req) => {
 
   const { data: pet } = await admin
     .from("pets")
-    .select("name, species, sex, breed, birth_date, birth_date_estimated, weight_kg, photo_path, deleted_at")
+    .select("name, species, sex, breed, birth_date, birth_date_estimated, weight_kg, size, photo_path, deleted_at")
     .eq("id", petId)
     .maybeSingle();
   if (!pet || pet.deleted_at) return json(404, GONE);
@@ -327,6 +356,7 @@ Deno.serve(async (req) => {
       birth_date: pet.birth_date,
       birth_date_estimated: pet.birth_date_estimated,
       weight_kg: pet.weight_kg,
+      size: dogSize(pet, day),
       photo_url: pet.photo_path ? url(pet.photo_path) : null,
     },
     notes: noteList,

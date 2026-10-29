@@ -16,6 +16,7 @@ Dois tipos de registro, nos mesmos formatos no SQLite e no Postgres:
 | `birth_date` | Dia do nascimento. Obrigatório em pets novos. |
 | `birth_date_estimated` | `true` quando a data foi calculada a partir de uma idade aproximada. |
 | `weight_kg` | Peso atual, de 0,1 a 150 kg, com uma casa decimal. Opcional. |
+| `size` | Porte escolhido à mão, só para cães (`DogSize`: `mini`, `small`, `medium`, `large`, `giant`). Vazio segue o peso. Um pet que vira gato perde o porte. Local: versão 14 do banco do celular. Servidor: migração `20261029120000_dog_size.sql`. |
 | `photo_path` | Caminho da foto de perfil no bucket privado `pet-photos`: `<id do pet>/<id da foto>.jpg` (ou `.png`, `.webp`). Opcional. |
 | `updated_at` | Momento da última alteração, em UTC. |
 | `deleted_at` | Marcação de exclusão lógica, usada ao excluir o pet. |
@@ -46,6 +47,7 @@ Tela: botão "Adicionar pet" em `/pets`, o card "Adicionar novo pet" no fim da a
 - Raça: sugestões de `lib/features/pets/domain/breeds.dart` conforme o tipo, com "Sem raça definida (SRD)" primeiro; a busca ignora maiúsculas e acentos, e dá para digitar uma raça fora da lista.
 - Nascimento: escolhida no calendário ou, com "Não sei a data exata", pela idade aproximada em anos. Nesse caso a data é o dia de hoje naquele ano, marcada como aproximada, e a idade aparece como "Cerca de 3 anos".
 - Peso: aceita vírgula ou ponto ("23,5") e é arredondado para uma casa decimal.
+- Porte (só cães): um campo "Porte" abaixo do peso (`ChoiceField`). A primeira opção segue o peso e mostra o resultado enquanto se digita ("Médio, pelo peso"; "Definido quando adulto" antes de 1 ano; "Pelo peso (informe o peso)" sem peso); as outras são os cinco portes, com a faixa de peso. A regra fica em `lib/features/pets/domain/dog_size.dart` (`dogSizeForWeight`, `petSize`): até 5 kg Mini, até 10 Pequeno, até 25 Médio, até 45 Grande, acima Gigante.
 - Gera o `Pet` e um `PetTutor` com `role = owner`, `status = accepted` e o `user_id` do usuário atual.
 - Grava os dois na mesma transação e enfileira os dois.
 - Navega para `/pets/<id>`.

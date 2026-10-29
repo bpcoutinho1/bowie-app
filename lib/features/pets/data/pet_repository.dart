@@ -7,6 +7,7 @@ import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_photo_store.dart';
+import 'package:bowie/features/pets/domain/dog_size.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
 
@@ -20,6 +21,7 @@ class PetProfile {
     this.breed,
     this.birthDateEstimated = false,
     this.weightKg,
+    this.size,
   });
 
   final String name;
@@ -29,6 +31,9 @@ class PetProfile {
   final DateTime? birthDate;
   final bool birthDateEstimated;
   final double? weightKg;
+
+  /// The size chosen by hand, for dogs. Null follows the weight.
+  final DogSize? size;
 }
 
 class PetDetails {
@@ -250,6 +255,9 @@ class PetRepository {
       birthDateEstimated: profile.birthDateEstimated,
       weightKg: weight == null ? null : (weight * 10).round() / 10,
       clearWeight: weight == null,
+      // Only dogs have a size.
+      size: species == PetSpecies.dog ? profile.size : null,
+      clearSize: species != PetSpecies.dog || profile.size == null,
       updatedAt: timestamp,
     );
   }

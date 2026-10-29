@@ -1,4 +1,5 @@
 import 'package:bowie/core/dates.dart';
+import 'package:bowie/features/pets/domain/dog_size.dart';
 
 enum PetSpecies {
   dog('Cão'),
@@ -36,6 +37,7 @@ class Pet {
     this.birthDate,
     this.birthDateEstimated = false,
     this.weightKg,
+    this.size,
     this.photoPath,
     this.createdAt,
     this.deletedAt,
@@ -55,6 +57,10 @@ class Pet {
   final bool birthDateEstimated;
   final double? weightKg;
 
+  /// The size a tutor chose for a dog. Null means it follows the weight
+  /// (see [petSize]).
+  final DogSize? size;
+
   /// Where the profile photo is in the private bucket `pet-photos`:
   /// `<pet id>/<photo id>.jpg`. The phone keeps a copy (see PetPhotoStore).
   final String? photoPath;
@@ -73,11 +79,13 @@ class Pet {
     DateTime? birthDate,
     bool? birthDateEstimated,
     double? weightKg,
+    DogSize? size,
     String? photoPath,
     DateTime? updatedAt,
     DateTime? deletedAt,
     bool clearBreed = false,
     bool clearWeight = false,
+    bool clearSize = false,
     bool clearPhoto = false,
   }) {
     return Pet(
@@ -89,6 +97,7 @@ class Pet {
       birthDate: birthDate ?? this.birthDate,
       birthDateEstimated: birthDateEstimated ?? this.birthDateEstimated,
       weightKg: clearWeight ? null : weightKg ?? this.weightKg,
+      size: clearSize ? null : size ?? this.size,
       photoPath: clearPhoto ? null : photoPath ?? this.photoPath,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -106,6 +115,7 @@ class Pet {
       'birth_date': birthDate == null ? null : formatDay(birthDate!),
       'birth_date_estimated': birthDateEstimated,
       'weight_kg': weightKg,
+      'size': size?.code,
       'photo_path': photoPath,
       // The server sets it on insert; sending none keeps what it has.
       if (createdAt != null) 'created_at': createdAt!.toUtc().toIso8601String(),
@@ -128,6 +138,7 @@ class Pet {
       birthDate: birth == null ? null : parseDay(birth),
       birthDateEstimated: _bool(row['birth_date_estimated']),
       weightKg: weight == null ? null : (weight as num).toDouble(),
+      size: DogSize.fromCode(row['size'] as String?),
       photoPath: row['photo_path'] as String?,
       createdAt: _optionalDate(row['created_at']),
       updatedAt: DateTime.parse(row['updated_at']! as String).toUtc(),

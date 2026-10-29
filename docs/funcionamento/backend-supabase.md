@@ -18,6 +18,7 @@ O backend é só o Supabase: autenticação por email, tabelas no Postgres prote
 14. `20261023120000_tutor_invites.sql`: coluna `invited_at` em `pet_tutors`, gravada pela função `send-invite` a cada envio. Pode rodar mais de uma vez.
 15. `20261024120000_no_trial.sql`: contas novas começam no plano grátis, sem teste do Premium (`trial_ends_at` passa a ter padrão `now()`). Pode rodar mais de uma vez.
 16. `20261026120000_weight_and_pet_dates.sql`: pesagens no diário (`pet_events.kind` aceita `weight` e ganha `weight_kg`, obrigatório nas pesagens, de 0,1 a 150) e a data de cadastro de cada pet (`pets.created_at`: os pets que já existiam ganham a data mais antiga que o servidor tem deles; o gatilho `pets_keep_created_at` marca a data na criação e não deixa mudar). Pode rodar mais de uma vez. Veja [diário](diario.md#peso) e [primeiro uso e lembretes](primeiro-uso-e-lembretes.md#vacinas-que-faltam-no-sino).
+17. `20261029120000_dog_size.sql`: coluna `size` em `pets`, o porte escolhido à mão para cães (`mini`, `small`, `medium`, `large` ou `giant`; vazio segue o peso). Pode rodar mais de uma vez. Precisa rodar antes de atualizar a função `pet-share`, que lê a coluna. Veja [pets](../produto/pets.md#porte).
 
 ## Configuração do app
 

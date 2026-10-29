@@ -14,6 +14,8 @@ import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/onboarding/presentation/onboarding_pages.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/breeds.dart';
+import 'package:bowie/core/ui/choice_field.dart';
+import 'package:bowie/features/pets/domain/dog_size.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/weight.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
@@ -55,6 +57,9 @@ class _PetPageState extends ConsumerState<PetPage> {
   final _email = TextEditingController();
   PetSpecies? _species;
   PetSex? _sex;
+
+  /// The size chosen by hand; null follows the weight.
+  DogSize? _size;
   DateTime? _birthDate;
 
   /// A photo chosen but not saved yet. [_removePhoto] marks the saved photo
@@ -89,6 +94,7 @@ class _PetPageState extends ConsumerState<PetPage> {
     _name.text = pet.name;
     _species = pet.species;
     _sex = pet.sex;
+    _size = pet.size;
     _breed.text = pet.breed ?? '';
     _unknownBirthDate = pet.birthDateEstimated;
     final birth = pet.birthDate;
@@ -271,7 +277,10 @@ class _PetPageState extends ConsumerState<PetPage> {
             labelText: 'Peso atual (kg)',
             hintText: 'Ex.: 23,5',
           ),
+          // The size follows the weight as it is typed.
+          onChanged: (_) => setState(() {}),
         ),
+        if (_species == PetSpecies.dog) ...[gap, _sizeField()],
         if (details != null) _WeightHistory(pet: details.pet),
         if (_error != null) ...[
           const SizedBox(height: BowieSpacing.s3),
@@ -422,6 +431,58 @@ class _PetPageState extends ConsumerState<PetPage> {
       birthDate: birthDate,
       birthDateEstimated: _unknownBirthDate,
       weightKg: parseWeight(_weight.text),
+      size: _size,
+    );
+  }
+
+  /// The birth day as typed, for the size: a puppy has none yet.
+  DateTime? _typedBirthDate() {
+    if (!_unknownBirthDate) return _birthDate;
+    final years = int.tryParse(_ageYears.text.trim());
+    return years == null ? null : estimatedBirthDate(years, DateTime.now());
+  }
+
+  /// "Porte": by the weight (the default) or chosen by hand.
+  Widget _sizeField() {
+    double? weight;
+    try {
+      weight = parseWeight(_weight.text);
+    } on AppFailure {
+      weight = null;
+    }
+    final byWeight = petSize(
+      species: PetSpecies.dog,
+      chosen: null,
+      weightKg: weight,
+      birthDate: _typedBirthDate(),
+      today: DateTime.now(),
+    )!;
+    final automatic = switch (byWeight.source) {
+      SizeSource.puppy => 'Definido quando adulto',
+      SizeSource.unknown => 'Pelo peso (informe o peso)',
+      _ => '${byWeight.size!.label}, pelo peso',
+    };
+    return ChoiceField<String>(
+      label: 'Porte',
+      value: _size?.code ?? _bySizeWeight,
+      options: [
+        ChoiceOption(
+          value: _bySizeWeight,
+          label: automatic,
+          icon: LucideIcons.scale,
+          description: byWeight.source == SizeSource.puppy
+              ? 'Antes de 1 ano, o peso ainda não diz o porte adulto.'
+              : 'Muda sozinho quando o peso muda.',
+        ),
+        for (final size in DogSize.values)
+          ChoiceOption(
+            value: size.code,
+            label: size.label,
+            icon: LucideIcons.dog,
+            description: size.range,
+          ),
+      ],
+      onChanged: (code) => setState(() => _size = DogSize.fromCode(code)),
     );
   }
 
@@ -916,6 +977,9 @@ class _BreedField extends StatelessWidget {
 }
 
 enum _TutorAction { resend, remove }
+
+/// The "Porte" option that follows the weight.
+const _bySizeWeight = 'weight';
 
 /// Under "Peso atual": the chart of the weighings in the diary, and the way to
 /// add one.
