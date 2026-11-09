@@ -106,3 +106,4 @@ As assinaturas do Premium pela Google Play ainda não estão ligadas. Sem a chav
 | "Keystore was tampered with, or password was incorrect" | A senha no `key.properties` está errada. Confira as duas linhas de senha. |
 | A Play diz que o pacote foi assinado com a chave errada | O `.aab` foi gerado sem o `key.properties` ou com outra chave. Gere de novo pelo script. |
 | "Version code já usado" | Gere o pacote de novo: o script usa um número novo a cada minuto. |
+| A Play pede para justificar "Read media images" e "Read media video" | O app não usa essas permissões: um pacote (`open_filex`) as declarava, e o `AndroidManifest.xml` do app as remove. Gere um pacote novo pelo script e envie: o formulário some. Não escreva justificativa, porque a Play recusa acesso amplo a fotos para quem só escolhe uma foto de vez em quando. |
