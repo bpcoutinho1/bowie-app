@@ -5,7 +5,7 @@ O que precisa existir para os primeiros testes com outras pessoas e, depois, par
 | Item | Situação | Observação |
 | --- | --- | --- |
 | Conta Apple Developer | Ativa (Individual), em conversão | US$ 99 por ano. Hoje a loja mostra o nome do Bruno como desenvolvedor. A conversão para Organização, em nome da Arca Lab (CNPJ e D-U-N-S), foi pedida à Apple em 22 de outubro de 2026. **O app só é publicado na App Store depois da conversão**; até lá, só TestFlight. Depois dela: aceitar de novo o Paid Apps Agreement, cadastrar banco e dados fiscais da empresa, fazer o cadastro de pessoa jurídica na StoneX, conferir o Small Business Program e trocar o controlador dos dados na política de privacidade e nos termos. |
-| Conta Google Play Console | Pendente | US$ 25, pagamento único. Necessária para o teste interno e para o Google Play. |
+| Conta Google Play Console | Pendente | US$ 25, pagamento único, como Organização (Arca Lab). Necessária para o teste interno e para o Google Play. Passo a passo em [publicar na Google Play](../guias/play-store.md). |
 | Projeto no Supabase | Criado | Conferir a **região do servidor** (veja abaixo). |
 | Domínio | Comprado | `bowieapp.pet`, no Hostinger: landing page no domínio principal e a ficha compartilhada em `ficha.bowieapp.pet`. Passo a passo em [domínio](../guias/dominio.md). |
 | Página web | Parcial | Política de privacidade em https://bowieapp.pet/privacidade/ e termos de uso em https://bowieapp.pet/termos/ (o app abre os dois na tela do Premium). Falta a página do link de convite, com os botões das lojas. |
