@@ -6,6 +6,7 @@ import 'package:bowie/core/documents.dart';
 import 'package:bowie/core/flags.dart';
 import 'package:bowie/core/photo_picker.dart';
 import 'package:bowie/core/sync/network_status.dart';
+import 'package:bowie/core/text_sharer.dart';
 import 'package:bowie/features/auth/data/auth_repository.dart';
 import 'package:bowie/features/auth/data/device_lock.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
@@ -40,6 +41,10 @@ final documentPickerProvider = Provider<DocumentPicker>(
 
 final documentOpenerProvider = Provider<DocumentOpener>(
   (ref) => const OpenFilexOpener(),
+);
+
+final textSharerProvider = Provider<TextSharer>(
+  (ref) => const SharePlusSharer(),
 );
 
 final networkStatusProvider = Provider<NetworkStatus>(

@@ -155,6 +155,7 @@ As regras no aparelho dão retorno imediato. As regras do servidor (veja [Backen
 ## Convite por email
 
 - `PetRepository.inviteTutor` cria o vínculo pendente no celular e devolve a linha. Em seguida, `PetSyncService.sendInvite` sincroniza (para a linha chegar ao servidor) e chama a Edge Function `send-invite` ([backend](backend-supabase.md#edge-function-send-invite)). Sem internet, o convite fica registrado e o app avisa que o email não foi enviado.
-- Na tela do pet, o tutor principal vê um ⋮ ao lado de cada tutor: "Reenviar convite" e "Cancelar convite" nos pendentes; "Remover tutor" nos que aceitaram. Cancelar e remover pedem confirmação.
+- Depois de convidar, um diálogo diz se o email foi ("Convite enviado") ou não ("Convite registrado", com o motivo) e oferece "Enviar pelo WhatsApp". `inviteMessage` (`lib/features/pets/domain/invite_message.dart`) monta a mensagem com o nome de quem convidou (`AppUser.name`), o pet, `appSiteUrl` (https://bowieapp.pet) e o email convidado; `TextSharer` (`lib/core/text_sharer.dart`, com `share_plus`) abre o compartilhar do celular, onde a pessoa escolhe o WhatsApp ou outro app.
+- Na tela do pet, o tutor principal vê um ⋮ ao lado de cada tutor: "Reenviar convite", "Enviar pelo WhatsApp" e "Cancelar convite" nos pendentes; "Remover tutor" nos que aceitaram. Cancelar e remover pedem confirmação.
 - `PetRepository.removeTutor` (só o tutor principal, nunca o próprio tutor principal) marca `deleted_at` no vínculo. A mudança sincroniza: a pessoa removida deixa de ver o pet nos celulares dela, e o que ela registrou continua no histórico. O mesmo email pode ser convidado de novo.
 

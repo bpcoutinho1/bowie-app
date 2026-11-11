@@ -1,15 +1,29 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'package:bowie/app/providers.dart';
+import 'package:bowie/app/theme.dart';
 import 'package:bowie/core/error/app_failure.dart';
+import 'package:bowie/core/text_sharer.dart';
 import 'package:bowie/features/auth/domain/app_user.dart';
 import 'package:bowie/features/pets/data/pet_local_store.dart';
 import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/data/pet_sync_service.dart';
+import 'package:bowie/features/pets/domain/invite_message.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/pet_tutor.dart';
+import 'package:bowie/features/pets/presentation/pet_page.dart';
 
 import 'support/fakes.dart';
+
+class FakeSharer implements TextSharer {
+  final shared = <String>[];
+
+  @override
+  Future<void> share(String text, {Rect? origin}) async => shared.add(text);
+}
 
 void main() {
   const bruno = AppUser(id: 'bruno-1', email: 'bruno@example.com');
@@ -152,5 +166,93 @@ void main() {
       () => pets.removeTutor(petId: bowie.id, tutorId: owner.id, byUser: bruno),
       throwsA(isA<AppFailure>()),
     );
+  });
+
+  test('the WhatsApp message says who, which pet, and which email', () {
+    final text = inviteMessage(
+      pet: bowie,
+      email: 'ana@example.com',
+      inviterName: 'Bruno',
+    );
+    expect(
+      text,
+      startsWith('Bruno convidou você para cuidar do Bowie no app Bowie 🐾'),
+    );
+    expect(text, contains('1. Baixe o app: https://bowieapp.pet'));
+    expect(text, contains('com o email ana@example.com'));
+    expect(text, contains('toque em "Aceitar" no convite do Bowie'));
+    expect(
+      inviteMessage(pet: bowie, email: 'ana@example.com'),
+      startsWith('Você recebeu um convite para cuidar do Bowie'),
+      reason: 'without a name, no gender for who reads it',
+    );
+  });
+
+  testWidgets('after inviting, the invitation can go by WhatsApp', (
+    tester,
+  ) async {
+    const brunoNamed = AppUser(
+      id: 'bruno-1',
+      email: 'bruno@example.com',
+      name: 'Bruno',
+    );
+    final remote = FakeRemote();
+    final sharer = FakeSharer();
+    tester.view.physicalSize = const Size(1170, 4200);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          petLocalStoreProvider.overrideWithValue(store),
+          petRepositoryProvider.overrideWithValue(pets),
+          currentUserProvider.overrideWithValue(brunoNamed),
+          textSharerProvider.overrideWithValue(sharer),
+          syncServiceProvider.overrideWithValue(
+            PetSyncService(
+              store: store,
+              remote: remote,
+              isSignedIn: () => true,
+              network: FakeNetwork(),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: buildTheme(Brightness.light),
+          home: PetPage(petId: bowie.id),
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      for (var i = 0; i < 8; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    await settle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Convidar por email'),
+      'ana@example.com',
+    );
+    await tester.tap(find.text('Convidar'));
+    await settle();
+    expect(find.text('Convite enviado'), findsOneWidget);
+    expect(remote.invitesSent, hasLength(1));
+
+    await tester.tap(find.text('Enviar pelo WhatsApp'));
+    await settle();
+    expect(sharer.shared, hasLength(1));
+    expect(sharer.shared.single, contains('Bruno convidou você'));
+    expect(sharer.shared.single, contains('ana@example.com'));
+
+    // Later, from the pending invitation's menu.
+    await tester.tap(find.byTooltip('Opções para ana@example.com'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Enviar pelo WhatsApp'));
+    await settle();
+    expect(sharer.shared, hasLength(2));
   });
 }

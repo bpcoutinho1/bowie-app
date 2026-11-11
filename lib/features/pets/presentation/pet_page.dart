@@ -16,6 +16,7 @@ import 'package:bowie/features/pets/data/pet_repository.dart';
 import 'package:bowie/features/pets/domain/breeds.dart';
 import 'package:bowie/core/ui/choice_field.dart';
 import 'package:bowie/features/pets/domain/dog_size.dart';
+import 'package:bowie/features/pets/domain/invite_message.dart';
 import 'package:bowie/features/pets/domain/pet.dart';
 import 'package:bowie/features/pets/domain/weight.dart';
 import 'package:bowie/core/ui/bowie_card.dart';
@@ -315,14 +316,23 @@ class _PetPageState extends ConsumerState<PetPage> {
                       icon: const Icon(LucideIcons.ellipsisVertical),
                       onSelected: (action) => switch (action) {
                         _TutorAction.resend => _resend(tutor),
+                        _TutorAction.message => _shareInvite(
+                          details.pet,
+                          tutor.email,
+                        ),
                         _TutorAction.remove => _remove(details, tutor),
                       },
                       itemBuilder: (context) => [
-                        if (tutor.status == TutorStatus.pending)
+                        if (tutor.status == TutorStatus.pending) ...[
                           const PopupMenuItem(
                             value: _TutorAction.resend,
                             child: Text('Reenviar convite'),
                           ),
+                          const PopupMenuItem(
+                            value: _TutorAction.message,
+                            child: Text('Enviar pelo WhatsApp'),
+                          ),
+                        ],
                         PopupMenuItem(
                           value: _TutorAction.remove,
                           child: Text(
@@ -677,20 +687,18 @@ class _PetPageState extends ConsumerState<PetPage> {
           .read(petRepositoryProvider)
           .inviteTutor(petId: details.pet.id, email: _email.text, byUser: user);
       _email.clear();
+      String? emailProblem;
       try {
         await ref.read(syncServiceProvider).sendInvite(tutor.id);
-        messenger.showSnackBar(
-          SnackBar(content: Text('Convite enviado para ${tutor.email}')),
-        );
       } on AppFailure catch (error) {
         // The invitation is kept; the email can go later.
+        emailProblem = error.message;
+      }
+      if (mounted) {
+        await _offerMessage(details.pet, tutor.email, emailProblem);
+      } else {
         messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              'Convite registrado, mas o email não foi enviado. '
-              '${error.message} Depois, toque em ⋮ e "Reenviar convite".',
-            ),
-          ),
+          SnackBar(content: Text('Convite registrado para ${tutor.email}')),
         );
       }
     } on AppFailure catch (error) {
@@ -698,6 +706,61 @@ class _PetPageState extends ConsumerState<PetPage> {
     } finally {
       if (mounted) setState(() => _inviting = false);
     }
+  }
+
+  /// After inviting: the email went (or not), and the same invitation can go
+  /// by WhatsApp too, as a ready message.
+  Future<void> _offerMessage(
+    Pet pet,
+    String email,
+    String? emailProblem,
+  ) async {
+    final send = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(
+          emailProblem == null ? 'Convite enviado' : 'Convite registrado',
+        ),
+        content: Text(
+          emailProblem == null
+              ? 'Enviamos um email para $email. Quer avisar pelo WhatsApp '
+                    'também? A mensagem vai pronta, com o passo a passo.'
+              : 'O email para $email não foi enviado agora. $emailProblem '
+                    'Você pode mandar o convite pelo WhatsApp, com a '
+                    'mensagem pronta, ou depois tocar em ⋮ e "Reenviar '
+                    'convite".',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialog).pop(false),
+            child: const Text('Agora não'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(dialog).pop(true),
+            icon: const Icon(LucideIcons.messageCircle),
+            label: const Text('Enviar pelo WhatsApp'),
+          ),
+        ],
+      ),
+    );
+    if (send == true && mounted) await _shareInvite(pet, email);
+  }
+
+  /// Opens the share sheet (WhatsApp, Mensagens...) with the invitation.
+  Future<void> _shareInvite(Pet pet, String email) async {
+    final user = ref.read(currentUserProvider);
+    final size = MediaQuery.sizeOf(context);
+    await ref
+        .read(textSharerProvider)
+        .share(
+          inviteMessage(pet: pet, email: email, inviterName: user?.name),
+          // iPad points the sheet at a spot on the screen.
+          origin: Rect.fromCenter(
+            center: size.center(Offset.zero),
+            width: 1,
+            height: 1,
+          ),
+        );
   }
 
   Future<void> _resend(PetTutor tutor) async {
@@ -976,7 +1039,7 @@ class _BreedField extends StatelessWidget {
   }
 }
 
-enum _TutorAction { resend, remove }
+enum _TutorAction { resend, message, remove }
 
 /// The "Porte" option that follows the weight.
 const _bySizeWeight = 'weight';
