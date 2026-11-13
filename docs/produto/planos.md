@@ -35,4 +35,4 @@ O comprovante de vacina fica no plano grátis de propósito: é o que hotéis e 
 Já existe: o plano de cada conta no banco (`account_plans`), os contadores e os limites no app, com a tela "Bowie Premium". O plano é mudado à mão no Supabase para testes ([guia](../guias/planos.md)). Falta:
 
 - Conferir o limite de arquivos também no servidor, no envio, e não só no app. A leitura por IA já é conferida no servidor.
-- Ligar a assinatura pela App Store: o código está pronto e falta a configuração ([guia](../guias/assinaturas.md)). O Google Play vem com o app de Android.
+- Ligar a assinatura pelo Google Play: o código está pronto e falta a configuração ([guia](../guias/assinaturas-android.md)). A App Store já está ligada ([guia](../guias/assinaturas.md)).

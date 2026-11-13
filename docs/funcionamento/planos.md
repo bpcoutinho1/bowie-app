@@ -34,7 +34,7 @@ A leitura por IA é conferida também no servidor: a função `read-vaccine-card
 
 ## Assinatura pelas lojas
 
-A cobrança passa pela App Store (e, no futuro, pelo Google Play), por meio do RevenueCat. Configuração: [guia](../guias/assinaturas.md).
+A cobrança passa pela App Store e pelo Google Play, por meio do RevenueCat. Configuração: [App Store](../guias/assinaturas.md) e [Google Play](../guias/assinaturas-android.md). No Google Play, os produtos têm os mesmos nomes da App Store, com os planos básicos `monthly` e `yearly` (no RevenueCat: `bowie.premium.monthly:monthly` e `bowie.premium.yearly:yearly`), no mesmo entitlement `premium` e na mesma offering.
 
 - **Produtos:** `bowie.premium.monthly` e `bowie.premium.yearly`, no entitlement `premium` do RevenueCat, na offering marcada como Current (pacotes Monthly e Annual).
 - **App** (`lib/features/plans/data/store_billing.dart`): `RevenueCatBilling` usa a chave pública de `REVENUECAT_IOS_KEY` ou `REVENUECAT_ANDROID_KEY` (`dart_defines.json`). Sem a chave, `NoStoreBilling` e nada para vender. Toda chamada passa o id da conta do Supabase, que vira o id do cliente no RevenueCat: é ele que liga a compra à conta. Uma compra cancelada na tela da loja não muda nada.
