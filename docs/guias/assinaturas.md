@@ -1,6 +1,6 @@
 # Ligar as assinaturas (App Store e RevenueCat)
 
-Passo a passo para o botão "Assinar" do Bowie Premium cobrar pela App Store. Faça uma vez. Como funciona: [planos](../funcionamento/planos.md#assinatura-pelas-lojas). O Google Play fica para quando o app for para o Android.
+Passo a passo para o botão "Assinar" do Bowie Premium cobrar pela App Store. Faça uma vez. Como funciona: [planos](../funcionamento/planos.md#assinatura-pelas-lojas). Para o Android, veja [assinaturas no Android](assinaturas-android.md).
 
 Os nomes que o código espera, escritos exatamente assim:
 

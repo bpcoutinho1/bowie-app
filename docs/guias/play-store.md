@@ -95,7 +95,7 @@ Depois de testar num Android de verdade, promova a versão do teste interno para
 
 ## Assinaturas no Android
 
-As assinaturas do Premium pela Google Play ainda não estão ligadas. Sem a chave `REVENUECAT_ANDROID_KEY` no `dart_defines.json`, o app mostra "Assinatura em breve" na tela do Premium, e o resto funciona normalmente. Para ligar, é preciso criar os produtos no Google Play, ligar o app Android no RevenueCat e pôr a chave pública `goog_…` no `dart_defines.json` (o mesmo caminho do [guia de assinaturas](assinaturas.md), com o Google Play no lugar da App Store).
+Passo a passo completo em [assinaturas no Android](assinaturas-android.md): perfil de pagamentos, assinaturas no Google Play, acesso do RevenueCat, chave `goog_…` no `dart_defines.json`, teste sem pagar e produção. Sem a chave, o app mostra "Assinatura em breve" na tela do Premium, e o resto funciona normalmente.
 
 ## Problemas comuns
 
