@@ -34,8 +34,9 @@ A senha fica só nos segredos do Supabase: não coloque no app, no repositório 
 ## 5. Testar
 
 1. No app, abra um pet, digite um email seu (diferente do da conta) em "Convidar por email" e toque em **Convidar**.
-2. Deve aparecer "Convite enviado para …", e o email chega em até alguns minutos. Confira também o spam.
-3. No ⋮ ao lado do convite, teste **Reenviar convite** (depois de 2 minutos) e **Cancelar convite**.
+2. Deve aparecer "Convite enviado", e o email chega em até alguns minutos. Confira também o spam.
+3. Depois de convidar, toque em **Enviar pelo WhatsApp** e confira a mensagem pronta (com o link do site e o email convidado).
+4. No ⋮ ao lado do convite, teste **Reenviar convite** (depois de 2 minutos), **Enviar pelo WhatsApp** e **Cancelar convite**.
 
 | Mensagem no app | O que fazer |
 | --- | --- |

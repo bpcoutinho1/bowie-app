@@ -47,6 +47,18 @@ O convite pendente expira em **30 dias**. Depois disso, o tutor principal pode r
 
 O email é o que liga o convite à pessoa: o cadastro precisa usar o mesmo email que recebeu o convite.
 
+**Convite pelo WhatsApp** (decisão de 11 de novembro de 2026): além do email, o tutor principal pode mandar o convite por WhatsApp ou outro app de mensagem. Depois de tocar em "Convidar", o app pergunta se ele quer avisar pelo WhatsApp também; o mesmo item fica no ⋮ de cada convite pendente ("Enviar pelo WhatsApp"). A mensagem vai pronta, com emoji, quem convidou, o pet, o link do site (bowieapp.pet, onde a pessoa escolhe App Store ou Google Play) e os passos, incluindo o email com que a pessoa precisa entrar:
+
+> Bruno convidou você para cuidar do Bowie no app Bowie 🐾
+>
+> 1. Baixe o app: https://bowieapp.pet
+> 2. Entre ou crie sua conta com o email ana@email.com
+> 3. Na aba Pets, toque em "Aceitar" no convite do Bowie
+>
+> Assim a gente acompanha junto as vacinas, os remédios e o dia a dia do Bowie 💙
+
+A mensagem não dá acesso por si só: aceitar continua exigindo a conta com o email convidado. Sem o nome de quem convidou, ela começa com "Você recebeu um convite para cuidar do Bowie".
+
 O que isso exige do sistema:
 
 - Envio de email transacional pelo servidor (por exemplo, uma função do Supabase com um provedor de email). Hoje o app não envia email nenhum.
