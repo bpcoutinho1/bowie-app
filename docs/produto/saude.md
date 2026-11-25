@@ -60,6 +60,26 @@ Duas formas de registrar:
 
 O status é **por vacina**, e vale a dose mais recente. Doses anteriores da mesma vacina ficam no histórico como "substituídas" e não geram lembrete.
 
+#### Mesma vacina com outro nome
+
+Uma vacina muda de nome na carteirinha de um ano para outro: a V10 de um ano vira "DHPPi+L" ou "Nobivac DHPPi" no seguinte, conforme o fabricante. Para o status, contam como a mesma vacina:
+
+- **Sozinho, pelos nomes conhecidos:**
+
+| Vacina | Nomes que contam (sem maiúsculas e acentos, em qualquer parte do nome) |
+| --- | --- |
+| Polivalente | V3, V4, V5, V8, V10, V11, V12, polivalente, múltipla, tríplice, quádrupla, quíntupla, óctupla, déctupla, DHPP, DAPP, DA2PP |
+| Raiva | raiva, antirrábica, rábica, rabies, Rabisin |
+| Tosse dos canis | tosse, Bordetella, traqueobronquite, KC |
+| Giárdia | giárdia, giardíase |
+| Leishmaniose | leishmaniose, Leish-Tec |
+| FeLV | FeLV, leucemia |
+
+  Um pet é de uma espécie só, então as polivalentes de cão (V8, V10) e de gato (V3, V4, V5) nunca se misturam.
+- **À mão:** um nome ambíguo, como "Nobivac Canine" (Nobivac é uma marca com várias vacinas), fica separado até um tutor juntar. Na página da vacina, "Juntar com outra vacina" mostra as outras do mesmo pet; escolhida uma, as duas viram uma só, e uma dose nova com o mesmo nome entra junto. "Desfazer junção" separa de novo. Vermífugos e antipulgas só se juntam pelo nome igual.
+
+O card mostra o nome da dose mais recente, como está na carteirinha, e "Também registrada como V10" com os outros nomes. Na leitura da carteirinha, a mesma vacina na mesma data aparece uma vez só, mesmo escrita de dois jeitos ("DHPPi+L" e "Polivalente (DHPPi+L)").
+
 O status nunca aparece só pela cor: sempre há texto ("Vence em 12 dias") e ícone. Fale do pet pelo nome: "A vacina V10 do Bowie vence em 12 dias".
 
 ### Lembrete

@@ -42,6 +42,7 @@ Seu código para confirmar a conta no Bowie
 Corpo:
 
 ```html
+<p><img src="https://ficha.bowieapp.pet/email/bowie-symbol.png" width="60" height="64" alt="Bowie"></p>
 <h2>Boas-vindas ao Bowie</h2>
 <p>Use este código no app para confirmar a sua conta:</p>
 <p style="font-size: 32px; font-weight: 800; letter-spacing: 6px;">{{ .Token }}</p>
@@ -60,6 +61,7 @@ Seu código para criar uma senha nova no Bowie
 Corpo:
 
 ```html
+<p><img src="https://ficha.bowieapp.pet/email/bowie-symbol.png" width="60" height="64" alt="Bowie"></p>
 <h2>Crie uma senha nova</h2>
 <p>Use este código no app Bowie:</p>
 <p style="font-size: 32px; font-weight: 800; letter-spacing: 6px;">{{ .Token }}</p>
@@ -67,13 +69,13 @@ Corpo:
 <p>Bowie · Quem ama, lembra.</p>
 ```
 
-O `{{ .Token }}` é trocado pelo código. Não mude esse trecho. Os outros modelos (Magic Link, Change Email Address, Invite User) o app não usa.
+O `{{ .Token }}` é trocado pelo código. Não mude esse trecho. A imagem do topo é o símbolo do Bowie, publicado junto com a ficha compartilhada (`web-share/email/`). O GitHub publica a imagem sozinho quando a mudança entra na `main`. Os outros modelos (Magic Link, Change Email Address, Invite User) o app não usa.
 
 ## 4. Código e endereço do site
 
 1. Em **Authentication → Sign In / Providers → Email**, confira:
    - **Confirm email** ligado (quem cria a conta confirma o email);
-   - **Email OTP Length**: 6;
+   - **Email OTP Length**: 6. O app aceita códigos de 6 a 10 números e não diz quantos são, mas os emails ficam mais fáceis de digitar com 6. Se o código chegar com 8 números, é aqui que se corrige;
    - **Email OTP Expiration**: 3600 segundos (1 hora), como dizem os emails.
 2. Em **Authentication → URL Configuration**, coloque **Site URL** `https://bowieapp.pet`. Ele só aparece em links, que os emails acima não usam, mas evita que algum email antigo aponte para `localhost`.
 

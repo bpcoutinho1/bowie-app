@@ -16,6 +16,7 @@ O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/s
 | `product`, `lot`, `veterinarian`, `notes` | Opcionais: produto e fabricante, lote, veterinário (nome e CRMV), observações. |
 | `remind_days` | 7, 14 ou 30: quantos dias antes do vencimento o celular avisa (`reminderDayOptions`). Linhas antigas, sem o campo, valem 7. Local: versão 12 do banco do celular. Servidor: migração `20261022120000_flea_tick_reminders.sql`. |
 | `proof_paths` | Fotos do comprovante, até 2 (`maxProofPhotos`), em JSON (`["<petId>/<uuid>.jpg"]`). `hasProof` diz se há alguma. |
+| `series` | A vacina a que um tutor juntou a dose (por exemplo, `polivalente`), ou vazio para seguir o nome. Local: versão 15 do banco do celular. Servidor: migração `20261125120000_vaccine_series.sql`. |
 | `updated_by` | Quem salvou a última versão (inclusive a exclusão). |
 | `updated_at`, `deleted_at` | Como nos pets. Excluir marca `deleted_at`. |
 
@@ -23,7 +24,8 @@ O que a aba **Saúde** faz hoje. As regras de produto estão em [`docs/produto/s
 
 `lib/features/health/domain/vaccine_status.dart`:
 
-- As doses são agrupadas por tipo e nome, ignorando maiúsculas e acentos ("raiva" e "Raíva" são a mesma vacina).
+- As doses são agrupadas por `groupKey`: o tipo e, nesta ordem, a vacina a que um tutor juntou a dose (`series`), a família do nome (`vaccineFamilies`, só para vacinas: V10 e DHPPi+L são `polivalente`; regras em [saúde](../produto/saude.md#mesma-vacina-com-outro-nome)) ou o nome, ignorando maiúsculas e acentos ("raiva" e "Raíva" são a mesma vacina). A mesma lógica está na função `pet-share`, para a ficha.
+- `HealthRepository.joinGroups` junta um grupo a outro: grava em `series` de cada dose do primeiro a chave do segundo (`seriesOf`). `separateGroup` limpa `series`. Uma dose nova com um nome já juntado herda a junção (`joinedSeries`), e editar uma dose mantém a que ela tinha. Na página da vacina (`DoseHistoryPage`), "Juntar com outra vacina" abre a lista das outras vacinas do pet, e "Desfazer junção" aparece quando há dose juntada. O card na aba Saúde e a página mostram "Também registrada como …" com os outros nomes (`otherNames`), e cada dose com nome diferente do grupo mostra o próprio nome.
 - Em cada grupo, a dose mais recente define o status:
 
 | Faltam | Status | Texto |
@@ -79,8 +81,8 @@ A regra de produto e o exemplo do Bowie estão em [`docs/produto/carteirinha-de-
 1. **Fotos.** "Tirar foto" (câmera) ou "Da galeria" (várias de uma vez), até 4 fotos por leitura, com miniaturas que dá para remover. As fotos chegam redimensionadas para no máximo 2000 px, em JPEG com qualidade 85 (`ImagePickerPhotos`, `lib/features/health/data/photo_picker.dart`). O formato é conferido pelos primeiros bytes: JPEG, PNG e WebP passam; outros (como HEIC) mostram um aviso.
 2. **Leitura.** Na primeira vez, um diálogo pede consentimento antes de qualquer foto sair do celular ("Enviar as fotos para leitura?"). O aceite fica guardado no aparelho (`PrefsReadingConsent`, chave `card_reading_consent_v1`). `SupabaseCardReader` (`lib/features/health/data/card_reader.dart`) chama a Edge Function `read-vaccine-card` com as fotos em base64 e espera até 160 s. A tela mostra "Lendo a carteirinha de Bowie" e um botão "Cancelar", que descarta a resposta quando ela chegar. Erros voltam como mensagens em português (sem internet, servidor ocupado, foto ilegível).
 3. **Revisão.** `buildReview` (`lib/features/health/domain/card_reading.dart`) monta a lista:
-   - Doses repetidas na leitura (a mesma página em duas fotos) aparecem uma vez.
-   - Doses que o pet já tem (mesmo tipo, nome e data de aplicação) aparecem com "Já registrada" e desmarcadas.
+   - Doses repetidas na leitura (a mesma página em duas fotos, ou a mesma vacina escrita de dois jeitos na mesma data, como "DHPPi+L" e "Polivalente (DHPPi+L)") aparecem uma vez.
+   - Doses que o pet já tem (a mesma vacina, mesmo com outro nome, e a mesma data de aplicação) aparecem com "Já registrada" e desmarcadas.
    - Doses sem nome, sem data, com aplicação no futuro ou com a próxima dose antes da aplicação aparecem desmarcadas, com o problema em vermelho. Marcar uma delas abre a correção.
    - Campos que a leitura marcou como incertos aparecem em "Confira: lote, próxima dose", em amarelo.
    - Tocar num registro abre a correção (bottom sheet). Ao confirmar, as dúvidas somem, porque a pessoa conferiu.

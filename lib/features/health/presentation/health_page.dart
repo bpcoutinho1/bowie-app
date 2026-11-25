@@ -221,6 +221,13 @@ class _GroupCard extends StatelessWidget {
                     '${formatDayBr(latest.appliedOn)}',
                     style: BowieType.caption.copyWith(color: colors.textMuted),
                   ),
+                  if (group.otherNames.isNotEmpty)
+                    Text(
+                      'Também registrada como ${joinNames(group.otherNames)}',
+                      style: BowieType.caption.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
                   const SizedBox(height: BowieSpacing.s2),
                   StatusBadge(
                     status: group.statusOn(today),

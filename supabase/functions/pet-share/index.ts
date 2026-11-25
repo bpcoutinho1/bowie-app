@@ -89,6 +89,38 @@ function fold(text: string): string {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 }
 
+// Vaccines that go by many names on the card, as in the app
+// (lib/features/health/domain/vaccine_status.dart): V10 followed by DHPPi+L
+// is one vaccine.
+const VACCINE_FAMILIES: [string, (string | RegExp)[]][] = [
+  ["raiva", ["raiva", "antirrabica", "anti-rabica", "rabica", "rabies", "rabisin"]],
+  ["polivalente", [
+    /\bv ?(3|4|5|8|10|11|12)\b/,
+    "polivalente", "multipla", "triplice", "quadrupla", "quintupla", "octupla", "decupla", "dectupla",
+    /\bd(h|a2?)pp/,
+  ]],
+  ["tosse dos canis", ["tosse", "bordetel", "traqueobronquite", /\bkc\b/]],
+  ["giardia", ["giard"]],
+  ["leishmaniose", ["leish"]],
+  ["felv", ["felv", "leucemia"]],
+];
+
+function vaccineFamily(name: string): string | null {
+  const folded = fold(name);
+  for (const [key, patterns] of VACCINE_FAMILIES) {
+    if (patterns.some((p) => typeof p === "string" ? folded.includes(p) : p.test(folded))) return key;
+  }
+  return null;
+}
+
+function groupKey(dose: Record<string, unknown>): string {
+  const kind = String(dose.kind);
+  const name = String(dose.name);
+  const series = typeof dose.series === "string" ? dose.series.trim() : "";
+  const key = series || (kind === "vaccine" ? vaccineFamily(name) : null) || fold(name);
+  return `${kind}:${key}`;
+}
+
 function list<T>(raw: unknown): T[] {
   try {
     const value = typeof raw === "string" ? JSON.parse(raw) : raw;
@@ -193,7 +225,7 @@ Deno.serve(async (req) => {
   const [vaccines, notes, meds, owner, others, events] = await Promise.all([
     admin
       .from("pet_vaccines")
-      .select("kind, name, applied_on, next_due_on, product, lot, veterinarian, proof_paths")
+      .select("kind, name, series, applied_on, next_due_on, product, lot, veterinarian, proof_paths")
       .eq("pet_id", petId)
       .is("deleted_at", null),
     admin
@@ -265,7 +297,7 @@ Deno.serve(async (req) => {
   // One group per vaccine, the latest dose deciding the status.
   const groups = new Map<string, Record<string, unknown>[]>();
   for (const dose of vaccines.data ?? []) {
-    const key = `${dose.kind}:${fold(dose.name)}`;
+    const key = groupKey(dose);
     groups.set(key, [...(groups.get(key) ?? []), dose]);
   }
   const vaccineList = [...groups.values()]
@@ -279,6 +311,7 @@ Deno.serve(async (req) => {
         status: days < 0 ? "overdue" : days <= DUE_SOON_DAYS ? "due_soon" : "up_to_date",
         days_left: days,
         doses: doses.map((dose) => ({
+          name: dose.name,
           applied_on: dose.applied_on,
           next_due_on: dose.next_due_on,
           product: dose.product,

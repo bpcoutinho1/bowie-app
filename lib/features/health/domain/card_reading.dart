@@ -156,25 +156,32 @@ class ReviewItem {
 
   ReadDose dose;
 
-  /// The pet already has a dose with this name and application date.
+  /// The pet already has a dose of this vaccine on this application date.
   final bool alreadySaved;
   bool selected;
 }
 
 /// Turns a reading into review items: repeated doses (the same page in two
-/// photos) appear once, doses the pet already has start unselected, and doses
+/// photos, or one vaccine written two ways on the same day) appear once, doses the pet already has start unselected, and doses
 /// with missing data start unselected until someone completes them.
 List<ReviewItem> buildReview(
   CardReading reading,
   Iterable<VaccineDose> existing,
   DateTime today,
 ) {
-  String key(DoseKind kind, String name, DateTime? applied) =>
-      '${groupKey(kind, name)}@${applied == null ? '' : formatDay(applied)}';
+  final joined = joinedSeries(existing);
+  String day(DateTime? applied) => applied == null ? '' : formatDay(applied);
+  String key(DoseKind kind, String name, DateTime? applied) {
+    final series = seriesFor(kind, name, joined);
+    return '${groupKey(kind, name, series: series)}@${day(applied)}';
+  }
 
+  // The same vaccine on the same day is the same dose, whatever the name:
+  // "DHPPi+L" and "Polivalente (DHPPi+L)" read from one card.
   final saved = {
     for (final dose in existing)
-      if (dose.deletedAt == null) key(dose.kind, dose.name, dose.appliedOn),
+      if (dose.deletedAt == null)
+        '${doseGroupKey(dose)}@${day(dose.appliedOn)}',
   };
   final seen = <String>{};
   final items = <ReviewItem>[];
