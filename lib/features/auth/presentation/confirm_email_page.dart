@@ -69,7 +69,7 @@ class _ConfirmEmailPageState extends ConsumerState<ConfirmEmailPage> {
           children: [
             Text(
               widget.justSent
-                  ? 'Enviamos um código de 6 números para ${widget.email}. '
+                  ? 'Enviamos um código para ${widget.email}. '
                         'Digite aqui para confirmar a conta. Confira também a '
                         'caixa de spam.'
                   : 'A conta ${widget.email} ainda não foi confirmada. Digite '

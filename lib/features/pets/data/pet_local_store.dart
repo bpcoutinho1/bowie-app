@@ -61,7 +61,7 @@ class PetLocalStore {
   static Future<PetLocalStore> open({String? databasePath}) async {
     final db = await openDatabase(
       databasePath ?? path.join(await getDatabasesPath(), 'bowie.db'),
-      version: 14,
+      version: 15,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -79,6 +79,7 @@ class PetLocalStore {
         if (from < 12) await _addReminderDays(db);
         if (from < 13) await _addEventWeight(db);
         if (from < 14) await _addDogSize(db);
+        if (from < 15) await _addVaccineSeries(db);
       },
       onCreate: (db, version) async {
         await db.execute('''
@@ -102,6 +103,7 @@ class PetLocalStore {
         await _addReminderDays(db);
         await _addEventWeight(db);
         await _addDogSize(db);
+        await _addVaccineSeries(db);
         await db.execute('''
           CREATE TABLE pet_tutors (
             id TEXT PRIMARY KEY,
@@ -136,6 +138,12 @@ class PetLocalStore {
       },
     );
     return PetLocalStore(db);
+  }
+
+  /// Version 15: the vaccine a tutor joined a dose to.
+  static Future<void> _addVaccineSeries(DatabaseExecutor db) async {
+    if (!await _hasTable(db, 'pet_vaccines')) return;
+    await db.execute('ALTER TABLE pet_vaccines ADD COLUMN series TEXT');
   }
 
   /// Version 14: the size a tutor chose for a dog.

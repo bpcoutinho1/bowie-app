@@ -45,6 +45,7 @@ class VaccineDose {
     this.notes,
     this.proofPaths = const [],
     this.remindDays = defaultReminderDays,
+    this.series,
     this.updatedBy,
     this.deletedAt,
   });
@@ -74,6 +75,11 @@ class VaccineDose {
   /// The reminder goes off this many days before [nextDueOn]: 7, 14 or 30.
   final int remindDays;
 
+  /// The vaccine a tutor joined this dose to, when its name alone does not
+  /// say it ("Nobivac Canine" as a dose of "DHPPi+L"). Null follows the name
+  /// (`groupKey` in vaccine_status.dart).
+  final String? series;
+
   /// The user who saved this version, so tutors can see who changed it.
   final String? updatedBy;
   final DateTime updatedAt;
@@ -97,6 +103,7 @@ class VaccineDose {
       notes: notes,
       proofPaths: proofPaths,
       remindDays: remindDays,
+      series: series,
       updatedBy: updatedBy ?? this.updatedBy,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -117,6 +124,33 @@ class VaccineDose {
       notes: notes,
       proofPaths: paths,
       remindDays: remindDays,
+      series: series,
+      updatedBy: updatedBy,
+      updatedAt: updatedAt,
+      deletedAt: deletedAt,
+    );
+  }
+
+  /// The same dose joined to [series], or back to its name when null.
+  VaccineDose copyWithSeries(
+    String? series, {
+    required DateTime updatedAt,
+    required String updatedBy,
+  }) {
+    return VaccineDose(
+      id: id,
+      petId: petId,
+      kind: kind,
+      name: name,
+      appliedOn: appliedOn,
+      nextDueOn: nextDueOn,
+      product: product,
+      lot: lot,
+      veterinarian: veterinarian,
+      notes: notes,
+      proofPaths: proofPaths,
+      remindDays: remindDays,
+      series: series,
       updatedBy: updatedBy,
       updatedAt: updatedAt,
       deletedAt: deletedAt,
@@ -137,6 +171,7 @@ class VaccineDose {
       'notes': notes,
       'proof_paths': jsonEncode(proofPaths),
       'remind_days': remindDays,
+      'series': series,
       'updated_by': updatedBy,
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'deleted_at': deletedAt?.toUtc().toIso8601String(),
@@ -166,6 +201,10 @@ class VaccineDose {
         final num days when reminderDayOptions.contains(days.toInt()) =>
           days.toInt(),
         _ => defaultReminderDays,
+      },
+      series: switch (row['series']) {
+        final String text when text.trim().isNotEmpty => text.trim(),
+        _ => null,
       },
       updatedBy: row['updated_by'] as String?,
       updatedAt: DateTime.parse(row['updated_at']! as String).toUtc(),

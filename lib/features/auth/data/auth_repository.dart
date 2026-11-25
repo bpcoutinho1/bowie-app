@@ -89,7 +89,9 @@ class AuthRepository {
   String _code(String code) {
     final digits = code.replaceAll(RegExp(r'\s'), '');
     if (!RegExp(r'^\d{6,10}$').hasMatch(digits)) {
-      throw const AppFailure('Digite o código de 6 números que enviamos.');
+      throw const AppFailure(
+        'Digite os números do código que enviamos por email.',
+      );
     }
     return digits;
   }

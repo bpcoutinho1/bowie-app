@@ -90,7 +90,13 @@ class HealthRepository {
   }) async {
     await _requireMember(input.petId, byUser);
     final previous = id == null ? null : await _store.getDose(id);
-    final draft = _build(id, input, byUser);
+    final draft = _build(
+      id,
+      input,
+      byUser,
+      // An edited dose keeps the vaccine it was joined to.
+      series: previous != null ? previous.series : await _joinedSeries(input),
+    );
     final proofs = await _proofs(input, previous);
     final dose = draft.copyWithProofs(proofs.paths);
     final removed = <String>[];
@@ -115,7 +121,10 @@ class HealthRepository {
     for (final petId in {for (final input in inputs) input.petId}) {
       await _requireMember(petId, byUser);
     }
-    final drafts = [for (final input in inputs) _build(null, input, byUser)];
+    final drafts = [
+      for (final input in inputs)
+        _build(null, input, byUser, series: await _joinedSeries(input)),
+    ];
     final saved = <VaccineDose>[];
     for (var i = 0; i < drafts.length; i++) {
       final proofs = await _proofs(inputs[i], null);
@@ -168,7 +177,12 @@ class HealthRepository {
     return (paths: paths, added: added);
   }
 
-  VaccineDose _build(String? id, DoseInput input, AppUser byUser) {
+  VaccineDose _build(
+    String? id,
+    DoseInput input,
+    AppUser byUser, {
+    String? series,
+  }) {
     final name = input.name.trim();
     if (name.isEmpty) {
       throw AppFailure(switch (input.kind) {
@@ -218,9 +232,58 @@ class HealthRepository {
       veterinarian: _optional(input.veterinarian, 'o veterinário'),
       notes: _optional(input.notes, 'as observações', max: 500),
       remindDays: input.remindDays,
+      series: series,
       updatedBy: byUser.id,
       updatedAt: _now().toUtc(),
     );
+  }
+
+  /// A new dose with a name the tutors joined to another vaccine goes there.
+  Future<String?> _joinedSeries(DoseInput input) async {
+    final doses = await _store.listDoses(input.petId);
+    return seriesFor(input.kind, input.name.trim(), joinedSeries(doses));
+  }
+
+  /// Makes every dose of [from] part of [into], as the same vaccine under
+  /// another name: the newest dose of both sets the status.
+  Future<void> joinGroups({
+    required VaccineGroup from,
+    required VaccineGroup into,
+    required AppUser byUser,
+  }) async {
+    if (from.key == into.key) return;
+    if (from.kind != into.kind) {
+      throw const AppFailure('Só dá para juntar registros do mesmo tipo.');
+    }
+    final petId = into.latest.petId;
+    if (from.latest.petId != petId) {
+      throw const AppFailure('Só dá para juntar registros do mesmo pet.');
+    }
+    await _requireMember(petId, byUser);
+    final series = seriesOf(into.key);
+    final now = _now().toUtc();
+    // The doses of [into] already share its key.
+    for (final dose in from.doses) {
+      if (dose.series == series) continue;
+      await _store.saveDose(
+        dose.copyWithSeries(series, updatedAt: now, updatedBy: byUser.id),
+      );
+    }
+  }
+
+  /// Undoes [joinGroups]: every dose of [group] follows its own name again.
+  Future<void> separateGroup({
+    required VaccineGroup group,
+    required AppUser byUser,
+  }) async {
+    await _requireMember(group.latest.petId, byUser);
+    final now = _now().toUtc();
+    for (final dose in group.doses) {
+      if (dose.series == null) continue;
+      await _store.saveDose(
+        dose.copyWithSeries(null, updatedAt: now, updatedBy: byUser.id),
+      );
+    }
   }
 
   /// Any accepted tutor can delete a record. The row keeps who did it.

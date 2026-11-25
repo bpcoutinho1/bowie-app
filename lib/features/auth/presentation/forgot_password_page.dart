@@ -67,7 +67,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             Text(
               _codeSent
                   ? 'Se houver uma conta com ${_email.text.trim()}, enviamos '
-                        'um código de 6 números para lá. Confira também a '
+                        'um código para lá. Confira também a '
                         'caixa de spam.'
                   : 'Digite o email da sua conta. Vamos enviar um código para '
                         'você criar uma senha nova.',

@@ -198,7 +198,7 @@
             older.length > 0
               ? h('details', {}, h('summary', {}, older.length === 1 ? '1 dose anterior' : older.length + ' doses anteriores'),
                 h('div', { class: 'rows' }, older.map((dose) => h('div', {},
-                  h('p', { class: 'callout' }, day(dose.applied_on) + (dose.product ? ' · ' + dose.product : '')),
+                  h('p', { class: 'callout' }, [day(dose.applied_on), dose.name !== group.name ? dose.name : null, dose.product].filter(Boolean).join(' · ')),
                   photos(dose.proofs, 'Comprovante')))))
               : null);
         }))));

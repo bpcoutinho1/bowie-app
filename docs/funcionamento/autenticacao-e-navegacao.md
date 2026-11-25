@@ -65,9 +65,9 @@ O cadastro pede nome e celular, além de email e senha. `checkProfile` (`lib/fea
 
 ## Confirmar o email
 
-A conta nova é confirmada por um código de 6 números enviado por email, digitado no app (sem link, como na recuperação de senha).
+A conta nova é confirmada por um código enviado por email (6 números, conforme o [guia dos emails](../guias/emails.md#4-código-e-endereço-do-site); o app aceita de 6 a 10 e não diz quantos são), digitado no app (sem link, como na recuperação de senha).
 
-1. Criada a conta, se o Supabase pede confirmação, o app vai para `/confirmar-email` com "Enviamos um código de 6 números para…". "Reenviar o código" (`resendConfirmation`, `resend` do tipo `signup`) fica bloqueado por 60 s.
+1. Criada a conta, se o Supabase pede confirmação, o app vai para `/confirmar-email` com "Enviamos um código para…". "Reenviar o código" (`resendConfirmation`, `resend` do tipo `signup`) fica bloqueado por 60 s.
 2. `AuthRepository.confirmEmail` valida o código (`verifyOTP`, tipo `email`), o que já entra na conta. Com a sessão, o `AuthGate` leva ao desbloqueio e ao app.
 3. Quem tenta entrar com a conta ainda não confirmada (`email_not_confirmed`) recebe `EmailNotConfirmed`, e o login abre a mesma tela, com "peça um novo" código.
 
@@ -75,7 +75,7 @@ O email precisa do modelo com `{{ .Token }}` no Supabase: veja [emails da conta]
 
 ## Recuperar a senha
 
-Por código de 6 números enviado por email, sem link: funciona sem domínio e sem abrir o app por um link.
+Por código enviado por email, sem link: funciona sem domínio e sem abrir o app por um link.
 
 1. "Esqueci minha senha", no login, abre `/recuperar-senha` com o email já digitado.
 2. "Enviar código" chama `AuthRepository.sendPasswordCode` (`resetPasswordForEmail`). A tela diz "Se houver uma conta com…", porque o servidor responde igual com ou sem conta. "Reenviar o código" fica bloqueado por 60 s.
